@@ -5,9 +5,11 @@
       "img": "icons/svg/mystery-man.svg",
       "system": {
         "details": {
-          "concept": "",
-          "demeanor": "",
-          "quote": "",
+          "playerName": "",
+          "heroName": "",
+          "codeName": "",
+          "origin": "",
+          "affiliation": "",
           "background": ""
         },
         "traits": {
