@@ -46,11 +46,12 @@ Hooks.once('init', async function () {
 
   const systemBasePath = game.system?.path ?? `systems/${game.system.id}`;
   CONFIG.BNW.systemBasePath = systemBasePath;
+  CONFIG.BNW.templatePath = `${systemBasePath}/templates`;
 
   const templatesToLoad = [
-    `${systemBasePath}/templates/actors/delta-sheet.hbs`,
-    `${systemBasePath}/templates/items/power-sheet.hbs`,
-    `${systemBasePath}/templates/chat/skill-roll-card.hbs`
+    `${CONFIG.BNW.templatePath}/actors/delta-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
   const loadHandlebarsTemplates =
