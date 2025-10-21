@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Determine release tag
+        id: release_tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            tag="${{ github.event.release.tag_name }}"
+          else
+            tag="${GITHUB_REF#refs/tags/}"
+          fi
+          if [ -z "$tag" ]; then
+            echo "Unable to determine the release tag" >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create distribution archive
+        run: |
+          mkdir -p dist
+          rm -f dist/system.zip
+          files=(system.json)
+          for path in templates scripts styles packs lang assets; do
+            if [ -e "$path" ]; then
+              files+=("$path")
+            fi
+          done
+          printf 'Including files in archive: %s\n' "${files[*]}"
+          zip -r "dist/system.zip" "${files[@]}"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          release_name: ${{ steps.release_tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            system.json
+            dist/system.zip
+
+      - name: Verify manifest URL availability
+        env:
+          MANIFEST_URL: https://github.com/${{ github.repository }}/releases/latest/download/system.json
+        run: |
+          echo "Verifying manifest URL: $MANIFEST_URL"
+          for attempt in {1..5}; do
+            if curl -IsSf "$MANIFEST_URL" >/dev/null; then
+              exit 0
+            fi
+            echo "Attempt $attempt failed. Retrying..."
+            sleep 5
+          done
+          echo "Manifest URL did not become available in time" >&2
+          exit 1
