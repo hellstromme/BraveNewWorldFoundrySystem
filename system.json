@@ -40,5 +40,13 @@
       "flags": {}
     }
   ],
+  "documentTypes": {
+    "Actor": [
+      "delta"
+    ],
+    "Item": [
+      "power"
+    ]
+  },
   "esmodules": []
 }
