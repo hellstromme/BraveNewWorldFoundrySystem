@@ -1,6 +1,6 @@
 class BraveNewWorldActorSheet extends ActorSheet {
   static get defaultOptions() {
-    const basePath = `systems/${game.system.id}`;
+    const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bravenewworld', 'sheet', 'actor', 'bnw'],
       template: `${basePath}/templates/actors/delta-sheet.hbs`,
@@ -11,7 +11,8 @@ class BraveNewWorldActorSheet extends ActorSheet {
   }
 
   get template() {
-    return `systems/${game.system.id}/templates/actors/${this.actor.type}-sheet.hbs`;
+    const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
+    return `${basePath}/templates/actors/${this.actor.type}-sheet.hbs`;
   }
 
   async getData(options) {
