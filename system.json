@@ -1,5 +1,4 @@
 {
-  "$schema": "https://foundryvtt.com/schemas/system.json",
   "id": "bravenewworld",
   "title": "Brave New World",
   "description": "A Foundry VTT system for the Brave New World TTRPG.",
@@ -12,8 +11,10 @@
   "url": "https://github.com/BraveNewWorldFoundrySystem",
   "manifest": "https://github.com/BraveNewWorldFoundrySystem/releases/latest/download/system.json",
   "download": "https://github.com/BraveNewWorldFoundrySystem/releases/latest/download/system.zip",
-  "minimumCoreVersion": "11",
-  "compatibleCoreVersion": "11",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "11"
+  },
   "scripts": [
     "scripts/bnw-dice.js",
     "scripts/bnw-actor-sheet.js",
@@ -23,9 +24,6 @@
   "styles": [
     "styles/main.css"
   ],
-  "template": "templates/template.json",
-  "actorTypes": ["delta"],
-  "itemTypes": ["power"],
   "packs": [
     {
       "name": "bnw-items",
@@ -42,6 +40,5 @@
       "flags": {}
     }
   ],
-  "esmodules": [],
-  "dependencies": []
+  "esmodules": []
 }
