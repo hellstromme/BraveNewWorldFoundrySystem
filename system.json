@@ -41,12 +41,16 @@
     }
   ],
   "documentTypes": {
-    "Actor": [
-      "delta"
-    ],
-    "Item": [
-      "power"
-    ]
+    "Actor": {
+      "delta": {
+        "label": "BNW.ActorType.Delta"
+      }
+    },
+    "Item": {
+      "power": {
+        "label": "BNW.ItemType.Power"
+      }
+    }
   },
   "esmodules": []
 }
