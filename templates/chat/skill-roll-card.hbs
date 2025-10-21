@@ -1,0 +1,35 @@
+<div class="bnw-roll-card">
+  <header>
+    <h2>{{title}}</h2>
+    <p class="subtitle">{{actorName}} &mdash; {{skillLabel}} ({{traitLabel}})</p>
+  </header>
+  <section class="dice-results">
+    <div class="dice-list">
+      {{#each dice as |die|}}
+        <span class="die">{{die}}</span>
+      {{/each}}
+    </div>
+    <div class="result-summary">
+      <div>
+        <span class="label">{{localize 'BNW.Label.Highest'}}</span>
+        <span class="value">{{highest}}</span>
+      </div>
+      <div>
+        <span class="label">{{localize 'BNW.Label.Target'}}</span>
+        <span class="value">{{target}}</span>
+      </div>
+      <div class="outcome {{#if success}}success{{else}}failure{{/if}}">
+        {{#if success}}
+          {{localize 'BNW.Roll.Success'}}
+        {{else}}
+          {{localize 'BNW.Roll.Failure'}}
+        {{/if}}
+      </div>
+    </div>
+  </section>
+  {{#if bonusDice}}
+    <footer>
+      <span>{{localize 'BNW.Label.BonusDice'}}: {{bonusDice}}</span>
+    </footer>
+  {{/if}}
+</div>

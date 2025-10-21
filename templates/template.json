@@ -1,0 +1,110 @@
+{
+  "Actor": {
+    "delta": {
+      "type": "delta",
+      "img": "icons/svg/mystery-man.svg",
+      "system": {
+        "details": {
+          "concept": "",
+          "demeanor": "",
+          "quote": "",
+          "background": ""
+        },
+        "traits": {
+          "body": {
+            "label": "Body",
+            "value": 3
+          },
+          "mind": {
+            "label": "Mind",
+            "value": 3
+          },
+          "spirit": {
+            "label": "Spirit",
+            "value": 3
+          }
+        },
+        "skills": {
+          "athletics": {
+            "label": "Athletics",
+            "trait": "body",
+            "value": 2
+          },
+          "brawl": {
+            "label": "Brawl",
+            "trait": "body",
+            "value": 2
+          },
+          "might": {
+            "label": "Might",
+            "trait": "body",
+            "value": 2
+          },
+          "stealth": {
+            "label": "Stealth",
+            "trait": "body",
+            "value": 2
+          },
+          "investigation": {
+            "label": "Investigation",
+            "trait": "mind",
+            "value": 2
+          },
+          "knowledge": {
+            "label": "Knowledge",
+            "trait": "mind",
+            "value": 2
+          },
+          "science": {
+            "label": "Science",
+            "trait": "mind",
+            "value": 2
+          },
+          "technology": {
+            "label": "Technology",
+            "trait": "mind",
+            "value": 2
+          },
+          "leadership": {
+            "label": "Leadership",
+            "trait": "spirit",
+            "value": 2
+          },
+          "persuasion": {
+            "label": "Persuasion",
+            "trait": "spirit",
+            "value": 2
+          },
+          "streetwise": {
+            "label": "Streetwise",
+            "trait": "spirit",
+            "value": 2
+          },
+          "willpower": {
+            "label": "Willpower",
+            "trait": "spirit",
+            "value": 2
+          }
+        },
+        "powers": [],
+        "gear": [],
+        "notes": ""
+      }
+    }
+  },
+  "Item": {
+    "power": {
+      "type": "power",
+      "img": "icons/svg/explosion.svg",
+      "system": {
+        "summary": "",
+        "activation": "standard",
+        "cost": 0,
+        "dice": 0,
+        "trait": "body",
+        "skill": "athletics",
+        "notes": ""
+      }
+    }
+  }
+}

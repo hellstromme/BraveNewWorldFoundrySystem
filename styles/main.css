@@ -1,1 +1,273 @@
 /* Core styling for the Brave New World Foundry system. */
+
+.bnw.sheet form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bnw.sheet .sheet-header {
+  gap: 1rem;
+  align-items: center;
+}
+
+.bnw.sheet .profile-img {
+  flex: 0 0 120px;
+  height: 120px;
+  border: 0;
+}
+
+.bnw.sheet .header-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bnw.sheet .details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.bnw.sheet .details-grid label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 0.25rem;
+}
+
+.bnw.sheet .sheet-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.bnw.sheet .sheet-body .tab {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0.75rem;
+  box-sizing: border-box;
+}
+
+.bnw.sheet .traits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.bnw.sheet .trait-card {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .trait-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .trait-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.bnw.sheet .trait-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.75rem;
+  gap: 0.25rem;
+}
+
+.bnw.sheet .trait-skills {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bnw.sheet .trait-skills th,
+.bnw.sheet .trait-skills td {
+  padding: 0.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light-tertiary);
+}
+
+.bnw.sheet .trait-skills tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bnw.sheet .trait-skills .skill-dice input,
+.bnw.sheet .trait-skills .skill-label input {
+  width: 100%;
+}
+
+.bnw.sheet .trait-skills .skill-controls {
+  text-align: center;
+}
+
+.bnw.sheet .trait-skills .skill-controls button {
+  border: none;
+  background: var(--color-border-light-primary);
+  color: var(--color-text-dark-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bnw.sheet .trait-skills .skill-controls button:hover {
+  background: var(--color-border-light-highlight);
+}
+
+.bnw.sheet .powers-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .powers-list .item {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.bnw.sheet .powers-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .powers-list .item .item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  min-width: 120px;
+}
+
+.bnw.sheet .powers-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .powers-list .item .item-controls a {
+  padding: 0.25rem 0.35rem;
+  border-radius: 4px;
+}
+
+.bnw.sheet .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.bnw.sheet .form-group textarea {
+  min-height: 180px;
+}
+
+.bnw.sheet .details-grid input,
+.bnw.sheet .trait-skills input,
+.bnw.sheet .form-group input,
+.bnw.sheet .form-group select,
+.bnw.sheet .form-group textarea {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.chat-message .bnw-roll-card {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.chat-message .bnw-roll-card header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chat-message .bnw-roll-card .subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-dark-secondary);
+}
+
+.chat-message .bnw-roll-card .dice-list {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.chat-message .bnw-roll-card .dice-list .die {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--color-border-light-primary);
+  font-weight: 600;
+}
+
+.chat-message .bnw-roll-card .result-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+
+.chat-message .bnw-roll-card .result-summary .label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-text-dark-secondary);
+}
+
+.chat-message .bnw-roll-card .result-summary .value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.chat-message .bnw-roll-card .outcome {
+  text-align: center;
+  padding: 0.35rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.chat-message .bnw-roll-card .outcome.success {
+  background: rgba(46, 204, 113, 0.2);
+  color: #1e824c;
+}
+
+.chat-message .bnw-roll-card .outcome.failure {
+  background: rgba(231, 76, 60, 0.2);
+  color: #96281b;
+}
+
+.chat-message .bnw-roll-card footer {
+  font-size: 0.8rem;
+  color: var(--color-text-dark-secondary);
+}
+
+.bnw-dialog .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bnw-dialog .context {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-dark-secondary);
+}
