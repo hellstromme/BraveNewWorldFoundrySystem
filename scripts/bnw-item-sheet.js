@@ -1,6 +1,6 @@
 class BraveNewWorldItemSheet extends ItemSheet {
   static get defaultOptions() {
-    const basePath = `systems/${game.system.id}`;
+    const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bravenewworld', 'sheet', 'item', 'bnw'],
       template: `${basePath}/templates/items/power-sheet.hbs`,
@@ -10,7 +10,8 @@ class BraveNewWorldItemSheet extends ItemSheet {
   }
 
   get template() {
-    return `systems/${game.system.id}/templates/items/${this.item.type}-sheet.hbs`;
+    const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
+    return `${basePath}/templates/items/${this.item.type}-sheet.hbs`;
   }
 
   async getData(options) {

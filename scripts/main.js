@@ -44,11 +44,13 @@ Hooks.once('init', async function () {
     });
   }
 
-  const basePath = `systems/${game.system.id}`;
+  const systemBasePath = game.system?.path ?? `systems/${game.system.id}`;
+  CONFIG.BNW.systemBasePath = systemBasePath;
+
   const templatesToLoad = [
-    `${basePath}/templates/actors/delta-sheet.hbs`,
-    `${basePath}/templates/items/power-sheet.hbs`,
-    `${basePath}/templates/chat/skill-roll-card.hbs`
+    `${systemBasePath}/templates/actors/delta-sheet.hbs`,
+    `${systemBasePath}/templates/items/power-sheet.hbs`,
+    `${systemBasePath}/templates/chat/skill-roll-card.hbs`
   ];
 
   const loadHandlebarsTemplates =
