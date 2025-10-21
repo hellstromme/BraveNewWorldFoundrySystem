@@ -66,6 +66,7 @@
                   {{#each (lookup ../skillsByTrait trait.key) as |skill|}}
                     <tr data-skill="{{skill.key}}">
                       <td class="skill-label">
+                        <input type="hidden" name="system.skills.{{skill.key}}.trait" value="{{skill.trait}}" />
                         <input type="text" name="system.skills.{{skill.key}}.label" value="{{skill.label}}" />
                       </td>
                       <td class="skill-dice">
