@@ -13,7 +13,8 @@
   "download": "https://github.com/BraveNewWorldFoundrySystem/releases/latest/download/system.zip",
   "compatibility": {
     "minimum": "11",
-    "verified": "11"
+    "verified": "13",
+    "maximum": "13"
   },
   "scripts": [
     "scripts/bnw-dice.js",
