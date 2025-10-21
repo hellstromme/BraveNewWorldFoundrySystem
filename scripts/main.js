@@ -4,6 +4,12 @@ Hooks.once('init', async function () {
   CONFIG.BNW = CONFIG.BNW ?? {};
   CONFIG.BNW.traits = CONFIG.BNW.traits ?? ['body', 'mind', 'spirit'];
 
+  CONFIG.Actor.typeLabels = CONFIG.Actor.typeLabels ?? {};
+  CONFIG.Actor.typeLabels.delta = game.i18n.localize('BNW.ActorType.Delta');
+
+  CONFIG.Item.typeLabels = CONFIG.Item.typeLabels ?? {};
+  CONFIG.Item.typeLabels.power = game.i18n.localize('BNW.ItemType.Power');
+
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
   }

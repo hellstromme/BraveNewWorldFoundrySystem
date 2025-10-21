@@ -36,5 +36,7 @@
   "BNW.Roll.Success": "Success",
   "BNW.Roll.Failure": "Failure",
   "BNW.Warning.UnknownTrait": "Unknown trait: {trait}",
-  "BNW.Warning.UnknownSkill": "Unknown skill: {skill}"
+  "BNW.Warning.UnknownSkill": "Unknown skill: {skill}",
+  "BNW.ActorType.Delta": "Delta",
+  "BNW.ItemType.Power": "Power"
 }
