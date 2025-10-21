@@ -10,7 +10,7 @@ BraveNewWorldFoundrySystem brings the Brave New World tabletop roleplaying game 
 
 ## Prerequisites
 
-- Foundry Virtual Tabletop core software version 11 (minimum and currently supported version).【F:system.json†L15-L18】
+- Foundry Virtual Tabletop core software version 11 or later, with current manifest compatibility spanning minimum 11 through verified/maximum 13.【F:system.json†L15-L19】
 - Access to the Brave New World tabletop rules for reference when defining traits, skills, and powers.
 
 ## Installation
