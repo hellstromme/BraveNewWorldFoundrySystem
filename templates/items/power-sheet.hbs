@@ -28,11 +28,21 @@
         </label>
         <label>
           <span>{{localize 'BNW.Label.AssociatedTrait'}}</span>
-          <input type="text" name="system.trait" value="{{system.trait}}" />
+          <select name="system.trait">
+            <option value="">&mdash;</option>
+            {{#each traitOptions as |trait|}}
+              <option value="{{trait.key}}" {{#if (eq ../system.trait trait.key)}}selected{{/if}}>{{trait.label}}</option>
+            {{/each}}
+          </select>
         </label>
         <label>
           <span>{{localize 'BNW.Label.AssociatedSkill'}}</span>
-          <input type="text" name="system.skill" value="{{system.skill}}" />
+          <select name="system.skill">
+            <option value="">&mdash;</option>
+            {{#each skillOptions as |skill|}}
+              <option value="{{skill.key}}" {{#if (eq ../system.skill skill.key)}}selected{{/if}}>{{skill.label}}</option>
+            {{/each}}
+          </select>
         </label>
       </div>
     </div>
