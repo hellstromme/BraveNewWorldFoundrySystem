@@ -1,0 +1,47 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Power'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.Summary'}}</span>
+          <input type="text" name="system.summary" value="{{system.summary}}" />
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Activation'}}</span>
+          <select name="system.activation">
+            <option value="standard" {{#if (eq system.activation 'standard')}}selected{{/if}}>{{localize 'BNW.Activation.Standard'}}</option>
+            <option value="quick" {{#if (eq system.activation 'quick')}}selected{{/if}}>{{localize 'BNW.Activation.Quick'}}</option>
+            <option value="free" {{#if (eq system.activation 'free')}}selected{{/if}}>{{localize 'BNW.Activation.Free'}}</option>
+          </select>
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Cost'}}</span>
+          <input type="number" name="system.cost" value="{{system.cost}}" min="0" />
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.BonusDice'}}</span>
+          <input type="number" name="system.dice" value="{{system.dice}}" min="0" />
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.AssociatedTrait'}}</span>
+          <input type="text" name="system.trait" value="{{system.trait}}" />
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.AssociatedSkill'}}</span>
+          <input type="text" name="system.skill" value="{{system.skill}}" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Notes'}}</label>
+      <textarea name="system.notes" placeholder="{{localize 'BNW.Placeholder.Notes'}}">{{system.notes}}</textarea>
+    </div>
+  </section>
+</form>

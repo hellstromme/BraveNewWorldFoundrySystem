@@ -15,11 +15,17 @@
   "minimumCoreVersion": "11",
   "compatibleCoreVersion": "11",
   "scripts": [
+    "scripts/bnw-dice.js",
+    "scripts/bnw-actor-sheet.js",
+    "scripts/bnw-item-sheet.js",
     "scripts/main.js"
   ],
   "styles": [
     "styles/main.css"
   ],
+  "template": "templates/template.json",
+  "actorTypes": ["delta"],
+  "itemTypes": ["power"],
   "packs": [
     {
       "name": "bnw-items",
