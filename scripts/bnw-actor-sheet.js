@@ -17,7 +17,18 @@ class BraveNewWorldActorSheet extends ActorSheet {
     const context = await super.getData(options);
     const system = foundry.utils.deepClone(this.actor.system ?? {});
 
-    system.details ??= { concept: '', demeanor: '', quote: '', background: '' };
+    system.details ??= {};
+    const defaultDetails = {
+      playerName: '',
+      heroName: '',
+      codeName: '',
+      origin: '',
+      affiliation: '',
+      background: ''
+    };
+    for (const [key, value] of Object.entries(defaultDetails)) {
+      if (system.details[key] === undefined) system.details[key] = value;
+    }
     system.traits ??= {};
     system.skills ??= {};
     system.notes ??= '';

@@ -1,8 +1,10 @@
 {
   "BNW.Welcome": "Welcome to the Brave New World system",
-  "BNW.Detail.Concept": "Concept",
-  "BNW.Detail.Demeanor": "Demeanor",
-  "BNW.Detail.Quote": "Quote",
+  "BNW.Detail.PlayerName": "Player's Name",
+  "BNW.Detail.HeroName": "Hero's Name",
+  "BNW.Detail.CodeName": "Code Name",
+  "BNW.Detail.OriginStory": "Origin Story",
+  "BNW.Detail.Affiliation": "Affiliation",
   "BNW.Detail.Background": "Background",
   "BNW.Tab.TraitsSkills": "Traits & Skills",
   "BNW.Tab.Powers": "Powers",
