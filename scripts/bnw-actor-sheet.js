@@ -47,6 +47,16 @@ class BraveNewWorldActorSheet extends ActorSheet {
     context.system = system;
     context.traits = this._prepareTraits(system.traits);
     context.skillsByTrait = this._prepareSkills(system.skills, context.traits);
+
+    for (const [traitKey, skills] of Object.entries(context.skillsByTrait ?? {})) {
+      for (const skill of skills) {
+        const skillData = system.skills[skill.key] ?? (system.skills[skill.key] = {});
+        if (!skillData.trait) {
+          skillData.trait = skill?.trait ?? traitKey;
+        }
+      }
+    }
+
     context.powers = this.actor.items.filter((item) => item.type === 'power');
 
     return context;
