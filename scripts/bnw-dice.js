@@ -2,6 +2,56 @@ const BNW = globalThis.BNW ?? (globalThis.BNW = {});
 BNW.dice = BNW.dice ?? {};
 
 /**
+ * Attempt to coerce a target number value from a DialogV2 response.
+ * @param {*} value
+ * @returns {number|null}
+ */
+function coerceTargetValue(value) {
+  const parseNumber = (candidate) => {
+    if (candidate == null) return null;
+    const parsed = Number(candidate);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string') return parseNumber(value);
+
+  if (value instanceof FormData) {
+    return parseNumber(value.get?.('target'));
+  }
+
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const parsed = coerceTargetValue(entry);
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  if (value && typeof value === 'object') {
+    if (value.formData) {
+      const parsed = coerceTargetValue(value.formData);
+      if (parsed != null) return parsed;
+    }
+
+    if (typeof value.get === 'function') {
+      const parsed = coerceTargetValue(value.get('target'));
+      if (parsed != null) return parsed;
+    }
+
+    const directKeys = ['target', 'value', 'result'];
+    for (const key of directKeys) {
+      if (key in value) {
+        const parsed = parseNumber(value[key]);
+        if (parsed != null) return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Prompt the user for a target number if one was not provided.
  * @param {object} options
  * @param {number} [options.defaultTarget=7]
@@ -51,7 +101,9 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
         }
       });
 
-      if (result != null) return result;
+      const coerced = coerceTargetValue(result);
+      if (coerced != null) return coerced;
+      return defaultTarget;
     } catch (error) {
       console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
     }
@@ -141,23 +193,25 @@ BNW.dice.rollTraitSkill = async function ({
   const formula = `${pool}d6x=6`;
   let roll = new Roll(formula);
 
-  const evaluateArgsLength = typeof roll.evaluate === 'function' ? roll.evaluate.length : null;
-  let evaluation = null;
-  if (typeof roll.evaluate === 'function') {
-    try {
-      evaluation = evaluateArgsLength === 0 ? roll.evaluate() : roll.evaluate({ async: true });
-    } catch (error) {
-      if (typeof roll.evaluateSync === 'function') {
-        roll = roll.evaluateSync();
-        evaluation = null;
+  const releaseGeneration = Number(game?.release?.generation ?? 0);
+  try {
+    if (typeof roll.evaluate === 'function') {
+      if (releaseGeneration >= 13) {
+        roll = await roll.evaluate();
       } else {
-        throw error;
+        roll = await roll.evaluate({ async: true });
       }
+    } else if (typeof roll.evaluateSync === 'function') {
+      roll = roll.evaluateSync();
     }
-  }
-
-  if (evaluation) {
-    roll = evaluation instanceof Promise ? await evaluation : evaluation;
+  } catch (error) {
+    if (typeof roll.evaluateSync === 'function') {
+      roll = roll.evaluateSync();
+    } else {
+      console.error('BNW | Failed to evaluate roll', error);
+      ui.notifications?.error?.(game?.i18n?.localize?.('BNW.Error.RollEvaluation') ?? 'Failed to evaluate roll.');
+      return null;
+    }
   }
 
   const diceResults = [];
