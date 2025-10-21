@@ -39,6 +39,7 @@
   "BNW.Roll.Failure": "Failure",
   "BNW.Warning.UnknownTrait": "Unknown trait: {trait}",
   "BNW.Warning.UnknownSkill": "Unknown skill: {skill}",
+  "BNW.Error.RollEvaluation": "Failed to evaluate roll.",
   "BNW.ActorType.Delta": "Delta",
   "BNW.ItemType.Power": "Power"
 }

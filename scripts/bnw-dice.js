@@ -2,6 +2,56 @@ const BNW = globalThis.BNW ?? (globalThis.BNW = {});
 BNW.dice = BNW.dice ?? {};
 
 /**
+ * Attempt to coerce a target number value from a DialogV2 response.
+ * @param {*} value
+ * @returns {number|null}
+ */
+function coerceTargetValue(value) {
+  const parseNumber = (candidate) => {
+    if (candidate == null) return null;
+    const parsed = Number(candidate);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string') return parseNumber(value);
+
+  if (value instanceof FormData) {
+    return parseNumber(value.get?.('target'));
+  }
+
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const parsed = coerceTargetValue(entry);
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  if (value && typeof value === 'object') {
+    if (value.formData) {
+      const parsed = coerceTargetValue(value.formData);
+      if (parsed != null) return parsed;
+    }
+
+    if (typeof value.get === 'function') {
+      const parsed = coerceTargetValue(value.get('target'));
+      if (parsed != null) return parsed;
+    }
+
+    const directKeys = ['target', 'value', 'result'];
+    for (const key of directKeys) {
+      if (key in value) {
+        const parsed = parseNumber(value[key]);
+        if (parsed != null) return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Prompt the user for a target number if one was not provided.
  * @param {object} options
  * @param {number} [options.defaultTarget=7]
@@ -24,6 +74,40 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
       </div>
     </form>
   `;
+
+  const dialogV2 = foundry?.applications?.api?.DialogV2;
+  if (dialogV2?.prompt) {
+    try {
+      const result = await dialogV2.prompt({
+        title,
+        content,
+        label: buttonLabel,
+        rejectClose: false,
+        submit: (event, form, formData) => {
+          const rawFromData = formData?.get?.('target');
+          if (rawFromData != null) {
+            const parsed = Number(rawFromData);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+
+          const root = form instanceof HTMLElement ? form : form?.element ?? null;
+          const input = root?.querySelector?.('input[name="target"]');
+          if (input?.value != null) {
+            const parsed = Number(input.value);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+
+          return defaultTarget;
+        }
+      });
+
+      const coerced = coerceTargetValue(result);
+      if (coerced != null) return coerced;
+      return defaultTarget;
+    } catch (error) {
+      console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
+    }
+  }
 
   return Dialog.prompt({
     title,
@@ -106,15 +190,60 @@ BNW.dice.rollTraitSkill = async function ({
   });
   if (resolvedTarget == null) return null;
 
-  const roll = await (new Roll(`${pool}d6`)).evaluate({ async: true });
-  const diceResults = roll.dice.reduce((results, term) => {
-    if (!term?.results) return results;
-    for (const result of term.results) {
-      if (result?.result != null) results.push(Number(result.result));
+  const formula = `${pool}d6x=6`;
+  let roll = new Roll(formula);
+
+  const releaseGeneration = Number(game?.release?.generation ?? 0);
+  try {
+    if (typeof roll.evaluate === 'function') {
+      if (releaseGeneration >= 13) {
+        roll = await roll.evaluate();
+      } else {
+        roll = await roll.evaluate({ async: true });
+      }
+    } else if (typeof roll.evaluateSync === 'function') {
+      roll = roll.evaluateSync();
     }
-    return results;
-  }, []);
-  const highest = diceResults.length ? Math.max(...diceResults) : 0;
+  } catch (error) {
+    if (typeof roll.evaluateSync === 'function') {
+      roll = roll.evaluateSync();
+    } else {
+      console.error('BNW | Failed to evaluate roll', error);
+      ui.notifications?.error?.(game?.i18n?.localize?.('BNW.Error.RollEvaluation') ?? 'Failed to evaluate roll.');
+      return null;
+    }
+  }
+
+  const diceResults = [];
+
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+
+      runningTotal += value;
+
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        runningTotal = 0;
+      }
+    }
+
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+    }
+  }
+
+  if (!diceResults.length) {
+    diceResults.push(0);
+  }
+
+  const highest = Math.max(...diceResults);
   const success = highest >= resolvedTarget;
 
   const data = {
@@ -136,7 +265,9 @@ BNW.dice.rollTraitSkill = async function ({
     (game.system?.id ? `systems/${game.system.id}` : '');
   const templateBasePath =
     CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
-  const content = await renderTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
+  const renderHandlebarsTemplate =
+    foundry?.applications?.handlebars?.renderTemplate ?? renderTemplate;
+  const content = await renderHandlebarsTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
 
   return roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
