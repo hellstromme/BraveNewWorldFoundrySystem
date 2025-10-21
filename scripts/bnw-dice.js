@@ -25,6 +25,38 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
     </form>
   `;
 
+  const dialogV2 = foundry?.applications?.api?.DialogV2;
+  if (dialogV2?.prompt) {
+    try {
+      const result = await dialogV2.prompt({
+        title,
+        content,
+        label: buttonLabel,
+        rejectClose: false,
+        submit: (event, form, formData) => {
+          const rawFromData = formData?.get?.('target');
+          if (rawFromData != null) {
+            const parsed = Number(rawFromData);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+
+          const root = form instanceof HTMLElement ? form : form?.element ?? null;
+          const input = root?.querySelector?.('input[name="target"]');
+          if (input?.value != null) {
+            const parsed = Number(input.value);
+            if (Number.isFinite(parsed)) return parsed;
+          }
+
+          return defaultTarget;
+        }
+      });
+
+      if (result != null) return result;
+    } catch (error) {
+      console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
+    }
+  }
+
   return Dialog.prompt({
     title,
     content,
@@ -106,15 +138,58 @@ BNW.dice.rollTraitSkill = async function ({
   });
   if (resolvedTarget == null) return null;
 
-  const roll = await (new Roll(`${pool}d6`)).evaluate({ async: true });
-  const diceResults = roll.dice.reduce((results, term) => {
-    if (!term?.results) return results;
-    for (const result of term.results) {
-      if (result?.result != null) results.push(Number(result.result));
+  const formula = `${pool}d6x=6`;
+  let roll = new Roll(formula);
+
+  const evaluateArgsLength = typeof roll.evaluate === 'function' ? roll.evaluate.length : null;
+  let evaluation = null;
+  if (typeof roll.evaluate === 'function') {
+    try {
+      evaluation = evaluateArgsLength === 0 ? roll.evaluate() : roll.evaluate({ async: true });
+    } catch (error) {
+      if (typeof roll.evaluateSync === 'function') {
+        roll = roll.evaluateSync();
+        evaluation = null;
+      } else {
+        throw error;
+      }
     }
-    return results;
-  }, []);
-  const highest = diceResults.length ? Math.max(...diceResults) : 0;
+  }
+
+  if (evaluation) {
+    roll = evaluation instanceof Promise ? await evaluation : evaluation;
+  }
+
+  const diceResults = [];
+
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+
+      runningTotal += value;
+
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        runningTotal = 0;
+      }
+    }
+
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+    }
+  }
+
+  if (!diceResults.length) {
+    diceResults.push(0);
+  }
+
+  const highest = Math.max(...diceResults);
   const success = highest >= resolvedTarget;
 
   const data = {
@@ -136,7 +211,9 @@ BNW.dice.rollTraitSkill = async function ({
     (game.system?.id ? `systems/${game.system.id}` : '');
   const templateBasePath =
     CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
-  const content = await renderTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
+  const renderHandlebarsTemplate =
+    foundry?.applications?.handlebars?.renderTemplate ?? renderTemplate;
+  const content = await renderHandlebarsTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
 
   return roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
