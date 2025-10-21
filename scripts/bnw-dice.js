@@ -30,8 +30,22 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
     content,
     label: buttonLabel,
     callback: (html) => {
-      const input = html?.querySelector('input[name="target"]');
-      const value = Number(input?.value ?? defaultTarget);
+      const selector = 'input[name="target"]';
+
+      let inputElement = null;
+      if (typeof html?.find === 'function') {
+        inputElement = html.find(selector)?.[0] ?? null;
+      }
+
+      if (!inputElement) {
+        const root = html?.[0] ?? html;
+        if (root?.querySelector) {
+          inputElement = root.querySelector(selector);
+        }
+      }
+
+      const rawValue = inputElement?.value;
+      const value = Number(rawValue);
       return Number.isFinite(value) ? value : defaultTarget;
     },
     rejectClose: false
