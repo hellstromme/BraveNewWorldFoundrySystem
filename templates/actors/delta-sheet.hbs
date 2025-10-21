@@ -54,7 +54,7 @@
                 </tr>
               </thead>
               <tbody>
-                {{#if (lookup ../skillsByTrait trait.key)}}
+                {{#if (hasEntries (lookup ../skillsByTrait trait.key))}}
                   {{#each (lookup ../skillsByTrait trait.key) as |skill|}}
                     <tr data-skill="{{skill.key}}">
                       <td class="skill-label">

@@ -14,6 +14,20 @@ Hooks.once('init', async function () {
     Handlebars.registerHelper('eq', (a, b) => a === b);
   }
 
+  if (!Handlebars.helpers.hasEntries) {
+    Handlebars.registerHelper('hasEntries', (value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+
+      if (value && typeof value === 'object') {
+        return Object.keys(value).length > 0;
+      }
+
+      return false;
+    });
+  }
+
   await loadTemplates([
     'templates/actors/delta-sheet.hbs',
     'templates/items/power-sheet.hbs',
