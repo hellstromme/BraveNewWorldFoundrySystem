@@ -3,6 +3,22 @@ Hooks.once('init', async function () {
 
   CONFIG.BNW = CONFIG.BNW ?? {};
   CONFIG.BNW.traits = CONFIG.BNW.traits ?? ['body', 'mind', 'spirit'];
+  CONFIG.BNW.defaultSkills =
+    CONFIG.BNW.defaultSkills ??
+    Object.freeze({
+      athletics: { label: 'Athletics', trait: 'body', value: 2 },
+      brawl: { label: 'Brawl', trait: 'body', value: 2 },
+      might: { label: 'Might', trait: 'body', value: 2 },
+      stealth: { label: 'Stealth', trait: 'body', value: 2 },
+      investigation: { label: 'Investigation', trait: 'mind', value: 2 },
+      knowledge: { label: 'Knowledge', trait: 'mind', value: 2 },
+      science: { label: 'Science', trait: 'mind', value: 2 },
+      technology: { label: 'Technology', trait: 'mind', value: 2 },
+      leadership: { label: 'Leadership', trait: 'spirit', value: 2 },
+      persuasion: { label: 'Persuasion', trait: 'spirit', value: 2 },
+      streetwise: { label: 'Streetwise', trait: 'spirit', value: 2 },
+      willpower: { label: 'Willpower', trait: 'spirit', value: 2 }
+    });
 
   CONFIG.Actor.typeLabels = CONFIG.Actor.typeLabels ?? {};
   CONFIG.Actor.typeLabels.delta = game.i18n.localize('BNW.ActorType.Delta');

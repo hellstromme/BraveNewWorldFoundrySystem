@@ -31,6 +31,11 @@ class BraveNewWorldActorSheet extends ActorSheet {
     }
     system.traits ??= {};
     system.skills ??= {};
+
+    const defaultSkills = CONFIG.BNW?.defaultSkills ?? {};
+    if (foundry.utils.isEmpty(system.skills) && !foundry.utils.isEmpty(defaultSkills)) {
+      system.skills = foundry.utils.deepClone(defaultSkills);
+    }
     system.notes ??= '';
 
     for (const traitKey of CONFIG.BNW?.traits ?? []) {
