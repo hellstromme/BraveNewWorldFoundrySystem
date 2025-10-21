@@ -44,11 +44,16 @@ Hooks.once('init', async function () {
     });
   }
 
-  await loadTemplates([
-    'templates/actors/delta-sheet.hbs',
-    'templates/items/power-sheet.hbs',
-    'templates/chat/skill-roll-card.hbs'
-  ]);
+  const basePath = `systems/${game.system.id}`;
+  const templatesToLoad = [
+    `${basePath}/templates/actors/delta-sheet.hbs`,
+    `${basePath}/templates/items/power-sheet.hbs`,
+    `${basePath}/templates/chat/skill-roll-card.hbs`
+  ];
+
+  const loadHandlebarsTemplates =
+    foundry?.applications?.handlebars?.loadTemplates ?? loadTemplates;
+  await loadHandlebarsTemplates(templatesToLoad);
 
   Actors.unregisterSheet('core', ActorSheet);
   Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
