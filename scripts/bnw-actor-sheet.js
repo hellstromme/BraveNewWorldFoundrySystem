@@ -1,8 +1,9 @@
 class BraveNewWorldActorSheet extends ActorSheet {
   static get defaultOptions() {
+    const basePath = `systems/${game.system.id}`;
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bravenewworld', 'sheet', 'actor', 'bnw'],
-      template: 'templates/actors/delta-sheet.hbs',
+      template: `${basePath}/templates/actors/delta-sheet.hbs`,
       width: 720,
       height: 720,
       tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'traits' }]
@@ -10,7 +11,7 @@ class BraveNewWorldActorSheet extends ActorSheet {
   }
 
   get template() {
-    return `templates/actors/${this.actor.type}-sheet.hbs`;
+    return `systems/${game.system.id}/templates/actors/${this.actor.type}-sheet.hbs`;
   }
 
   async getData(options) {
