@@ -131,7 +131,7 @@ class BraveNewWorldItemSheet extends ItemSheet {
     const firstDefaultKey = Object.keys(defaultTraits)[0];
     if (firstDefaultKey) return firstDefaultKey;
 
-    return 'body';
+    return 'strength';
   }
 
   _capitalize(value) {

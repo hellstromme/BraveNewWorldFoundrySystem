@@ -76,7 +76,7 @@ class BraveNewWorldActorSheet extends ActorSheet {
       groups[trait.key] = [];
     }
 
-    const defaultTraitKey = traits[0]?.key ?? CONFIG.BNW?.traits?.[0] ?? 'body';
+    const defaultTraitKey = traits[0]?.key ?? CONFIG.BNW?.traits?.[0] ?? 'strength';
 
     for (const [key, data] of Object.entries(skills)) {
       const traitKey = data?.trait ?? defaultTraitKey;

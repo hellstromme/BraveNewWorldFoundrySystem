@@ -13,12 +13,16 @@
           "background": ""
         },
         "traits": {
-          "body": {
-            "label": "Body",
+          "strength": {
+            "label": "Strength",
             "value": 3
           },
-          "mind": {
-            "label": "Mind",
+          "speed": {
+            "label": "Speed",
+            "value": 3
+          },
+          "smarts": {
+            "label": "Smarts",
             "value": 3
           },
           "spirit": {
@@ -29,42 +33,42 @@
         "skills": {
           "athletics": {
             "label": "Athletics",
-            "trait": "body",
+            "trait": "strength",
             "value": 2
           },
           "brawl": {
             "label": "Brawl",
-            "trait": "body",
+            "trait": "strength",
             "value": 2
           },
           "might": {
             "label": "Might",
-            "trait": "body",
+            "trait": "strength",
             "value": 2
           },
           "stealth": {
             "label": "Stealth",
-            "trait": "body",
+            "trait": "speed",
             "value": 2
           },
           "investigation": {
             "label": "Investigation",
-            "trait": "mind",
+            "trait": "smarts",
             "value": 2
           },
           "knowledge": {
             "label": "Knowledge",
-            "trait": "mind",
+            "trait": "smarts",
             "value": 2
           },
           "science": {
             "label": "Science",
-            "trait": "mind",
+            "trait": "smarts",
             "value": 2
           },
           "technology": {
             "label": "Technology",
-            "trait": "mind",
+            "trait": "smarts",
             "value": 2
           },
           "leadership": {
@@ -103,7 +107,7 @@
         "activation": "standard",
         "cost": 0,
         "dice": 0,
-        "trait": "body",
+        "trait": "strength",
         "skill": "athletics",
         "notes": ""
       }
