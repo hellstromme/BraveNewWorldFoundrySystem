@@ -37,9 +37,14 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels = CONFIG.Item.typeLabels ?? {};
   CONFIG.Item.typeLabels.power = game.i18n.localize('BNW.ItemType.Power');
   CONFIG.Item.typeLabels.trick = game.i18n.localize('BNW.ItemType.Trick');
+  CONFIG.Item.typeLabels.quirk = game.i18n.localize('BNW.ItemType.Quirk');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
+  }
+
+  if (!Handlebars.helpers.gt) {
+    Handlebars.registerHelper('gt', (a, b) => a > b);
   }
 
   if (!Handlebars.helpers.hasEntries) {
@@ -64,6 +69,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/actors/delta-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/trick-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
@@ -79,7 +85,7 @@ Hooks.once('init', async function () {
 
   Items.unregisterSheet('core', ItemSheet);
   Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
-    types: ['power', 'trick'],
+    types: ['power', 'trick', 'quirk'],
     makeDefault: true
   });
 });

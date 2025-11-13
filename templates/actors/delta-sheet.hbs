@@ -38,6 +38,7 @@
     <a class="item" data-tab="traits">{{localize 'BNW.Tab.TraitsSkills'}}</a>
     <a class="item" data-tab="powers">{{localize 'BNW.Tab.Powers'}}</a>
     <a class="item" data-tab="tricks">{{localize 'BNW.Tab.Tricks'}}</a>
+    <a class="item" data-tab="quirks">{{localize 'BNW.Tab.Quirks'}}</a>
     <a class="item" data-tab="notes">{{localize 'BNW.Tab.Notes'}}</a>
   </nav>
 
@@ -140,6 +141,54 @@
               <p class="summary">{{item.system.summary}}</p>
               {{#if item.system.requiresPower}}
                 <p class="requirement"><em>{{localize 'BNW.Label.RequiresPower'}}: {{item.system.requiredPowerName}}</em></p>
+              {{/if}}
+            </div>
+            <div class="item-controls">
+              <a class="item-control item-edit" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a class="item-control item-delete" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          </li>
+        {{/each}}
+      </ol>
+    </div>
+
+    <div class="tab quirks" data-group="primary" data-tab="quirks">
+      <div class="item-controls header">
+        <button type="button" class="item-control item-create" data-type="quirk">
+          <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddQuirk'}}
+        </button>
+        <div class="negative-quirks-total">
+          <strong>{{localize 'BNW.Label.TotalNegativeQuirks'}}:</strong> {{negativeQuirksTotal}} / 10
+        </div>
+      </div>
+      <ol class="quirks-list">
+        {{#each quirks as |item|}}
+          <li class="item quirk flexrow" data-item-id="{{item.id}}">
+            <div class="item-name">
+              <h4>{{item.name}}</h4>
+              {{#if item.system.costs}}
+                <p class="costs">
+                  <strong>{{localize 'BNW.Label.Cost'}}:</strong>
+                  {{#each item.system.costs as |cost index|}}
+                    {{#if (eq cost 0)}}
+                      0{{#unless @last}},{{/unless}}
+                    {{else if (gt cost 0)}}
+                      +{{cost}}{{#unless @last}} or {{/unless}}
+                    {{else}}
+                      {{cost}}{{#unless @last}} or {{/unless}}
+                    {{/if}}
+                  {{/each}}
+                </p>
+              {{/if}}
+              {{#if item.system.quirkType}}
+                <p class="quirk-type"><em>{{localize 'BNW.Label.QuirkType'}}: {{item.system.quirkType}}</em></p>
+              {{/if}}
+              {{#if item.system.requirements}}
+                <p class="requirements"><em>{{localize 'BNW.Label.Requirements'}}: {{item.system.requirements}}</em></p>
               {{/if}}
             </div>
             <div class="item-controls">
