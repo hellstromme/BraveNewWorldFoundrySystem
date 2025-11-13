@@ -36,6 +36,7 @@ Hooks.once('init', async function () {
 
   CONFIG.Item.typeLabels = CONFIG.Item.typeLabels ?? {};
   CONFIG.Item.typeLabels.power = game.i18n.localize('BNW.ItemType.Power');
+  CONFIG.Item.typeLabels.trick = game.i18n.localize('BNW.ItemType.Trick');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -62,6 +63,7 @@ Hooks.once('init', async function () {
   const templatesToLoad = [
     `${CONFIG.BNW.templatePath}/actors/delta-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/trick-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
@@ -77,7 +79,7 @@ Hooks.once('init', async function () {
 
   Items.unregisterSheet('core', ItemSheet);
   Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
-    types: ['power'],
+    types: ['power', 'trick'],
     makeDefault: true
   });
 });
