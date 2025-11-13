@@ -122,14 +122,26 @@ Hooks.once('ready', async function () {
   if (!game?.user?.isGM) return;
   if (!game?.settings) return;
 
-  let shouldRunMigration = !traitMigrationSettingRegistered;
+  let shouldRunMigration = false;
 
   if (traitMigrationSettingRegistered) {
     try {
       shouldRunMigration = !game.settings.get(TRAIT_MIGRATION_NAMESPACE, TRAIT_MIGRATION_SETTING);
     } catch (error) {
-      console.warn('BNW | Failed to read trait migration setting, attempting migration once', error);
+      console.warn('BNW | Failed to read trait migration setting, will check for legacy data', error);
       shouldRunMigration = true;
+    }
+  } else {
+    // If setting registration failed, check if any actors have legacy traits
+    console.warn('BNW | Migration setting not registered, checking for legacy traits in actors');
+    const actors = Array.from(game?.actors?.contents ?? []);
+    for (const actor of actors) {
+      if (!actor || actor.type !== 'delta') continue;
+      const traits = actor.system?.traits ?? {};
+      if (Object.prototype.hasOwnProperty.call(traits, 'body') || Object.prototype.hasOwnProperty.call(traits, 'mind')) {
+        shouldRunMigration = true;
+        break;
+      }
     }
   }
 
@@ -150,18 +162,39 @@ Hooks.once('ready', async function () {
   }
 });
 
+/**
+ * Coerce a value to a finite number, or return the fallback value.
+ * @param {*} value - The value to coerce
+ * @param {number} [fallback=0] - The fallback value if coercion fails
+ * @returns {number} The coerced number or fallback
+ */
 function coerceNumber(value, fallback = 0) {
+  if (value == null) {  // Catches both null and undefined
+    const fallbackParsed = Number(fallback);
+    return Number.isFinite(fallbackParsed) ? fallbackParsed : 0;
+  }
   const parsed = Number(value);
   if (Number.isFinite(parsed)) return parsed;
   const fallbackParsed = Number(fallback);
   return Number.isFinite(fallbackParsed) ? fallbackParsed : 0;
 }
 
+/**
+ * Capitalize the first letter of a string.
+ * @param {string} value - The string to capitalize
+ * @returns {string} The capitalized string
+ */
 function capitalize(value) {
   if (typeof value !== 'string' || value.length === 0) return '';
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+/**
+ * Ensure a trait object has proper label and numeric value.
+ * @param {Object} traits - The traits object to modify
+ * @param {string} key - The trait key to sanitize
+ * @param {number} [fallbackValue=0] - Default value if trait doesn't exist
+ */
 function sanitizeTrait(traits, key, fallbackValue = 0) {
   const existing = traits[key] ?? {};
   const defaultLabel = BNW_DEFAULT_TRAIT_LABELS[key] ?? capitalize(key);
@@ -174,6 +207,12 @@ function sanitizeTrait(traits, key, fallbackValue = 0) {
   };
 }
 
+/**
+ * Map legacy trait names to new trait names.
+ * @param {string} traitKey - The trait key to map
+ * @param {string} [skillKey=''] - The skill key (used for body trait mapping)
+ * @returns {string} The mapped trait key, or empty string if invalid
+ */
 function mapLegacyTrait(traitKey, skillKey = '') {
   const normalizedTrait = String(traitKey ?? '').toLowerCase();
   if (!normalizedTrait) return '';
@@ -190,6 +229,11 @@ function mapLegacyTrait(traitKey, skillKey = '') {
   return normalizedTrait;
 }
 
+/**
+ * Migrate legacy trait data from body/mind/spirit to strength/speed/smarts/spirit.
+ * This function processes all actors and items in the game world.
+ * @returns {Promise<void>}
+ */
 async function migrateLegacyTraitData() {
   const actors = Array.from(game?.actors?.contents ?? []);
   const items = Array.from(game?.items?.contents ?? []);
@@ -260,6 +304,11 @@ async function migrateLegacyTraitData() {
   }
 }
 
+/**
+ * Migrate a single item's trait reference from legacy to new trait names.
+ * @param {Item} item - The item to migrate
+ * @returns {Promise<void>}
+ */
 async function migrateItemTrait(item) {
   if (!item || item.type !== 'power') return;
 
