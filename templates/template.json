@@ -127,7 +127,7 @@
       "img": "icons/svg/item-bag.svg",
       "system": {
         "description": "",
-        "costs": [],
+        "costs": [0],
         "quirkType": "standard",
         "requirements": ""
       }

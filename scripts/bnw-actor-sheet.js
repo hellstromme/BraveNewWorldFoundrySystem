@@ -116,7 +116,11 @@ class BraveNewWorldActorSheet extends ActorSheet {
   _calculateNegativeQuirksTotal(quirks = []) {
     let total = 0;
     for (const quirk of quirks) {
-      const costs = quirk.system?.costs ?? [];
+      let costs = quirk.system?.costs ?? [];
+      // Ensure costs is an array
+      if (!Array.isArray(costs)) {
+        costs = [];
+      }
       // Find the most negative cost for this quirk (best value for the player)
       let mostNegative = 0;
       for (const cost of costs) {
@@ -164,7 +168,11 @@ class BraveNewWorldActorSheet extends ActorSheet {
 
     // Validate negative quirk limit before adding to actor
     if (itemData.type === 'quirk') {
-      const costs = itemData.system?.costs ?? [];
+      let costs = itemData.system?.costs ?? [];
+      // Ensure costs is an array
+      if (!Array.isArray(costs)) {
+        costs = [];
+      }
       let mostNegative = 0;
       for (const cost of costs) {
         const numCost = Number(cost ?? 0);
