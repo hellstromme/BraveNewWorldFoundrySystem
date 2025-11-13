@@ -22,25 +22,7 @@ const BNW_DEFAULT_SKILLS = Object.freeze({
   willpower: { label: 'Willpower', trait: 'spirit', value: 2 }
 });
 
-const LEGACY_SKILL_TRAIT_MAP = Object.freeze({
-  athletics: 'strength',
-  brawl: 'strength',
-  might: 'strength',
-  stealth: 'speed',
-  investigation: 'smarts',
-  knowledge: 'smarts',
-  science: 'smarts',
-  technology: 'smarts',
-  leadership: 'spirit',
-  persuasion: 'spirit',
-  streetwise: 'spirit',
-  willpower: 'spirit'
-});
 
-const TRAIT_MIGRATION_NAMESPACE = 'bravenewworld';
-const TRAIT_MIGRATION_SETTING = 'traitsStrengthSpeedMigration';
-
-let traitMigrationSettingRegistered = false;
 
 Hooks.once('init', async function () {
   console.log('BNW | Initializing Brave New World system');
@@ -48,21 +30,6 @@ Hooks.once('init', async function () {
   CONFIG.BNW = CONFIG.BNW ?? {};
   CONFIG.BNW.traits = CONFIG.BNW.traits ?? Array.from(BNW_DEFAULT_TRAIT_KEYS);
   CONFIG.BNW.defaultSkills = CONFIG.BNW.defaultSkills ?? BNW_DEFAULT_SKILLS;
-
-  if (game?.settings?.register) {
-    try {
-      game.settings.register(TRAIT_MIGRATION_NAMESPACE, TRAIT_MIGRATION_SETTING, {
-        name: 'Brave New World trait migration',
-        scope: 'world',
-        config: false,
-        type: Boolean,
-        default: false
-      });
-      traitMigrationSettingRegistered = true;
-    } catch (error) {
-      console.warn('BNW | Failed to register trait migration setting', error);
-    }
-  }
 
   CONFIG.Actor.typeLabels = CONFIG.Actor.typeLabels ?? {};
   CONFIG.Actor.typeLabels.delta = game.i18n.localize('BNW.ActorType.Delta');
@@ -119,47 +86,6 @@ Hooks.once('ready', async function () {
   game.bnw = game.bnw ?? {};
   game.bnw.dice = BNW.dice;
   console.log('BNW | Ready');
-  if (!game?.user?.isGM) return;
-  if (!game?.settings) return;
-
-  let shouldRunMigration = false;
-
-  if (traitMigrationSettingRegistered) {
-    try {
-      shouldRunMigration = !game.settings.get(TRAIT_MIGRATION_NAMESPACE, TRAIT_MIGRATION_SETTING);
-    } catch (error) {
-      console.warn('BNW | Failed to read trait migration setting, will check for legacy data', error);
-      shouldRunMigration = true;
-    }
-  } else {
-    // If setting registration failed, check if any actors have legacy traits
-    console.warn('BNW | Migration setting not registered, checking for legacy traits in actors');
-    const actors = Array.from(game?.actors?.contents ?? []);
-    for (const actor of actors) {
-      if (!actor || actor.type !== 'delta') continue;
-      const traits = actor.system?.traits ?? {};
-      if (Object.prototype.hasOwnProperty.call(traits, 'body') || Object.prototype.hasOwnProperty.call(traits, 'mind')) {
-        shouldRunMigration = true;
-        break;
-      }
-    }
-  }
-
-  if (!shouldRunMigration) return;
-
-  try {
-    await migrateLegacyTraitData();
-
-    if (traitMigrationSettingRegistered) {
-      try {
-        await game.settings.set(TRAIT_MIGRATION_NAMESPACE, TRAIT_MIGRATION_SETTING, true);
-      } catch (error) {
-        console.error('BNW | Failed to flag trait migration as complete', error);
-      }
-    }
-  } catch (error) {
-    console.error('BNW | Trait migration failed', error);
-  }
 });
 
 /**
@@ -187,142 +113,4 @@ function coerceNumber(value, fallback = 0) {
 function capitalize(value) {
   if (typeof value !== 'string' || value.length === 0) return '';
   return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-/**
- * Ensure a trait object has proper label and numeric value.
- * @param {Object} traits - The traits object to modify
- * @param {string} key - The trait key to sanitize
- * @param {number} [fallbackValue=0] - Default value if trait doesn't exist
- */
-function sanitizeTrait(traits, key, fallbackValue = 0) {
-  const existing = traits[key] ?? {};
-  const defaultLabel = BNW_DEFAULT_TRAIT_LABELS[key] ?? capitalize(key);
-  const label = typeof existing.label === 'string' && existing.label.trim().length ? existing.label : defaultLabel;
-  const value = coerceNumber(existing.value, fallbackValue);
-  traits[key] = {
-    ...existing,
-    label,
-    value
-  };
-}
-
-/**
- * Map legacy trait names to new trait names.
- * @param {string} traitKey - The trait key to map
- * @param {string} [skillKey=''] - The skill key (used for body trait mapping)
- * @returns {string} The mapped trait key, or empty string if invalid
- */
-function mapLegacyTrait(traitKey, skillKey = '') {
-  const normalizedTrait = String(traitKey ?? '').toLowerCase();
-  if (!normalizedTrait) return '';
-
-  if (normalizedTrait === 'body') {
-    const normalizedSkill = String(skillKey ?? '').toLowerCase();
-    return LEGACY_SKILL_TRAIT_MAP[normalizedSkill] ?? 'strength';
-  }
-
-  if (normalizedTrait === 'mind') {
-    return 'smarts';
-  }
-
-  return normalizedTrait;
-}
-
-/**
- * Migrate legacy trait data from body/mind/spirit to strength/speed/smarts/spirit.
- * This function processes all actors and items in the game world.
- * @returns {Promise<void>}
- */
-async function migrateLegacyTraitData() {
-  const actors = Array.from(game?.actors?.contents ?? []);
-  const items = Array.from(game?.items?.contents ?? []);
-
-  if (actors.length === 0 && items.length === 0) return;
-
-  console.log('BNW | Running legacy trait migration');
-
-  for (const actor of actors) {
-    if (!actor || actor.type !== 'delta') continue;
-
-    const traits = foundry.utils.deepClone(actor.system?.traits ?? {});
-    const skills = foundry.utils.deepClone(actor.system?.skills ?? {});
-
-    const hasLegacyTraits = Object.prototype.hasOwnProperty.call(traits, 'body') || Object.prototype.hasOwnProperty.call(traits, 'mind');
-
-    let traitsChanged = false;
-    if (hasLegacyTraits) {
-      const bodyValue = coerceNumber(traits.body?.value, 0);
-      const mindValue = coerceNumber(traits.mind?.value, 0);
-
-      delete traits.body;
-      delete traits.mind;
-
-      sanitizeTrait(traits, 'strength', bodyValue);
-      sanitizeTrait(traits, 'speed', bodyValue);
-      sanitizeTrait(traits, 'smarts', mindValue);
-      sanitizeTrait(traits, 'spirit', traits.spirit?.value ?? 0);
-      traitsChanged = true;
-    }
-
-    let skillsChanged = false;
-    for (const [skillKey, skillData] of Object.entries(skills)) {
-      const currentTraitRaw = skillData?.trait ?? '';
-      const normalizedTrait = String(currentTraitRaw ?? '').toLowerCase();
-      const normalizedSkill = String(skillKey ?? '').toLowerCase();
-      const mappedTrait = mapLegacyTrait(normalizedTrait, normalizedSkill);
-      if (!mappedTrait) continue;
-
-      if (mappedTrait !== normalizedTrait || currentTraitRaw !== mappedTrait) {
-        skillsChanged = true;
-        skills[skillKey] = {
-          ...skillData,
-          trait: mappedTrait
-        };
-      }
-    }
-
-    if (traitsChanged || skillsChanged) {
-      const updateData = {};
-      if (traitsChanged) updateData['system.traits'] = traits;
-      if (skillsChanged) updateData['system.skills'] = skills;
-
-      try {
-        await actor.update(updateData);
-      } catch (error) {
-        console.error(`BNW | Failed to migrate actor ${actor.name}`, error);
-      }
-    }
-
-    for (const item of actor.items ?? []) {
-      await migrateItemTrait(item);
-    }
-  }
-
-  for (const item of items) {
-    await migrateItemTrait(item);
-  }
-}
-
-/**
- * Migrate a single item's trait reference from legacy to new trait names.
- * @param {Item} item - The item to migrate
- * @returns {Promise<void>}
- */
-async function migrateItemTrait(item) {
-  if (!item || item.type !== 'power') return;
-
-  const traitRaw = item.system?.trait ?? '';
-  const skillKey = item.system?.skill ?? '';
-  const normalizedTrait = String(traitRaw ?? '').toLowerCase();
-  const mappedTrait = mapLegacyTrait(normalizedTrait, skillKey);
-  if (!mappedTrait) return;
-
-  if (mappedTrait === normalizedTrait && traitRaw === mappedTrait) return;
-
-  try {
-    await item.update({ 'system.trait': mappedTrait });
-  } catch (error) {
-    console.error(`BNW | Failed to migrate item ${item.name}`, error);
-  }
 }
