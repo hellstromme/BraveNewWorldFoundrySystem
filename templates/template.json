@@ -121,6 +121,16 @@
         "requiredPowerName": "",
         "notes": ""
       }
+    },
+    "quirk": {
+      "type": "quirk",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "description": "",
+        "costs": [],
+        "quirkType": "standard",
+        "requirements": ""
+      }
     }
   }
 }

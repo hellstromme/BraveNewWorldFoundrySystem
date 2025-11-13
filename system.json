@@ -53,6 +53,9 @@
       },
       "trick": {
         "label": "BNW.ItemType.Trick"
+      },
+      "quirk": {
+        "label": "BNW.ItemType.Quirk"
       }
     }
   },

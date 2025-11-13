@@ -59,6 +59,10 @@ class BraveNewWorldActorSheet extends ActorSheet {
 
     context.powers = this.actor.items.filter((item) => item.type === 'power');
     context.tricks = this.actor.items.filter((item) => item.type === 'trick');
+    context.quirks = this.actor.items.filter((item) => item.type === 'quirk');
+    
+    // Calculate total negative quirks points
+    context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
 
     return context;
   }
@@ -109,6 +113,23 @@ class BraveNewWorldActorSheet extends ActorSheet {
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
+  _calculateNegativeQuirksTotal(quirks = []) {
+    let total = 0;
+    for (const quirk of quirks) {
+      const costs = quirk.system?.costs ?? [];
+      // Find the most negative cost for this quirk (best value for the player)
+      let mostNegative = 0;
+      for (const cost of costs) {
+        const numCost = Number(cost ?? 0);
+        if (numCost < mostNegative) {
+          mostNegative = numCost;
+        }
+      }
+      total += mostNegative;
+    }
+    return Math.abs(total); // Return as positive number for display
+  }
+
   activateListeners(html) {
     super.activateListeners(html);
 
@@ -134,6 +155,35 @@ class BraveNewWorldActorSheet extends ActorSheet {
             'BNW.Warning.MissingRequiredPower',
             { trick: itemData.name, power: requiredPowerName }
           ) ?? `Cannot add trick '${itemData.name}' - requires power: ${requiredPowerName}`;
+          
+          ui.notifications?.warn?.(message);
+          return false;
+        }
+      }
+    }
+
+    // Validate negative quirk limit before adding to actor
+    if (itemData.type === 'quirk') {
+      const costs = itemData.system?.costs ?? [];
+      let mostNegative = 0;
+      for (const cost of costs) {
+        const numCost = Number(cost ?? 0);
+        if (numCost < mostNegative) {
+          mostNegative = numCost;
+        }
+      }
+
+      // Only validate if the quirk has negative costs
+      if (mostNegative < 0) {
+        const currentQuirks = this.actor.items.filter((item) => item.type === 'quirk');
+        const currentTotal = this._calculateNegativeQuirksTotal(currentQuirks);
+        const newTotal = currentTotal + Math.abs(mostNegative);
+
+        if (newTotal > 10) {
+          const message = game?.i18n?.format?.(
+            'BNW.Warning.TooManyNegativeQuirks',
+            { current: currentTotal, adding: Math.abs(mostNegative) }
+          ) ?? `Cannot add quirk - would exceed the limit of 10 negative quirk points (current: ${currentTotal}, attempting to add: ${Math.abs(mostNegative)})`;
           
           ui.notifications?.warn?.(message);
           return false;

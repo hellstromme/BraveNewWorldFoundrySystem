@@ -1,0 +1,46 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Quirk'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.QuirkType'}}</span>
+          <select name="system.quirkType">
+            <option value="standard" {{#if (eq system.quirkType 'standard')}}selected{{/if}}>{{localize 'BNW.QuirkType.Standard'}}</option>
+            <option value="social" {{#if (eq system.quirkType 'social')}}selected{{/if}}>{{localize 'BNW.QuirkType.Social'}}</option>
+          </select>
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Requirements'}}</span>
+          <input type="text" name="system.requirements" value="{{system.requirements}}" placeholder="{{localize 'BNW.Placeholder.Requirements'}}" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group">
+      <label>{{localize 'BNW.Label.Costs'}}</label>
+      <div class="costs-list">
+        {{#each system.costs as |cost index|}}
+          <div class="cost-item flexrow">
+            <input type="number" name="system.costs.{{index}}" value="{{cost}}" placeholder="{{localize 'BNW.Placeholder.Cost'}}" />
+            <button type="button" class="cost-remove" data-index="{{index}}">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {{/each}}
+        <button type="button" class="cost-add">
+          <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddCost'}}
+        </button>
+      </div>
+    </div>
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Description'}}</label>
+      <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.QuirkDescription'}}">{{system.description}}</textarea>
+    </div>
+  </section>
+</form>

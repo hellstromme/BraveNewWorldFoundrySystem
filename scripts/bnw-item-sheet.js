@@ -138,6 +138,39 @@ class BraveNewWorldItemSheet extends ItemSheet {
     if (typeof value !== 'string' || !value.length) return value ?? '';
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+
+    // Handle adding costs for quirks
+    html.find('.cost-add').on('click', this._onCostAdd.bind(this));
+    
+    // Handle removing costs for quirks
+    html.find('.cost-remove').on('click', this._onCostRemove.bind(this));
+  }
+
+  async _onCostAdd(event) {
+    event.preventDefault();
+    if (this.item.type !== 'quirk') return;
+
+    const costs = foundry.utils.deepClone(this.item.system?.costs ?? []);
+    costs.push(0);
+    
+    await this.item.update({ 'system.costs': costs });
+  }
+
+  async _onCostRemove(event) {
+    event.preventDefault();
+    if (this.item.type !== 'quirk') return;
+
+    const button = event.currentTarget;
+    const index = Number(button.dataset.index);
+    
+    const costs = foundry.utils.deepClone(this.item.system?.costs ?? []);
+    costs.splice(index, 1);
+    
+    await this.item.update({ 'system.costs': costs });
+  }
 }
 
 globalThis.BraveNewWorldItemSheet = BraveNewWorldItemSheet;

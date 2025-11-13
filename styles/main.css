@@ -271,3 +271,121 @@
   font-size: 0.85rem;
   color: var(--color-text-dark-secondary);
 }
+
+/* Quirks styling */
+.bnw.sheet .quirks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .quirks-list .item {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.bnw.sheet .quirks-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .quirks-list .item .item-name h4 {
+  margin: 0 0 0.25rem 0;
+}
+
+.bnw.sheet .quirks-list .item .item-name p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.bnw.sheet .quirks-list .item .item-name .costs {
+  color: var(--color-text-dark-primary);
+  font-weight: 500;
+}
+
+.bnw.sheet .quirks-list .item .item-name .quirk-type,
+.bnw.sheet .quirks-list .item .item-name .requirements {
+  color: var(--color-text-dark-secondary);
+  font-style: italic;
+}
+
+.bnw.sheet .negative-quirks-total {
+  font-size: 0.9rem;
+  color: var(--color-text-dark-secondary);
+  padding: 0.5rem;
+}
+
+.bnw.sheet .item-controls.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+/* Quirk item sheet cost management */
+.bnw.sheet .costs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .cost-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bnw.sheet .cost-item input {
+  flex: 1;
+}
+
+.bnw.sheet .cost-item button,
+.bnw.sheet .cost-add {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border-light-primary);
+  background: var(--color-bg-btn);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bnw.sheet .cost-item button:hover,
+.bnw.sheet .cost-add:hover {
+  background: var(--color-border-light-highlight);
+}
+
+.bnw.sheet .tricks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .tricks-list .item {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.bnw.sheet .tricks-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .tricks-list .item .item-name h4 {
+  margin: 0 0 0.25rem 0;
+}
+
+.bnw.sheet .tricks-list .item .item-name p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
