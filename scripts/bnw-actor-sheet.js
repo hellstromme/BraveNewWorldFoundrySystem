@@ -58,6 +58,7 @@ class BraveNewWorldActorSheet extends ActorSheet {
     }
 
     context.powers = this.actor.items.filter((item) => item.type === 'power');
+    context.tricks = this.actor.items.filter((item) => item.type === 'trick');
 
     return context;
   }
@@ -113,6 +114,34 @@ class BraveNewWorldActorSheet extends ActorSheet {
 
     html.find('.skill-roll').on('click', this._onSkillRoll.bind(this));
     html.find('.power-roll').on('click', this._onPowerRoll.bind(this));
+  }
+
+  async _onDropItemCreate(itemData) {
+    // Validate trick requirements before adding to actor
+    if (itemData.type === 'trick') {
+      const requiresPower = itemData.system?.requiresPower ?? false;
+      const requiredPowerName = itemData.system?.requiredPowerName ?? '';
+
+      if (requiresPower && requiredPowerName) {
+        // Check if the actor has the required power
+        const hasPower = this.actor.items.some(
+          (item) => item.type === 'power' && 
+                    item.name.toLowerCase().trim() === requiredPowerName.toLowerCase().trim()
+        );
+
+        if (!hasPower) {
+          const message = game?.i18n?.format?.(
+            'BNW.Warning.MissingRequiredPower',
+            { trick: itemData.name, power: requiredPowerName }
+          ) ?? `Cannot add trick '${itemData.name}' - requires power: ${requiredPowerName}`;
+          
+          ui.notifications?.warn?.(message);
+          return false;
+        }
+      }
+    }
+
+    return super._onDropItemCreate(itemData);
   }
 
   async _onSkillRoll(event) {

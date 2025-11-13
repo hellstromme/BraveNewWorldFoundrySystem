@@ -111,6 +111,16 @@
         "skill": "athletics",
         "notes": ""
       }
+    },
+    "trick": {
+      "type": "trick",
+      "img": "icons/svg/mystery-man.svg",
+      "system": {
+        "summary": "",
+        "requiresPower": false,
+        "requiredPowerName": "",
+        "notes": ""
+      }
     }
   }
 }

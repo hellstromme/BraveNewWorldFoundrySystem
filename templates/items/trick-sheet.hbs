@@ -1,0 +1,33 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Trick'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.Summary'}}</span>
+          <input type="text" name="system.summary" value="{{system.summary}}" />
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="system.requiresPower" {{#if system.requiresPower}}checked{{/if}} />
+          <span>{{localize 'BNW.Label.RequiresPower'}}</span>
+        </label>
+        {{#if system.requiresPower}}
+          <label>
+            <span>{{localize 'BNW.Label.RequiredPowerName'}}</span>
+            <input type="text" name="system.requiredPowerName" value="{{system.requiredPowerName}}" placeholder="{{localize 'BNW.Placeholder.PowerName'}}" />
+          </label>
+        {{/if}}
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Notes'}}</label>
+      <textarea name="system.notes" placeholder="{{localize 'BNW.Placeholder.TrickNotes'}}">{{system.notes}}</textarea>
+    </div>
+  </section>
+</form>

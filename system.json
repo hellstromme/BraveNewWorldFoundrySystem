@@ -50,6 +50,9 @@
     "Item": {
       "power": {
         "label": "BNW.ItemType.Power"
+      },
+      "trick": {
+        "label": "BNW.ItemType.Trick"
       }
     }
   },

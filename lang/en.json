@@ -39,7 +39,16 @@
   "BNW.Roll.Failure": "Failure",
   "BNW.Warning.UnknownTrait": "Unknown trait: {trait}",
   "BNW.Warning.UnknownSkill": "Unknown skill: {skill}",
+  "BNW.Warning.MissingRequiredPower": "Cannot add trick '{trick}' - requires power: {power}",
   "BNW.Error.RollEvaluation": "Failed to evaluate roll.",
   "BNW.ActorType.Delta": "Delta",
-  "BNW.ItemType.Power": "Power"
+  "BNW.ItemType.Power": "Power",
+  "BNW.ItemType.Trick": "Trick",
+  "BNW.Item.Trick": "Trick",
+  "BNW.Label.RequiresPower": "Requires Power",
+  "BNW.Label.RequiredPowerName": "Required Power Name",
+  "BNW.Placeholder.PowerName": "Enter power name",
+  "BNW.Placeholder.TrickNotes": "Describe what this trick does",
+  "BNW.Action.AddTrick": "Add Trick",
+  "BNW.Tab.Tricks": "Tricks"
 }

@@ -37,6 +37,7 @@
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="traits">{{localize 'BNW.Tab.TraitsSkills'}}</a>
     <a class="item" data-tab="powers">{{localize 'BNW.Tab.Powers'}}</a>
+    <a class="item" data-tab="tricks">{{localize 'BNW.Tab.Tricks'}}</a>
     <a class="item" data-tab="notes">{{localize 'BNW.Tab.Notes'}}</a>
   </nav>
 
@@ -113,6 +114,35 @@
               <a class="item-control power-roll" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollPower'}}">
                 <i class="fas fa-dice"></i>
               </a>
+              <a class="item-control item-edit" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a class="item-control item-delete" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          </li>
+        {{/each}}
+      </ol>
+    </div>
+
+    <div class="tab tricks" data-group="primary" data-tab="tricks">
+      <div class="item-controls header">
+        <button type="button" class="item-control item-create" data-type="trick">
+          <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddTrick'}}
+        </button>
+      </div>
+      <ol class="tricks-list">
+        {{#each tricks as |item|}}
+          <li class="item trick flexrow" data-item-id="{{item.id}}">
+            <div class="item-name">
+              <h4>{{item.name}}</h4>
+              <p class="summary">{{item.system.summary}}</p>
+              {{#if item.system.requiresPower}}
+                <p class="requirement"><em>{{localize 'BNW.Label.RequiresPower'}}: {{item.system.requiredPowerName}}</em></p>
+              {{/if}}
+            </div>
+            <div class="item-controls">
               <a class="item-control item-edit" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
                 <i class="fas fa-edit"></i>
               </a>
