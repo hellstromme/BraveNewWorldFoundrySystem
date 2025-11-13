@@ -169,7 +169,12 @@ class BraveNewWorldItemSheet extends ItemSheet {
     const button = event.currentTarget;
     const index = Number(button.dataset.index);
     
-    const costs = foundry.utils.deepClone(this.item.system?.costs ?? []);
+    let costs = this.item.system?.costs ?? [];
+    // Ensure costs is an array
+    if (!Array.isArray(costs)) {
+      costs = [];
+    }
+    costs = foundry.utils.deepClone(costs);
     costs.splice(index, 1);
     
     await this.item.update({ 'system.costs': costs });
