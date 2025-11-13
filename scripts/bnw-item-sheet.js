@@ -98,9 +98,8 @@ class BraveNewWorldItemSheet extends ItemSheet {
 
     const systemData = game.system ?? {};
     return (
-      foundry.utils.getProperty(systemData, 'template.Actor.delta.system.traits') ??
-      foundry.utils.getProperty(systemData, 'model.Actor.delta.traits') ??
       foundry.utils.getProperty(systemData, 'model.Actor.delta.system.traits') ??
+      foundry.utils.getProperty(systemData, 'model.Actor.delta.traits') ??
       {}
     );
   }
@@ -110,9 +109,8 @@ class BraveNewWorldItemSheet extends ItemSheet {
 
     const systemData = game.system ?? {};
     return (
-      foundry.utils.getProperty(systemData, 'template.Actor.delta.system.skills') ??
-      foundry.utils.getProperty(systemData, 'model.Actor.delta.skills') ??
       foundry.utils.getProperty(systemData, 'model.Actor.delta.system.skills') ??
+      foundry.utils.getProperty(systemData, 'model.Actor.delta.skills') ??
       {}
     );
   }
@@ -153,7 +151,12 @@ class BraveNewWorldItemSheet extends ItemSheet {
     event.preventDefault();
     if (this.item.type !== 'quirk') return;
 
-    const costs = foundry.utils.deepClone(this.item.system?.costs ?? []);
+    let costs = this.item.system?.costs ?? [];
+    // Ensure costs is an array
+    if (!Array.isArray(costs)) {
+      costs = [];
+    }
+    costs = foundry.utils.deepClone(costs);
     costs.push(0);
     
     await this.item.update({ 'system.costs': costs });
