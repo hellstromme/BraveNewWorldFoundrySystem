@@ -50,6 +50,36 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     primary: "traits"
   };
 
+  /* -------------------------------------------- */
+  /*  Lifecycle Methods                           */
+  /* -------------------------------------------- */
+
+  /** @override */
+  _attachFrameListeners() {
+    super._attachFrameListeners();
+    
+    // Listen for embedded document changes to trigger re-render
+    Hooks.on('createItem', this._onEmbeddedDocumentChange.bind(this));
+    Hooks.on('updateItem', this._onEmbeddedDocumentChange.bind(this));
+    Hooks.on('deleteItem', this._onEmbeddedDocumentChange.bind(this));
+  }
+
+  /**
+   * Handle embedded document changes
+   * @param {Item} item - The item that changed
+   * @param {object} changes - The changes made
+   * @param {object} options - Update options
+   * @param {string} userId - The user who made the change
+   * @private
+   */
+  _onEmbeddedDocumentChange(item, changes, options, userId) {
+    // Only re-render if this item belongs to our actor
+    if (item.parent?.id === this.document.id) {
+      console.log('BNW | Item changed, re-rendering:', item.name);
+      this.render(true, { parts: ['form'] });
+    }
+  }
+
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
