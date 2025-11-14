@@ -116,7 +116,21 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
   _calculateNegativeQuirksTotal(quirks = []) {
     let total = 0;
     for (const quirk of quirks) {
-      const cost = Number(quirk.system?.cost ?? 0);
+      // Handle both old (costs array) and new (cost single value) formats
+      let cost = 0;
+      if (quirk.system?.cost !== undefined) {
+        // New format: single cost value
+        cost = Number(quirk.system.cost ?? 0);
+      } else if (Array.isArray(quirk.system?.costs)) {
+        // Old format: costs array - find most negative
+        for (const c of quirk.system.costs) {
+          const numCost = Number(c ?? 0);
+          if (numCost < cost) {
+            cost = numCost;
+          }
+        }
+      }
+      
       if (cost < 0) {
         total += cost;
       }
@@ -158,7 +172,20 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     // Validate negative quirk limit before adding to actor
     if (itemData.type === 'quirk') {
-      const cost = Number(itemData.system?.cost ?? 0);
+      // Handle both old (costs array) and new (cost single value) formats
+      let cost = 0;
+      if (itemData.system?.cost !== undefined) {
+        // New format: single cost value
+        cost = Number(itemData.system.cost ?? 0);
+      } else if (Array.isArray(itemData.system?.costs)) {
+        // Old format: costs array - find most negative
+        for (const c of itemData.system.costs) {
+          const numCost = Number(c ?? 0);
+          if (numCost < cost) {
+            cost = numCost;
+          }
+        }
+      }
 
       // Only validate if the quirk has negative cost
       if (cost < 0) {
