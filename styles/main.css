@@ -40,11 +40,15 @@
 .bnw.sheet .sheet-body {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex scrolling */
 }
 
 /* V2 Tab Management - hide inactive tabs */
 .bnw.sheet .sheet-body .tab {
-  height: 100%;
+  flex: 1;
+  min-height: 0; /* Important for flex scrolling */
   overflow-y: auto;
   padding: 0.75rem;
   box-sizing: border-box;
