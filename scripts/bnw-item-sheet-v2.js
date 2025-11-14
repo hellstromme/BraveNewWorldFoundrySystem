@@ -36,17 +36,19 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   };
 
   /** @override */
-  _configureRenderOptions(options) {
-    super._configureRenderOptions(options);
+  async _renderHTML(context, options) {
+    // Temporarily override the template for this render
+    const originalTemplate = this.constructor.PARTS.form.template;
+    this.constructor.PARTS.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
     
-    // Set template path directly in options
-    const template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
-    console.log('BNW | Setting template in options:', template);
+    console.log('BNW | Rendering with template:', this.constructor.PARTS.form.template);
     
-    // Override parts in options
-    options.parts = {
-      form: { template }
-    };
+    try {
+      return await super._renderHTML(context, options);
+    } finally {
+      // Restore original template
+      this.constructor.PARTS.form.template = originalTemplate;
+    }
   }
 
   /* -------------------------------------------- */
