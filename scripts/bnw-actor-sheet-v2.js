@@ -26,7 +26,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       createItem: BraveNewWorldActorSheetV2.prototype._onCreateItem,
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
-      editImage: BraveNewWorldActorSheetV2.prototype._onEditImage
+      editImage: BraveNewWorldActorSheetV2.prototype._onEditImage,
+      changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab
     },
     form: {
       handler: BraveNewWorldActorSheetV2.prototype._onSubmitForm,
@@ -342,6 +343,37 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       }
     });
     fp.render(true);
+  }
+
+  /**
+   * Handle tab change
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  _onChangeTab(event, target) {
+    const tabName = target.dataset.tab;
+    const group = target.dataset.group || 'primary';
+    
+    console.log('BNW | Changing tab to:', tabName);
+    
+    const form = this.element.querySelector('[data-application-part="form"]');
+    if (!form) return;
+    
+    // Remove active from all tabs in this group
+    form.querySelectorAll(`.tab[data-group="${group}"]`).forEach(tab => {
+      tab.classList.remove('active');
+    });
+    form.querySelectorAll(`.sheet-tabs[data-group="${group}"] .item`).forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    // Add active to the selected tab
+    const selectedTab = form.querySelector(`.tab[data-group="${group}"][data-tab="${tabName}"]`);
+    if (selectedTab) {
+      selectedTab.classList.add('active');
+      target.classList.add('active');
+    }
   }
 
   /* -------------------------------------------- */
