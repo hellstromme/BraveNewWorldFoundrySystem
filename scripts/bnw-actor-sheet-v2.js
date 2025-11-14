@@ -54,7 +54,16 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     
+    // Add actor to context for templates
+    context.actor = this.document;
     context.system = foundry.utils.deepClone(this.document.system);
+    
+    console.log('BNW Actor | Preparing context', {
+      actorName: this.document.name,
+      systemData: context.system,
+      hasTraits: !!context.system.traits,
+      hasSkills: !!context.system.skills
+    });
     
     this._initializeDefaults(context.system);
     
@@ -66,6 +75,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
     
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
+    
+    console.log('BNW Actor | Context prepared', {
+      traitsCount: context.traits.length,
+      skillsCount: Object.keys(context.skillsByTrait).length,
+      powersCount: context.powers.length
+    });
     
     return context;
   }
