@@ -23,7 +23,33 @@ class BraveNewWorldItemSheet extends ItemSheet {
 
     context.traitOptions = this._prepareTraitOptions(actor, currentTrait);
     context.skillOptions = this._prepareSkillOptions(actor, currentSkill, context.traitOptions);
+    
+    // Ensure quirks always have at least one cost entry
+    if (this.item.type === 'quirk') {
+      if (!Array.isArray(context.system.costs) || context.system.costs.length === 0) {
+        context.system.costs = [0];
+      }
+    }
+    
     return context;
+  }
+
+  async _updateObject(event, formData) {
+    // Convert costs object to array for quirks
+    if (this.item.type === 'quirk' && formData['system.costs'] !== undefined) {
+      const costsData = foundry.utils.expandObject(formData)?.system?.costs;
+      if (costsData && typeof costsData === 'object' && !Array.isArray(costsData)) {
+        // Convert object with numeric keys to array
+        const costsArray = [];
+        const keys = Object.keys(costsData).sort((a, b) => Number(a) - Number(b));
+        for (const key of keys) {
+          costsArray.push(Number(costsData[key]) || 0);
+        }
+        formData['system.costs'] = costsArray;
+      }
+    }
+    
+    return super._updateObject(event, formData);
   }
 
   _prepareTraitOptions(actor, currentTrait) {
