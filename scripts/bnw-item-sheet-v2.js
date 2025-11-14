@@ -1,9 +1,7 @@
 /**
  * Brave New World Item Sheet - Application V2
  */
-class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2.mixin(
-  foundry.applications.api.HandlebarsApplicationMixin
-) {
+class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2 {
   
   /** @override */
   static DEFAULT_OPTIONS = {
