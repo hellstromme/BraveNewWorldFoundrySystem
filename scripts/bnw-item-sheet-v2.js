@@ -187,11 +187,8 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
     
-    // Update the document
-    await this.document.update(expanded);
-    
-    // V2 doesn't auto-refresh form on update, so we don't need to re-render
-    // The form retains its values naturally
+    // Update without rendering to preserve form state
+    await this.document.update(expanded, { render: false });
   }
 }
 
