@@ -314,29 +314,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
 
   /**
    * Handle form submission
-   * @param {Event} event
-   * @param {HTMLFormElement} form
-   * @param {FormDataExtended} formData
+   * In V2, the parameters are: formConfig, event
+   * @param {object} formConfig - Form configuration options
+   * @param {Event} event - The form change event
    * @private
    */
-  async _onSubmitForm(event, form, formData) {
-    // Handle different formData formats
-    let submitData = {};
+  async _onSubmitForm(formConfig, event) {
+    // Get the form element from the event
+    const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
     
-    if (formData instanceof FormData) {
-      // Standard FormData object
-      for (const [key, value] of formData.entries()) {
-        submitData[key] = value;
-      }
-    } else if (formData && typeof formData === 'object') {
-      // Already a plain object
-      submitData = formData;
-    } else {
-      // Fallback: extract from form directly
-      const fd = new FormData(form);
-      for (const [key, value] of fd.entries()) {
-        submitData[key] = value;
-      }
+    if (!form) {
+      console.warn('BNW | No form element found in event');
+      return;
+    }
+    
+    // Extract form data
+    const formData = new FormData(form);
+    const submitData = {};
+    for (const [key, value] of formData.entries()) {
+      submitData[key] = value;
     }
     
     // Expand dotted notation to nested object

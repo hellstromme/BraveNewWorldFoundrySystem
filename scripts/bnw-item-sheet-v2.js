@@ -166,56 +166,29 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
 
   /**
    * Handle form submission
-   * @param {Event} event
-   * @param {HTMLFormElement} form
-   * @param {FormDataExtended} formData
+   * In V2, the parameters are: formConfig, event
+   * @param {object} formConfig - Form configuration options
+   * @param {Event} event - The form change event
    * @private
    */
-  async _onSubmitForm(event, form, formData) {
-    // Debug: log what we receive
-    console.group('BNW | Form Submission Debug');
-    console.log('Event:', event);
-    console.log('Form:', form);
-    console.log('FormData:', formData);
-    console.log('FormData type check:', {
-      isFormData: formData instanceof FormData,
-      isObject: typeof formData === 'object',
-      isTruthy: !!formData,
-      constructor: formData?.constructor?.name
-    });
-    console.groupEnd();
+  async _onSubmitForm(formConfig, event) {
+    // Get the form element from the event
+    const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
     
-    // Handle different formData formats
-    let submitData = {};
-    
-    if (formData instanceof FormData) {
-      // Standard FormData object
-      console.log('BNW | Using FormData.entries()');
-      for (const [key, value] of formData.entries()) {
-        submitData[key] = value;
-      }
-    } else if (formData && typeof formData === 'object') {
-      // Already a plain object
-      console.log('BNW | Using formData as plain object');
-      submitData = formData;
-    } else if (form instanceof HTMLFormElement) {
-      // Extract from form element
-      console.log('BNW | Creating FormData from form element');
-      const fd = new FormData(form);
-      for (const [key, value] of fd.entries()) {
-        submitData[key] = value;
-      }
-    } else {
-      console.warn('BNW | Unable to extract form data, skipping update');
+    if (!form) {
+      console.warn('BNW | No form element found in event');
       return;
     }
     
-    console.log('BNW | Submit data:', submitData);
+    // Extract form data
+    const formData = new FormData(form);
+    const submitData = {};
+    for (const [key, value] of formData.entries()) {
+      submitData[key] = value;
+    }
     
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
-    console.log('BNW | Expanded data:', expanded);
-    
     await this.document.update(expanded);
   }
 }
