@@ -6,6 +6,24 @@
   height: 100%;
 }
 
+/* V2 window-content needs to be flex column and fill space */
+.bnw.sheet .window-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* V2 form part (the div inside window-content) */
+.bnw.sheet [data-application-part="form"] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .bnw.sheet .sheet-header {
   gap: 1rem;
   align-items: center;
