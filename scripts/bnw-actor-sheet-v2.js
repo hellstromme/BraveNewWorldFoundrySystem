@@ -1,0 +1,392 @@
+/**
+ * Brave New World Actor Sheet - Application V2
+ * Modern implementation using Foundry VTT Application V2 framework
+ */
+class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2 {
+  
+  /** @override */
+  static DEFAULT_OPTIONS = {
+    classes: ['bravenewworld', 'sheet', 'actor', 'bnw'],
+    position: {
+      width: 720,
+      height: 720
+    },
+    window: {
+      resizable: true
+    },
+    actions: {
+      rollSkill: BraveNewWorldActorSheetV2._onRollSkill,
+      rollPower: BraveNewWorldActorSheetV2._onRollPower,
+      createItem: BraveNewWorldActorSheetV2._onCreateItem,
+      editItem: BraveNewWorldActorSheetV2._onEditItem,
+      deleteItem: BraveNewWorldActorSheetV2._onDeleteItem,
+      editImage: BraveNewWorldActorSheetV2._onEditImage
+    },
+    form: {
+      handler: BraveNewWorldActorSheetV2._onSubmitForm,
+      submitOnChange: true
+    }
+  };
+
+  /** @override */
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/actors/actor-sheet-v2.hbs"
+    }
+  };
+
+  /** @override */
+  tabGroups = {
+    primary: "traits"
+  };
+
+  /* -------------------------------------------- */
+  /*  Context Preparation                         */
+  /* -------------------------------------------- */
+
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    
+    context.system = foundry.utils.deepClone(this.document.system);
+    
+    this._initializeDefaults(context.system);
+    
+    context.traits = this._prepareTraits(context.system.traits);
+    context.skillsByTrait = this._prepareSkills(context.system.skills, context.traits);
+    
+    context.powers = this.document.items.filter(i => i.type === 'power');
+    context.tricks = this.document.items.filter(i => i.type === 'trick');
+    context.quirks = this.document.items.filter(i => i.type === 'quirk');
+    
+    context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
+    
+    return context;
+  }
+
+  /* -------------------------------------------- */
+  /*  Data Preparation Helpers                    */
+  /* -------------------------------------------- */
+
+  /**
+   * Initialize default values for system data
+   * @param {object} system
+   * @private
+   */
+  _initializeDefaults(system) {
+    system.details ??= {};
+    const defaultDetails = {
+      playerName: '',
+      heroName: '',
+      codeName: '',
+      origin: '',
+      affiliation: '',
+      background: ''
+    };
+    foundry.utils.mergeObject(system.details, defaultDetails, { insertKeys: false });
+    
+    system.traits ??= {};
+    system.skills ??= {};
+    system.notes ??= '';
+    
+    const defaultSkills = CONFIG.BNW?.defaultSkills ?? {};
+    if (foundry.utils.isEmpty(system.skills) && !foundry.utils.isEmpty(defaultSkills)) {
+      system.skills = foundry.utils.deepClone(defaultSkills);
+    }
+    
+    for (const traitKey of CONFIG.BNW?.traits ?? []) {
+      system.traits[traitKey] ??= { 
+        label: this._capitalize(traitKey), 
+        value: 0 
+      };
+    }
+  }
+
+  /**
+   * Prepare trait data for rendering
+   * @param {object} traits
+   * @returns {Array}
+   * @private
+   */
+  _prepareTraits(traits = {}) {
+    return Object.entries(traits).map(([key, data]) => ({
+      key,
+      label: data?.label ?? this._capitalize(key),
+      value: Number(data?.value ?? 0)
+    }));
+  }
+
+  /**
+   * Prepare skill data grouped by trait
+   * @param {object} skills
+   * @param {Array} traits
+   * @returns {object}
+   * @private
+   */
+  _prepareSkills(skills = {}, traits = []) {
+    const groups = {};
+    for (const trait of traits) {
+      groups[trait.key] = [];
+    }
+
+    const defaultTraitKey = traits[0]?.key ?? CONFIG.BNW?.traits?.[0] ?? 'strength';
+
+    for (const [key, data] of Object.entries(skills)) {
+      const traitKey = data?.trait ?? defaultTraitKey;
+      const trait = traits.find(t => t.key === traitKey) ?? { key: traitKey, value: 0 };
+      const traitValue = Number(trait?.value ?? 0);
+      const skillValue = Number(data?.value ?? 0);
+      const pool = Math.max(traitValue + skillValue, 1);
+      
+      const skillData = {
+        key,
+        label: data?.label ?? this._capitalize(key),
+        trait: traitKey,
+        value: skillValue,
+        pool
+      };
+
+      if (!groups[traitKey]) groups[traitKey] = [];
+      groups[traitKey].push(skillData);
+    }
+
+    for (const trait of traits) {
+      groups[trait.key] = (groups[trait.key] ?? []).sort((a, b) => 
+        a.label.localeCompare(b.label)
+      );
+    }
+
+    return groups;
+  }
+
+  /**
+   * Calculate total negative quirk points
+   * @param {Array} quirks
+   * @returns {number}
+   * @private
+   */
+  _calculateNegativeQuirksTotal(quirks = []) {
+    let total = 0;
+    for (const quirk of quirks) {
+      const cost = Number(quirk.system?.cost ?? 0);
+      if (cost < 0) {
+        total += cost;
+      }
+    }
+    return Math.abs(total);
+  }
+
+  /**
+   * Capitalize first letter of string
+   * @param {string} value
+   * @returns {string}
+   * @private
+   */
+  _capitalize(value) {
+    if (typeof value !== 'string' || !value.length) return value ?? '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  /* -------------------------------------------- */
+  /*  Action Handlers                             */
+  /* -------------------------------------------- */
+
+  /**
+   * Handle skill roll action
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onRollSkill(event, target) {
+    const { trait, skill } = target.dataset;
+    
+    await BNW.dice.rollTraitSkill({
+      actor: this.document,
+      traitKey: trait,
+      skillKey: skill
+    });
+  }
+
+  /**
+   * Handle power roll action
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onRollPower(event, target) {
+    const { itemId } = target.dataset;
+    const item = this.document.items.get(itemId);
+    if (!item) return;
+
+    const traitKey = item.system?.trait ?? '';
+    const skillKey = item.system?.skill ?? '';
+
+    await BNW.dice.rollTraitSkill({
+      actor: this.document,
+      traitKey,
+      skillKey,
+      bonusDice: Number(item.system?.dice ?? 0),
+      label: item.name,
+      sourceItem: item
+    });
+  }
+
+  /**
+   * Handle item creation
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onCreateItem(event, target) {
+    const { type } = target.dataset;
+    
+    const itemData = {
+      name: game.i18n.format('DOCUMENT.New', { 
+        type: game.i18n.localize(`ITEM.Type${type.capitalize()}`) 
+      }),
+      type: type
+    };
+    
+    await this.document.createEmbeddedDocuments('Item', [itemData]);
+  }
+
+  /**
+   * Handle item edit
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onEditItem(event, target) {
+    const { itemId } = target.dataset;
+    const item = this.document.items.get(itemId);
+    if (item) {
+      item.sheet.render(true);
+    }
+  }
+
+  /**
+   * Handle item deletion
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onDeleteItem(event, target) {
+    const { itemId } = target.dataset;
+    const item = this.document.items.get(itemId);
+    if (!item) return;
+    
+    const confirmed = await Dialog.confirm({
+      title: game.i18n.localize('BNW.Dialog.DeleteItem'),
+      content: game.i18n.format('BNW.Dialog.DeleteItemContent', { name: item.name })
+    });
+    
+    if (confirmed) {
+      await item.delete();
+    }
+  }
+
+  /**
+   * Handle image edit
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  static async _onEditImage(event, target) {
+    const fp = new FilePicker({
+      type: "image",
+      current: this.document.img,
+      callback: async (path) => {
+        await this.document.update({ img: path });
+      }
+    });
+    fp.render(true);
+  }
+
+  /* -------------------------------------------- */
+  /*  Form Handling                               */
+  /* -------------------------------------------- */
+
+  /**
+   * Handle form submission
+   * @param {Event} event
+   * @param {HTMLFormElement} form
+   * @param {FormDataExtended} formData
+   * @private
+   */
+  static async _onSubmitForm(event, form, formData) {
+    const submitData = formData.object;
+    await this.document.update(submitData);
+  }
+
+  /* -------------------------------------------- */
+  /*  Drop Handlers                               */
+  /* -------------------------------------------- */
+
+  /** @override */
+  async _onDrop(event) {
+    const data = TextEditor.getDragEventData(event);
+    
+    if (data.type === 'Item') {
+      return this._onDropItem(event, data);
+    }
+    
+    return super._onDrop(event);
+  }
+
+  /**
+   * Handle dropping an item on the actor sheet
+   * @param {DragEvent} event
+   * @param {object} data
+   * @private
+   */
+  async _onDropItem(event, data) {
+    const item = await Item.implementation.fromDropData(data);
+    if (!item) return;
+    
+    if (item.type === 'trick') {
+      const requiresPower = item.system?.requiresPower ?? false;
+      const requiredPowerName = item.system?.requiredPowerName ?? '';
+
+      if (requiresPower && requiredPowerName) {
+        const hasPower = this.document.items.some(
+          i => i.type === 'power' && 
+               i.name.toLowerCase().trim() === requiredPowerName.toLowerCase().trim()
+        );
+
+        if (!hasPower) {
+          ui.notifications.warn(
+            game.i18n.format('BNW.Warning.MissingRequiredPower', {
+              trick: item.name,
+              power: requiredPowerName
+            })
+          );
+          return false;
+        }
+      }
+    }
+
+    if (item.type === 'quirk') {
+      const cost = Number(item.system?.cost ?? 0);
+
+      if (cost < 0) {
+        const currentQuirks = this.document.items.filter(i => i.type === 'quirk');
+        const currentTotal = this._calculateNegativeQuirksTotal(currentQuirks);
+        const newTotal = currentTotal + Math.abs(cost);
+
+        if (newTotal > 10) {
+          ui.notifications.warn(
+            game.i18n.format('BNW.Warning.TooManyNegativeQuirks', {
+              current: currentTotal,
+              adding: Math.abs(cost)
+            })
+          );
+          return false;
+        }
+      }
+    }
+
+    return super._onDropItem?.(event, data) ?? this.document.createEmbeddedDocuments('Item', [item.toObject()]);
+  }
+}
+
+globalThis.BraveNewWorldActorSheetV2 = BraveNewWorldActorSheetV2;

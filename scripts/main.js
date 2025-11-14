@@ -67,23 +67,48 @@ Hooks.once('init', async function () {
 
   const templatesToLoad = [
     `${CONFIG.BNW.templatePath}/actors/delta-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/actor-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/header.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/tabs.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/traits.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/powers.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/tricks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/quirks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/notes.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/power-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/trick-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/trick-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
   await foundry.applications.handlebars.loadTemplates(templatesToLoad);
 
-  foundry.documents.collections.Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
-    types: ['delta'],
-    makeDefault: true
-  });
+  // Register V2 Actor Sheets
+  foundry.applications.api.DocumentSheetConfig.registerSheet(
+    Actor,
+    'bravenewworld',
+    BraveNewWorldActorSheetV2,
+    {
+      types: ['delta'],
+      makeDefault: true,
+      label: "BNW.Sheet.Actor.V2"
+    }
+  );
 
-  foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
-    types: ['power', 'trick', 'quirk'],
-    makeDefault: true
-  });
+  // Register V2 Item Sheets
+  foundry.applications.api.DocumentSheetConfig.registerSheet(
+    Item,
+    'bravenewworld',
+    BraveNewWorldItemSheetV2,
+    {
+      types: ['power', 'trick', 'quirk'],
+      makeDefault: true,
+      label: "BNW.Sheet.Item.V2"
+    }
+  );
 });
 
 Hooks.once('ready', async function () {

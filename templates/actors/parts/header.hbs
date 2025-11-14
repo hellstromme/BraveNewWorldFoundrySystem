@@ -1,0 +1,34 @@
+<header class="sheet-header flexrow">
+  <img class="profile-img" src="{{actor.img}}" data-action="editImage" title="{{actor.name}}" />
+  <div class="header-fields">
+    <h1 class="actor-name">
+      <input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'Name'}}" />
+    </h1>
+    <div class="details-grid">
+      <label>
+        <span>{{localize 'BNW.Detail.PlayerName'}}</span>
+        <input type="text" name="system.details.playerName" value="{{system.details.playerName}}" />
+      </label>
+      <label>
+        <span>{{localize 'BNW.Detail.HeroName'}}</span>
+        <input type="text" name="system.details.heroName" value="{{system.details.heroName}}" />
+      </label>
+      <label>
+        <span>{{localize 'BNW.Detail.CodeName'}}</span>
+        <input type="text" name="system.details.codeName" value="{{system.details.codeName}}" />
+      </label>
+      <label>
+        <span>{{localize 'BNW.Detail.OriginStory'}}</span>
+        <input type="text" name="system.details.origin" value="{{system.details.origin}}" />
+      </label>
+      <label>
+        <span>{{localize 'BNW.Detail.Affiliation'}}</span>
+        <input type="text" name="system.details.affiliation" value="{{system.details.affiliation}}" />
+      </label>
+      <label>
+        <span>{{localize 'BNW.Detail.Background'}}</span>
+        <input type="text" name="system.details.background" value="{{system.details.background}}" />
+      </label>
+    </div>
+  </div>
+</header>

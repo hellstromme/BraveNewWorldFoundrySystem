@@ -1,0 +1,48 @@
+<div class="traits-grid">
+  {{#each traits as |trait|}}
+    <section class="trait-card" data-trait="{{trait.key}}">
+      <header class="trait-header">
+        <input class="trait-label" type="text" name="system.traits.{{trait.key}}.label" value="{{trait.label}}" />
+        <div class="trait-value">
+          <span>{{localize 'BNW.Label.TraitDice'}}</span>
+          <input type="number" name="system.traits.{{trait.key}}.value" value="{{trait.value}}" min="0" />
+        </div>
+      </header>
+      <table class="trait-skills">
+        <thead>
+          <tr>
+            <th>{{localize 'BNW.Label.Skill'}}</th>
+            <th>{{localize 'BNW.Label.Dice'}}</th>
+            <th>{{localize 'BNW.Label.Pool'}}</th>
+            <th class="roll-header">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#if (hasEntries (lookup ../skillsByTrait trait.key))}}
+            {{#each (lookup ../skillsByTrait trait.key) as |skill|}}
+              <tr data-skill="{{skill.key}}">
+                <td class="skill-label">
+                  <input type="hidden" name="system.skills.{{skill.key}}.trait" value="{{skill.trait}}" />
+                  <input type="text" name="system.skills.{{skill.key}}.label" value="{{skill.label}}" />
+                </td>
+                <td class="skill-dice">
+                  <input type="number" name="system.skills.{{skill.key}}.value" value="{{skill.value}}" min="0" />
+                </td>
+                <td class="skill-pool">{{skill.pool}}</td>
+                <td class="skill-controls">
+                  <button type="button" data-action="rollSkill" data-trait="{{trait.key}}" data-skill="{{skill.key}}">
+                    <i class="fas fa-dice-six"></i>
+                  </button>
+                </td>
+              </tr>
+            {{/each}}
+          {{else}}
+            <tr>
+              <td colspan="4" class="empty">{{localize 'BNW.Label.NoSkills'}}</td>
+            </tr>
+          {{/if}}
+        </tbody>
+      </table>
+    </section>
+  {{/each}}
+</div>
