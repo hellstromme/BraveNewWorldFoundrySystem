@@ -311,8 +311,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       created[0].sheet.render(true);
     }
     
-    // Re-render the actor sheet to show the new item
-    this.render();
+    // Force re-render the actor sheet to show the new item
+    this.render(true, { force: true });
   }
 
   /**
@@ -522,8 +522,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const itemData = item.toObject();
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     
-    // Re-render to show the new item
-    this.render();
+    // Force re-render to show the new item
+    this.render(true, { force: true });
     
     return created;
   }
