@@ -342,7 +342,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       const sheet = created[0].sheet;
       sheet.render(true);
       // Bring to front after a short delay to ensure it's rendered
-      setTimeout(() => sheet.bringToTop(), 50);
+      setTimeout(() => sheet.bringToFront(), 50);
     }
     
     // Force full re-render with parts refresh
@@ -374,9 +374,13 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const item = this.document.items.get(itemId);
     if (!item) return;
     
-    const confirmed = await Dialog.confirm({
-      title: game.i18n.localize('BNW.Dialog.DeleteItem'),
-      content: game.i18n.format('BNW.Dialog.DeleteItemContent', { name: item.name })
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: {
+        title: game.i18n.localize('BNW.Dialog.DeleteItem')
+      },
+      content: `<p>${game.i18n.format('BNW.Dialog.DeleteItemContent', { name: item.name })}</p>`,
+      rejectClose: false,
+      modal: true
     });
     
     if (confirmed) {
