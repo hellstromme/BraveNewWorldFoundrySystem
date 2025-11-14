@@ -50,13 +50,21 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     
+    // Copy document data to context
+    context.item = this.document;
     context.system = foundry.utils.deepClone(this.document.system);
+    
     const actor = this.document?.parent ?? null;
     const currentTrait = context.system?.trait ?? '';
     const currentSkill = context.system?.skill ?? '';
 
     context.traitOptions = this._prepareTraitOptions(actor, currentTrait);
     context.skillOptions = this._prepareSkillOptions(actor, currentSkill, context.traitOptions);
+    
+    console.log('BNW Item | Preparing context', {
+      itemName: this.document.name,
+      systemData: context.system
+    });
     
     return context;
   }
@@ -189,7 +197,12 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
+    
+    // Update the document
     await this.document.update(expanded);
+    
+    // V2 doesn't auto-refresh form on update, so we don't need to re-render
+    // The form retains its values naturally
   }
 }
 
