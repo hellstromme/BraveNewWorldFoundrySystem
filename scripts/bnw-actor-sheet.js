@@ -131,6 +131,19 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
     html.find('.power-roll').on('click', this._onPowerRoll.bind(this));
   }
 
+  async _onItemCreate(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const type = button.dataset.type;
+    
+    const itemData = {
+      name: game.i18n.format('DOCUMENT.New', { type: game.i18n.localize(`ITEM.Type${type.capitalize()}`) }),
+      type: type
+    };
+    
+    return this.actor.createEmbeddedDocuments('Item', [itemData]);
+  }
+
   async _onDropItemCreate(itemData) {
     // Validate trick requirements before adding to actor
     if (itemData.type === 'trick') {
