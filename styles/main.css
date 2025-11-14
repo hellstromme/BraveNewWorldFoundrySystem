@@ -44,14 +44,16 @@
 
 /* V2 Tab Management - hide inactive tabs */
 .bnw.sheet .sheet-body .tab {
-  display: none;
   height: 100%;
   overflow-y: auto;
   padding: 0.75rem;
   box-sizing: border-box;
-  display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.bnw.sheet .sheet-body .tab:not(.active) {
+  display: none;
 }
 
 .bnw.sheet .sheet-body .tab.active {
