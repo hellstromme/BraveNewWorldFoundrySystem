@@ -331,9 +331,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const { type } = target.dataset;
     
     const itemData = {
-      name: game.i18n.format('DOCUMENT.New', { 
-        type: game.i18n.localize(`ITEM.Type${type.capitalize()}`) 
-      }),
+      name: `New ${type.capitalize()}`,
       type: type
     };
     
