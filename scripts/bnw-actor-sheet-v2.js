@@ -339,9 +339,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     
-    // Open the sheet for the newly created item
+    // Open the sheet for the newly created item and bring it to front
     if (created && created[0]) {
-      created[0].sheet.render(true);
+      const sheet = created[0].sheet;
+      sheet.render(true);
+      // Bring to front after a short delay to ensure it's rendered
+      setTimeout(() => sheet.bringToTop(), 50);
     }
     
     // Force full re-render with parts refresh
