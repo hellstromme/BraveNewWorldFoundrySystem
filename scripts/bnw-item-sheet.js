@@ -177,12 +177,15 @@ class BraveNewWorldItemSheet extends foundry.appv1.sheets.ItemSheet {
     event.preventDefault();
     if (this.item.type !== 'quirk') return;
 
-    let costs = this.item.system?.costs ?? [];
-    // Ensure costs is an array
-    if (!Array.isArray(costs)) {
-      costs = [];
-    }
-    costs = foundry.utils.deepClone(costs);
+    // Read current values from form inputs to preserve any unsaved edits
+    const form = this.form;
+    const costInputs = form.querySelectorAll('input[name^="system.costs."]');
+    const costs = [];
+    costInputs.forEach(input => {
+      costs.push(Number(input.value) || 0);
+    });
+    
+    // Add new cost
     costs.push(0);
     
     await this.item.update({ 'system.costs': costs });
