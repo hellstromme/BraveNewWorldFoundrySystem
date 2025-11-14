@@ -1,4 +1,4 @@
-class BraveNewWorldItemSheet extends foundry.appv1.sheets.ItemSheet {
+class BraveNewWorldItemSheet extends ItemSheet {
   static get defaultOptions() {
     const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
     return foundry.utils.mergeObject(super.defaultOptions, {

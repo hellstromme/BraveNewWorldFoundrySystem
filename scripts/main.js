@@ -77,13 +77,11 @@ Hooks.once('init', async function () {
     foundry?.applications?.handlebars?.loadTemplates ?? loadTemplates;
   await loadHandlebarsTemplates(templatesToLoad);
 
-  foundry.documents.collections.Actors.unregisterSheet('core', foundry.appv1.sheets.ActorSheet);
   foundry.documents.collections.Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
     types: ['delta'],
     makeDefault: true
   });
 
-  foundry.documents.collections.Items.unregisterSheet('core', foundry.appv1.sheets.ItemSheet);
   foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
     types: ['power', 'trick', 'quirk'],
     makeDefault: true
