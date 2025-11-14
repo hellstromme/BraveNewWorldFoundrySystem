@@ -172,9 +172,14 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
    * @private
    */
   async _onSubmitForm(event, form, formData) {
-    // In V2, formData is already the object, not wrapped
-    const submitData = foundry.utils.expandObject(formData);
-    await this.document.update(submitData);
+    // Convert FormData to plain object
+    const submitData = {};
+    for (const [key, value] of formData.entries()) {
+      submitData[key] = value;
+    }
+    // Expand dotted notation to nested object
+    const expanded = foundry.utils.expandObject(submitData);
+    await this.document.update(expanded);
   }
 }
 
