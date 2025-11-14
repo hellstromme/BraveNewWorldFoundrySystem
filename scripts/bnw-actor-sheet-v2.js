@@ -423,9 +423,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
 
   /** @override */
   async _onDrop(event) {
-    const data = TextEditor.getDragEventData(event);
+    const data = foundry.applications.fields.DragEventData.fromEvent(event);
     
-    if (data.type === 'Item') {
+    if (data?.type === 'Item') {
       return this._onDropItem(event, data);
     }
     
@@ -441,6 +441,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
     if (!item) return;
+    
+    // Check if item already exists on this actor
+    if (item.parent?.id === this.document.id) {
+      console.log('BNW | Item already on this actor');
+      return false;
+    }
     
     if (item.type === 'trick') {
       const requiresPower = item.system?.requiresPower ?? false;
@@ -484,7 +490,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       }
     }
 
-    return super._onDropItem?.(event, data) ?? this.document.createEmbeddedDocuments('Item', [item.toObject()]);
+    // Create the item on this actor
+    const itemData = item.toObject();
+    return this.document.createEmbeddedDocuments('Item', [itemData]);
   }
 }
 
