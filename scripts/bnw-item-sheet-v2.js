@@ -31,13 +31,15 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   /** @override */
   static PARTS = {
     form: {
-      template: "systems/bravenewworld/templates/items/{type}-sheet-v2.hbs"
+      template: "systems/bravenewworld/templates/items/power-sheet-v2.hbs"
     }
   };
 
   /** @override */
-  get template() {
-    return `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
+  _configureRenderOptions(options) {
+    super._configureRenderOptions(options);
+    // Dynamically set the template based on item type
+    this.constructor.PARTS.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
   }
 
   /* -------------------------------------------- */
