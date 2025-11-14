@@ -193,25 +193,13 @@ BNW.dice.rollTraitSkill = async function ({
   const formula = `${pool}d6x=6`;
   let roll = new Roll(formula);
 
-  const releaseGeneration = Number(game?.release?.generation ?? 0);
+  // In Foundry v13+, roll.evaluate() no longer requires the async parameter
   try {
-    if (typeof roll.evaluate === 'function') {
-      if (releaseGeneration >= 13) {
-        roll = await roll.evaluate();
-      } else {
-        roll = await roll.evaluate({ async: true });
-      }
-    } else if (typeof roll.evaluateSync === 'function') {
-      roll = roll.evaluateSync();
-    }
+    roll = await roll.evaluate();
   } catch (error) {
-    if (typeof roll.evaluateSync === 'function') {
-      roll = roll.evaluateSync();
-    } else {
-      console.error('BNW | Failed to evaluate roll', error);
-      ui.notifications?.error?.(game?.i18n?.localize?.('BNW.Error.RollEvaluation') ?? 'Failed to evaluate roll.');
-      return null;
-    }
+    console.error('BNW | Failed to evaluate roll', error);
+    ui.notifications?.error?.(game?.i18n?.localize?.('BNW.Error.RollEvaluation') ?? 'Failed to evaluate roll.');
+    return null;
   }
 
   const diceResults = [];
@@ -265,9 +253,7 @@ BNW.dice.rollTraitSkill = async function ({
     (game.system?.id ? `systems/${game.system.id}` : '');
   const templateBasePath =
     CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
-  const renderHandlebarsTemplate =
-    foundry?.applications?.handlebars?.renderTemplate ?? renderTemplate;
-  const content = await renderHandlebarsTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
+  const content = await renderTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
 
   return roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
