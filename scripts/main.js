@@ -107,11 +107,23 @@ Hooks.once('init', async function () {
     label: "BNW.Sheet.Actor.V2"
   });
 
-  // Register V2 Item Sheets
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldItemSheetV2, {
-    types: ['power', 'trick', 'quirk'],
+  // Register V2 Item Sheets - one class per type
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldPowerSheetV2, {
+    types: ['power'],
     makeDefault: true,
-    label: "BNW.Sheet.Item.V2"
+    label: "BNW.Sheet.Item.Power.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldTrickSheetV2, {
+    types: ['trick'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Trick.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldQuirkSheetV2, {
+    types: ['quirk'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Quirk.V2"
   });
 });
 

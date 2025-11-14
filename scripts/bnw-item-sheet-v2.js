@@ -1,5 +1,6 @@
 /**
  * Brave New World Item Sheet - Application V2
+ * Base class for all item sheets
  */
 
 // Create the base class with HandlebarsApplicationMixin applied
@@ -35,22 +36,6 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     }
   };
 
-  /** @override */
-  async _renderHTML(context, options) {
-    // Temporarily override the template for this render
-    const originalTemplate = this.constructor.PARTS.form.template;
-    this.constructor.PARTS.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
-    
-    console.log('BNW | Rendering with template:', this.constructor.PARTS.form.template);
-    
-    try {
-      return await super._renderHTML(context, options);
-    } finally {
-      // Restore original template
-      this.constructor.PARTS.form.template = originalTemplate;
-    }
-  }
-
   /* -------------------------------------------- */
   /*  Context Preparation                         */
   /* -------------------------------------------- */
@@ -69,11 +54,6 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
 
     context.traitOptions = this._prepareTraitOptions(actor, currentTrait);
     context.skillOptions = this._prepareSkillOptions(actor, currentSkill, context.traitOptions);
-    
-    console.log('BNW Item | Preparing context', {
-      itemName: this.document.name,
-      systemData: context.system
-    });
     
     return context;
   }
@@ -215,4 +195,40 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   }
 }
 
+/**
+ * Power Item Sheet
+ */
+class BraveNewWorldPowerSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/power-sheet-v2.hbs"
+    }
+  };
+}
+
+/**
+ * Trick Item Sheet
+ */
+class BraveNewWorldTrickSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/trick-sheet-v2.hbs"
+    }
+  };
+}
+
+/**
+ * Quirk Item Sheet
+ */
+class BraveNewWorldQuirkSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/quirk-sheet-v2.hbs"
+    }
+  };
+}
+
 globalThis.BraveNewWorldItemSheetV2 = BraveNewWorldItemSheetV2;
+globalThis.BraveNewWorldPowerSheetV2 = BraveNewWorldPowerSheetV2;
+globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
+globalThis.BraveNewWorldQuirkSheetV2 = BraveNewWorldQuirkSheetV2;
