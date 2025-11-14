@@ -350,9 +350,15 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       submitData[key] = value;
     }
     
+    console.log('BNW Actor | Submitting form data:', submitData);
+    
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
-    await this.document.update(expanded);
+    
+    // Update without rendering
+    await this.document.update(expanded, { render: false });
+    
+    console.log('BNW Actor | Document updated (no render)');
   }
 
   /* -------------------------------------------- */
