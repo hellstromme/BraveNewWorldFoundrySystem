@@ -67,22 +67,63 @@ Hooks.once('init', async function () {
 
   const templatesToLoad = [
     `${CONFIG.BNW.templatePath}/actors/delta-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/actor-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/header.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/tabs.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/traits.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/powers.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/tricks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/quirks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/notes.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/power-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/trick-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/trick-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
+    `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
   await foundry.applications.handlebars.loadTemplates(templatesToLoad);
 
+  // Register V1 Actor Sheets (existing)
   foundry.documents.collections.Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
     types: ['delta'],
-    makeDefault: true
+    makeDefault: false,
+    label: "BNW.Sheet.Actor.V1"
   });
 
+  // Register V1 Item Sheets (existing)
   foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
     types: ['power', 'trick', 'quirk'],
-    makeDefault: true
+    makeDefault: false,
+    label: "BNW.Sheet.Item.V1"
+  });
+
+  // Register V2 Actor Sheets
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, 'bravenewworld', BraveNewWorldActorSheetV2, {
+    types: ['delta'],
+    makeDefault: true,
+    label: "BNW.Sheet.Actor.V2"
+  });
+
+  // Register V2 Item Sheets - one class per type
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldPowerSheetV2, {
+    types: ['power'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Power.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldTrickSheetV2, {
+    types: ['trick'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Trick.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldQuirkSheetV2, {
+    types: ['quirk'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Quirk.V2"
   });
 });
 

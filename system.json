@@ -20,6 +20,8 @@
     "scripts/bnw-dice.js",
     "scripts/bnw-actor-sheet.js",
     "scripts/bnw-item-sheet.js",
+    "scripts/bnw-actor-sheet-v2.js",
+    "scripts/bnw-item-sheet-v2.js",
     "scripts/main.js"
   ],
   "styles": [
