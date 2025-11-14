@@ -173,26 +173,34 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
    */
   async _onSubmitForm(event, form, formData) {
     // Debug: log what we receive
-    console.log('BNW | _onSubmitForm called', { 
-      eventType: event?.type, 
-      formType: form?.constructor?.name,
-      formDataType: formData?.constructor?.name,
-      formData 
+    console.group('BNW | Form Submission Debug');
+    console.log('Event:', event);
+    console.log('Form:', form);
+    console.log('FormData:', formData);
+    console.log('FormData type check:', {
+      isFormData: formData instanceof FormData,
+      isObject: typeof formData === 'object',
+      isTruthy: !!formData,
+      constructor: formData?.constructor?.name
     });
+    console.groupEnd();
     
     // Handle different formData formats
     let submitData = {};
     
     if (formData instanceof FormData) {
       // Standard FormData object
+      console.log('BNW | Using FormData.entries()');
       for (const [key, value] of formData.entries()) {
         submitData[key] = value;
       }
     } else if (formData && typeof formData === 'object') {
       // Already a plain object
+      console.log('BNW | Using formData as plain object');
       submitData = formData;
     } else if (form instanceof HTMLFormElement) {
       // Extract from form element
+      console.log('BNW | Creating FormData from form element');
       const fd = new FormData(form);
       for (const [key, value] of fd.entries()) {
         submitData[key] = value;
