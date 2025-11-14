@@ -46,6 +46,27 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     primary: "traits"
   };
 
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    
+    // Manually activate the first tab if none are active
+    const form = this.element.querySelector('[data-application-part="form"]');
+    if (form) {
+      const activeTab = form.querySelector('.tab.active');
+      if (!activeTab) {
+        const firstTab = form.querySelector('.tab[data-group="primary"]');
+        if (firstTab) {
+          firstTab.classList.add('active');
+          const tabName = firstTab.dataset.tab;
+          const tabLink = form.querySelector(`.sheet-tabs [data-tab="${tabName}"]`);
+          if (tabLink) tabLink.classList.add('active');
+          console.log('BNW | Manually activated first tab:', tabName);
+        }
+      }
+    }
+  }
+
   /* -------------------------------------------- */
   /*  Context Preparation                         */
   /* -------------------------------------------- */
