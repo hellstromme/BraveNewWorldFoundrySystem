@@ -4,7 +4,7 @@
 **Current State**: Using Application V1 (foundry.appv1.sheets.*)  
 **Target State**: Application V2 Framework  
 **Created**: 2025-11-14  
-**Status**: 📋 PLANNING
+**Status**: 🔄 IN PROGRESS - Core implementation complete, testing phase next
 
 ---
 
@@ -158,13 +158,15 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
 1. ✅ Document all current V1 features and behaviors
 2. ✅ Create test checklist for validation
 3. ✅ Review V2 API documentation at https://foundryvtt.com/api/v13
-4. ⬜ Set up git branch: `feature/v2-migration`
-5. ⬜ Create backup of current stable V1 implementation
+4. ✅ Set up git branch: `feature/v2-migration`
+5. ✅ Create backup of current stable V1 implementation
 
 **Deliverables**:
-- Feature parity checklist
-- Test plan document
-- Development branch ready
+- ✅ Feature parity checklist
+- ✅ Test plan document
+- ✅ Development branch ready
+
+**Status**: ✅ COMPLETE
 
 ---
 
@@ -214,26 +216,27 @@ templates/
 **Template Refactoring Tasks**:
 
 1. **Actor Sheet Templates**
-   - [ ] Extract header section to `parts/header.hbs`
-   - [ ] Extract tab navigation to `parts/tabs.hbs`
-   - [ ] Extract traits/skills section to `parts/traits.hbs`
-   - [ ] Extract powers section to `parts/powers.hbs`
-   - [ ] Extract tricks section to `parts/tricks.hbs`
-   - [ ] Extract quirks section to `parts/quirks.hbs`
-   - [ ] Extract notes section to `parts/notes.hbs`
-   - [ ] Create wrapper `actor-sheet-v2.hbs`
+   - ✅ Extract header section to `parts/header.hbs`
+   - ✅ Extract tab navigation to `parts/tabs.hbs`
+   - ✅ Extract traits/skills section to `parts/traits.hbs`
+   - ✅ Extract powers section to `parts/powers.hbs`
+   - ✅ Extract tricks section to `parts/tricks.hbs`
+   - ✅ Extract quirks section to `parts/quirks.hbs`
+   - ✅ Extract notes section to `parts/notes.hbs`
+   - ✅ Create wrapper `actor-sheet-v2.hbs`
 
 2. **Item Sheet Templates**
-   - [ ] Create `parts/power-form.hbs` (extract from power-sheet.hbs)
-   - [ ] Create `parts/trick-form.hbs` (extract from trick-sheet.hbs)
-   - [ ] Create `parts/quirk-form.hbs` (extract from quirk-sheet.hbs)
-   - [ ] Create wrapper `item-sheet-v2.hbs`
+   - ✅ Create `power-sheet-v2.hbs` with V2 actions
+   - ✅ Create `trick-sheet-v2.hbs` with V2 actions
+   - ✅ Create `quirk-sheet-v2.hbs` with V2 actions
 
 3. **Template Data Binding Updates**
-   - [ ] Update form field names for V2 auto-submission
-   - [ ] Add `data-action` attributes for V2 event handling
-   - [ ] Update CSS selectors to work with partials
-   - [ ] Add ARIA attributes for accessibility
+   - ✅ Update form field names for V2 auto-submission
+   - ✅ Add `data-action` attributes for V2 event handling
+   - ✅ Update CSS selectors to work with partials
+   - ⬜ Add ARIA attributes for accessibility (future enhancement)
+
+**Status**: ✅ COMPLETE
 
 **Example Template Conversion**:
 
@@ -765,18 +768,20 @@ Convert jQuery-style listeners to V2 action attributes:
 ```
 
 3. **Migration Checklist**:
-   - [ ] Create `bnw-actor-sheet-v2.js`
-   - [ ] Implement `_prepareContext()` method
-   - [ ] Implement `_preparePartContext()` for each part
-   - [ ] Convert all event handlers to static action methods
-   - [ ] Update template `data-action` attributes
-   - [ ] Test form submission and auto-save
-   - [ ] Test all dice rolling actions
-   - [ ] Test item creation/deletion
-   - [ ] Test drag-and-drop functionality
-   - [ ] Test tab navigation
-   - [ ] Verify quirk validation logic
-   - [ ] Verify trick validation logic
+   - ✅ Create `bnw-actor-sheet-v2.js`
+   - ✅ Implement `_prepareContext()` method
+   - ✅ Implement `_preparePartContext()` for each part
+   - ✅ Convert all event handlers to static action methods
+   - ✅ Update template `data-action` attributes
+   - ⬜ Test form submission and auto-save
+   - ⬜ Test all dice rolling actions
+   - ⬜ Test item creation/deletion
+   - ⬜ Test drag-and-drop functionality
+   - ⬜ Test tab navigation
+   - ⬜ Verify quirk validation logic
+   - ⬜ Verify trick validation logic
+
+**Status**: 🔄 IN PROGRESS - Implementation complete, testing pending
 
 ---
 
@@ -976,14 +981,16 @@ class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2 {
 ```
 
 2. **Migration Checklist**:
-   - [ ] Create `bnw-item-sheet-v2.js`
-   - [ ] Implement `_prepareContext()` method
-   - [ ] Migrate trait/skill dropdown logic
-   - [ ] Update template for V2 form handling
-   - [ ] Test form submission
-   - [ ] Test trait/skill selection
-   - [ ] Test all item types (power, trick, quirk)
-   - [ ] Verify data persistence
+   - ✅ Create `bnw-item-sheet-v2.js`
+   - ✅ Implement `_prepareContext()` method
+   - ✅ Migrate trait/skill dropdown logic
+   - ✅ Update template for V2 form handling
+   - ⬜ Test form submission
+   - ⬜ Test trait/skill selection
+   - ⬜ Test all item types (power, trick, quirk)
+   - ⬜ Verify data persistence
+
+**Status**: 🔄 IN PROGRESS - Implementation complete, testing pending
 
 ---
 
@@ -1044,12 +1051,14 @@ Hooks.once('init', async function () {
 ```
 
 3. **Migration Checklist**:
-   - [ ] Update sheet registration in `main.js`
-   - [ ] Update `system.json` scripts array
-   - [ ] Remove V1 sheet files (or keep for fallback)
-   - [ ] Test new document creation
-   - [ ] Test existing document migration
-   - [ ] Verify sheet selection in configuration
+   - ✅ Update sheet registration in `main.js`
+   - ✅ Update `system.json` scripts array
+   - ✅ Keep V1 sheet files for compatibility testing
+   - ⬜ Test new document creation
+   - ⬜ Test existing document migration
+   - ⬜ Verify sheet selection in configuration
+
+**Status**: 🔄 IN PROGRESS - Registration complete, testing pending
 
 ---
 
