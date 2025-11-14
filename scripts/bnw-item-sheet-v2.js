@@ -172,8 +172,12 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
    * @private
    */
   async _onSubmitForm(formConfig, event) {
+    console.log('BNW | _onSubmitForm called', { formConfig, event });
+    
     // Get the form element from the event
     const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
+    
+    console.log('BNW | Form element:', form);
     
     if (!form) {
       console.warn('BNW | No form element found in event');
@@ -187,9 +191,17 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
       submitData[key] = value;
     }
     
+    console.log('BNW | Submit data:', submitData);
+    
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
-    await this.document.update(expanded);
+    
+    console.log('BNW | Expanded data:', expanded);
+    console.log('BNW | Calling document.update...');
+    
+    const result = await this.document.update(expanded);
+    
+    console.log('BNW | Update result:', result);
   }
 }
 
