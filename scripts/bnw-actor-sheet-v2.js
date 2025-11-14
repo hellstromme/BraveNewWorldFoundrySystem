@@ -314,8 +314,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       created[0].sheet.render(true);
     }
     
-    // Force re-render the actor sheet to show the new item
-    this.render(true, { force: true });
+    // Force full re-render with parts refresh
+    await this.render(true, { parts: ['form'] });
   }
 
   /**
@@ -525,8 +525,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const itemData = item.toObject();
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     
-    // Force re-render to show the new item
-    this.render(true, { force: true });
+    // Force full re-render with parts refresh
+    await this.render(true, { parts: ['form'] });
     
     return created;
   }
