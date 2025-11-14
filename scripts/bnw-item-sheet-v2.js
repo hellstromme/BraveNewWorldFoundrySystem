@@ -16,10 +16,10 @@ class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2.m
       resizable: true
     },
     actions: {
-      editImage: BraveNewWorldItemSheetV2._onEditImage
+      editImage: BraveNewWorldItemSheetV2.prototype._onEditImage
     },
     form: {
-      handler: BraveNewWorldItemSheetV2._onSubmitForm,
+      handler: BraveNewWorldItemSheetV2.prototype._onSubmitForm,
       submitOnChange: true
     }
   };
@@ -143,7 +143,7 @@ class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2.m
    * @param {HTMLElement} target
    * @private
    */
-  static async _onEditImage(event, target) {
+  async _onEditImage(event, target) {
     const fp = new FilePicker({
       type: "image",
       current: this.document.img,
@@ -165,7 +165,7 @@ class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2.m
    * @param {FormDataExtended} formData
    * @private
    */
-  static async _onSubmitForm(event, form, formData) {
+  async _onSubmitForm(event, form, formData) {
     const submitData = formData.object;
     await this.document.update(submitData);
   }

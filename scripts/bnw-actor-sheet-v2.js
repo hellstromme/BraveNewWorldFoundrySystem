@@ -17,15 +17,15 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
       resizable: true
     },
     actions: {
-      rollSkill: BraveNewWorldActorSheetV2._onRollSkill,
-      rollPower: BraveNewWorldActorSheetV2._onRollPower,
-      createItem: BraveNewWorldActorSheetV2._onCreateItem,
-      editItem: BraveNewWorldActorSheetV2._onEditItem,
-      deleteItem: BraveNewWorldActorSheetV2._onDeleteItem,
-      editImage: BraveNewWorldActorSheetV2._onEditImage
+      rollSkill: BraveNewWorldActorSheetV2.prototype._onRollSkill,
+      rollPower: BraveNewWorldActorSheetV2.prototype._onRollPower,
+      createItem: BraveNewWorldActorSheetV2.prototype._onCreateItem,
+      editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
+      deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
+      editImage: BraveNewWorldActorSheetV2.prototype._onEditImage
     },
     form: {
-      handler: BraveNewWorldActorSheetV2._onSubmitForm,
+      handler: BraveNewWorldActorSheetV2.prototype._onSubmitForm,
       submitOnChange: true
     }
   };
@@ -199,7 +199,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onRollSkill(event, target) {
+  async _onRollSkill(event, target) {
     const { trait, skill } = target.dataset;
     
     await BNW.dice.rollTraitSkill({
@@ -215,7 +215,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onRollPower(event, target) {
+  async _onRollPower(event, target) {
     const { itemId } = target.dataset;
     const item = this.document.items.get(itemId);
     if (!item) return;
@@ -239,7 +239,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onCreateItem(event, target) {
+  async _onCreateItem(event, target) {
     const { type } = target.dataset;
     
     const itemData = {
@@ -258,7 +258,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onEditItem(event, target) {
+  async _onEditItem(event, target) {
     const { itemId } = target.dataset;
     const item = this.document.items.get(itemId);
     if (item) {
@@ -272,7 +272,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onDeleteItem(event, target) {
+  async _onDeleteItem(event, target) {
     const { itemId } = target.dataset;
     const item = this.document.items.get(itemId);
     if (!item) return;
@@ -293,7 +293,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {HTMLElement} target
    * @private
    */
-  static async _onEditImage(event, target) {
+  async _onEditImage(event, target) {
     const fp = new FilePicker({
       type: "image",
       current: this.document.img,
@@ -315,7 +315,7 @@ class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2
    * @param {FormDataExtended} formData
    * @private
    */
-  static async _onSubmitForm(event, form, formData) {
+  async _onSubmitForm(event, form, formData) {
     const submitData = formData.object;
     await this.document.update(submitData);
   }
