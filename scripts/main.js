@@ -101,14 +101,14 @@ Hooks.once('init', async function () {
   });
 
   // Register V2 Actor Sheets
-  DocumentSheetConfig.registerSheet(Actor, 'bravenewworld', BraveNewWorldActorSheetV2, {
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, 'bravenewworld', BraveNewWorldActorSheetV2, {
     types: ['delta'],
     makeDefault: true,
     label: "BNW.Sheet.Actor.V2"
   });
 
   // Register V2 Item Sheets
-  DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldItemSheetV2, {
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldItemSheetV2, {
     types: ['power', 'trick', 'quirk'],
     makeDefault: true,
     label: "BNW.Sheet.Item.V2"
