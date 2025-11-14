@@ -1,7 +1,13 @@
 /**
  * Brave New World Item Sheet - Application V2
  */
-class BraveNewWorldItemSheetV2 extends foundry.applications.sheets.ItemSheetV2 {
+
+// Create the base class with HandlebarsApplicationMixin applied
+const ItemSheetV2Base = foundry.applications.api.HandlebarsApplicationMixin(
+  foundry.applications.sheets.ItemSheetV2
+);
+
+class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   
   /** @override */
   static DEFAULT_OPTIONS = {
