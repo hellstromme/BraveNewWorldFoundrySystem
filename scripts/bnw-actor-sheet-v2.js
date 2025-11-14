@@ -423,7 +423,13 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
 
   /** @override */
   async _onDrop(event) {
-    const data = foundry.applications.fields.DragEventData.fromEvent(event);
+    // V2 way to get drag data - use the standard data transfer
+    let data;
+    try {
+      data = JSON.parse(event.dataTransfer.getData('text/plain'));
+    } catch (err) {
+      return false;
+    }
     
     if (data?.type === 'Item') {
       return this._onDropItem(event, data);
