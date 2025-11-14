@@ -32,7 +32,10 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     form: {
       handler: BraveNewWorldActorSheetV2.prototype._onSubmitForm,
       submitOnChange: true
-    }
+    },
+    dragDrop: [
+      { dragSelector: '.item[data-item-id]', dropSelector: 'form' }
+    ]
   };
 
   /** @override */
