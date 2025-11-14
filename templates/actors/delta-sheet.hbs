@@ -170,7 +170,6 @@
           <li class="item quirk flexrow" data-item-id="{{item.id}}">
             <div class="item-name">
               <h4>{{item.name}}</h4>
-              {{!-- Handle both old (costs array) and new (cost single value) formats --}}
               {{#if item.system.cost}}
                 <p class="cost">
                   <strong>{{localize 'BNW.Label.Cost'}}:</strong>
@@ -181,20 +180,6 @@
                   {{else}}
                     {{item.system.cost}}
                   {{/if}}
-                </p>
-              {{else if item.system.costs}}
-                {{!-- Old format with costs array --}}
-                <p class="costs">
-                  <strong>{{localize 'BNW.Label.Cost'}}:</strong>
-                  {{#each item.system.costs as |cost index|}}
-                    {{#if (eq cost 0)}}
-                      0{{#unless @last}} or {{/unless}}
-                    {{else if (gt cost 0)}}
-                      +{{cost}}{{#unless @last}} or {{/unless}}
-                    {{else}}
-                      {{cost}}{{#unless @last}} or {{/unless}}
-                    {{/if}}
-                  {{/each}}
                 </p>
               {{/if}}
               {{#if item.system.quirkType}}
