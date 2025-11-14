@@ -172,6 +172,14 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
    * @private
    */
   async _onSubmitForm(event, form, formData) {
+    // Debug: log what we receive
+    console.log('BNW | _onSubmitForm called', { 
+      eventType: event?.type, 
+      formType: form?.constructor?.name,
+      formDataType: formData?.constructor?.name,
+      formData 
+    });
+    
     // Handle different formData formats
     let submitData = {};
     
@@ -183,16 +191,23 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     } else if (formData && typeof formData === 'object') {
       // Already a plain object
       submitData = formData;
-    } else {
-      // Fallback: extract from form directly
+    } else if (form instanceof HTMLFormElement) {
+      // Extract from form element
       const fd = new FormData(form);
       for (const [key, value] of fd.entries()) {
         submitData[key] = value;
       }
+    } else {
+      console.warn('BNW | Unable to extract form data, skipping update');
+      return;
     }
+    
+    console.log('BNW | Submit data:', submitData);
     
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
+    console.log('BNW | Expanded data:', expanded);
+    
     await this.document.update(expanded);
   }
 }
