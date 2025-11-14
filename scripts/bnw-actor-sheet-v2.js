@@ -2,7 +2,9 @@
  * Brave New World Actor Sheet - Application V2
  * Modern implementation using Foundry VTT Application V2 framework
  */
-class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2 {
+class BraveNewWorldActorSheetV2 extends foundry.applications.sheets.ActorSheetV2.mixin(
+  foundry.applications.api.HandlebarsApplicationMixin
+) {
   
   /** @override */
   static DEFAULT_OPTIONS = {
