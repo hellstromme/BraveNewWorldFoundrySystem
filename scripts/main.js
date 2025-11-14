@@ -73,14 +73,14 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
-  await loadTemplates(templatesToLoad);
+  await foundry.applications.handlebars.loadTemplates(templatesToLoad);
 
-  Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
+  foundry.documents.collections.Actors.registerSheet('bravenewworld', BraveNewWorldActorSheet, {
     types: ['delta'],
     makeDefault: true
   });
 
-  Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
+  foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorldItemSheet, {
     types: ['power', 'trick', 'quirk'],
     makeDefault: true
   });

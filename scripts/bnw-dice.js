@@ -253,7 +253,7 @@ BNW.dice.rollTraitSkill = async function ({
     (game.system?.id ? `systems/${game.system.id}` : '');
   const templateBasePath =
     CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
-  const content = await renderTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
+  const content = await foundry.applications.handlebars.renderTemplate(`${templateBasePath}/chat/skill-roll-card.hbs`, data);
 
   return roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),

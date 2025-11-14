@@ -1,4 +1,4 @@
-class BraveNewWorldActorSheet extends ActorSheet {
+class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
   static get defaultOptions() {
     const basePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
     return foundry.utils.mergeObject(super.defaultOptions, {
