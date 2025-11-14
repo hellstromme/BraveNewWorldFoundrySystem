@@ -320,11 +320,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   async _onSubmitForm(event, form, formData) {
-    // Convert FormData to plain object
-    const submitData = {};
-    for (const [key, value] of formData.entries()) {
-      submitData[key] = value;
+    // Handle different formData formats
+    let submitData = {};
+    
+    if (formData instanceof FormData) {
+      // Standard FormData object
+      for (const [key, value] of formData.entries()) {
+        submitData[key] = value;
+      }
+    } else if (formData && typeof formData === 'object') {
+      // Already a plain object
+      submitData = formData;
+    } else {
+      // Fallback: extract from form directly
+      const fd = new FormData(form);
+      for (const [key, value] of fd.entries()) {
+        submitData[key] = value;
+      }
     }
+    
     // Expand dotted notation to nested object
     const expanded = foundry.utils.expandObject(submitData);
     await this.document.update(expanded);
