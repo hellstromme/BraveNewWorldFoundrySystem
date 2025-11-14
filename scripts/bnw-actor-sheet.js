@@ -116,20 +116,10 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
   _calculateNegativeQuirksTotal(quirks = []) {
     let total = 0;
     for (const quirk of quirks) {
-      let costs = quirk.system?.costs ?? [];
-      // Ensure costs is an array
-      if (!Array.isArray(costs)) {
-        costs = [];
+      const cost = Number(quirk.system?.cost ?? 0);
+      if (cost < 0) {
+        total += cost;
       }
-      // Find the most negative cost for this quirk (best value for the player)
-      let mostNegative = 0;
-      for (const cost of costs) {
-        const numCost = Number(cost ?? 0);
-        if (numCost < mostNegative) {
-          mostNegative = numCost;
-        }
-      }
-      total += mostNegative;
     }
     return Math.abs(total); // Return as positive number for display
   }
@@ -139,6 +129,19 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     html.find('.skill-roll').on('click', this._onSkillRoll.bind(this));
     html.find('.power-roll').on('click', this._onPowerRoll.bind(this));
+  }
+
+  async _onItemCreate(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const type = button.dataset.type;
+    
+    const itemData = {
+      name: game.i18n.format('DOCUMENT.New', { type: game.i18n.localize(`ITEM.Type${type.capitalize()}`) }),
+      type: type
+    };
+    
+    return this.actor.createEmbeddedDocuments('Item', [itemData]);
   }
 
   async _onDropItemCreate(itemData) {
@@ -168,30 +171,19 @@ class BraveNewWorldActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     // Validate negative quirk limit before adding to actor
     if (itemData.type === 'quirk') {
-      let costs = itemData.system?.costs ?? [];
-      // Ensure costs is an array
-      if (!Array.isArray(costs)) {
-        costs = [];
-      }
-      let mostNegative = 0;
-      for (const cost of costs) {
-        const numCost = Number(cost ?? 0);
-        if (numCost < mostNegative) {
-          mostNegative = numCost;
-        }
-      }
+      const cost = Number(itemData.system?.cost ?? 0);
 
-      // Only validate if the quirk has negative costs
-      if (mostNegative < 0) {
+      // Only validate if the quirk has negative cost
+      if (cost < 0) {
         const currentQuirks = this.actor.items.filter((item) => item.type === 'quirk');
         const currentTotal = this._calculateNegativeQuirksTotal(currentQuirks);
-        const newTotal = currentTotal + Math.abs(mostNegative);
+        const newTotal = currentTotal + Math.abs(cost);
 
         if (newTotal > 10) {
           const message = game?.i18n?.format?.(
             'BNW.Warning.TooManyNegativeQuirks',
-            { current: currentTotal, adding: Math.abs(mostNegative) }
-          ) ?? `Cannot add quirk - would exceed the limit of 10 negative quirk points (current: ${currentTotal}, attempting to add: ${Math.abs(mostNegative)})`;
+            { current: currentTotal, adding: Math.abs(cost) }
+          ) ?? `Cannot add quirk - would exceed the limit of 10 negative quirk points (current: ${currentTotal}, attempting to add: ${Math.abs(cost)})`;
           
           ui.notifications?.warn?.(message);
           return false;
