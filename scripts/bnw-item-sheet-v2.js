@@ -41,14 +41,21 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   /** @override */
   _configureRenderOptions(options) {
     super._configureRenderOptions(options);
+    
+    console.log('BNW | Configuring render for item type:', this.document.type);
+    
     // Override the template path for this specific instance
     if (!this._parts) this._parts = foundry.utils.deepClone(this.constructor.PARTS);
     this._parts.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
+    
+    console.log('BNW | Set template to:', this._parts.form.template);
   }
   
   /** @override */
   get parts() {
-    return this._parts ?? this.constructor.PARTS;
+    const p = this._parts ?? this.constructor.PARTS;
+    console.log('BNW | Getting parts:', p);
+    return p;
   }
 
   /* -------------------------------------------- */
