@@ -115,7 +115,10 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
       skillsCount: Object.keys(context.skillsByTrait).length,
-      powersCount: context.powers.length
+      powersCount: context.powers.length,
+      tricksCount: context.tricks.length,
+      quirksCount: context.quirks.length,
+      totalItems: this.document.items.size
     });
     
     return context;
