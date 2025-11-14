@@ -29,17 +29,26 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   };
 
   /** @override */
-  static PARTS = {
-    form: {
-      template: "systems/bravenewworld/templates/items/power-sheet-v2.hbs"
-    }
-  };
+  static get PARTS() {
+    // Return a new object each time to avoid sharing between instances
+    return {
+      form: {
+        template: "systems/bravenewworld/templates/items/power-sheet-v2.hbs"
+      }
+    };
+  }
 
   /** @override */
   _configureRenderOptions(options) {
     super._configureRenderOptions(options);
-    // Dynamically set the template based on item type
-    this.constructor.PARTS.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
+    // Override the template path for this specific instance
+    if (!this._parts) this._parts = foundry.utils.deepClone(this.constructor.PARTS);
+    this._parts.form.template = `systems/bravenewworld/templates/items/${this.document.type}-sheet-v2.hbs`;
+  }
+  
+  /** @override */
+  get parts() {
+    return this._parts ?? this.constructor.PARTS;
   }
 
   /* -------------------------------------------- */
