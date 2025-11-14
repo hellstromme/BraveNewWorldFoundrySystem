@@ -23,33 +23,7 @@ class BraveNewWorldItemSheet extends foundry.appv1.sheets.ItemSheet {
 
     context.traitOptions = this._prepareTraitOptions(actor, currentTrait);
     context.skillOptions = this._prepareSkillOptions(actor, currentSkill, context.traitOptions);
-    
-    // Ensure quirks always have at least one cost entry
-    if (this.item.type === 'quirk') {
-      if (!Array.isArray(context.system.costs) || context.system.costs.length === 0) {
-        context.system.costs = [0];
-      }
-    }
-    
     return context;
-  }
-
-  async _updateObject(event, formData) {
-    // Convert costs object to array for quirks
-    if (this.item.type === 'quirk' && formData['system.costs'] !== undefined) {
-      const costsData = foundry.utils.expandObject(formData)?.system?.costs;
-      if (costsData && typeof costsData === 'object' && !Array.isArray(costsData)) {
-        // Convert object with numeric keys to array
-        const costsArray = [];
-        const keys = Object.keys(costsData).sort((a, b) => Number(a) - Number(b));
-        for (const key of keys) {
-          costsArray.push(Number(costsData[key]) || 0);
-        }
-        formData['system.costs'] = costsArray;
-      }
-    }
-    
-    return super._updateObject(event, formData);
   }
 
   _prepareTraitOptions(actor, currentTrait) {
@@ -161,52 +135,6 @@ class BraveNewWorldItemSheet extends foundry.appv1.sheets.ItemSheet {
   _capitalize(value) {
     if (typeof value !== 'string' || !value.length) return value ?? '';
     return value.charAt(0).toUpperCase() + value.slice(1);
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    // Handle adding costs for quirks
-    html.find('.cost-add').on('click', this._onCostAdd.bind(this));
-    
-    // Handle removing costs for quirks
-    html.find('.cost-remove').on('click', this._onCostRemove.bind(this));
-  }
-
-  async _onCostAdd(event) {
-    event.preventDefault();
-    if (this.item.type !== 'quirk') return;
-
-    // Read current values from form inputs to preserve any unsaved edits
-    const form = this.form;
-    const costInputs = form.querySelectorAll('input[name^="system.costs."]');
-    const costs = [];
-    costInputs.forEach(input => {
-      costs.push(Number(input.value) || 0);
-    });
-    
-    // Add new cost
-    costs.push(0);
-    
-    await this.item.update({ 'system.costs': costs });
-  }
-
-  async _onCostRemove(event) {
-    event.preventDefault();
-    if (this.item.type !== 'quirk') return;
-
-    const button = event.currentTarget;
-    const index = Number(button.dataset.index);
-    
-    let costs = this.item.system?.costs ?? [];
-    // Ensure costs is an array
-    if (!Array.isArray(costs)) {
-      costs = [];
-    }
-    costs = foundry.utils.deepClone(costs);
-    costs.splice(index, 1);
-    
-    await this.item.update({ 'system.costs': costs });
   }
 }
 

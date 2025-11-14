@@ -23,20 +23,8 @@
 
   <section class="sheet-body">
     <div class="form-group">
-      <label>{{localize 'BNW.Label.Costs'}}</label>
-      <div class="costs-list">
-        {{#each system.costs as |cost index|}}
-          <div class="cost-item flexrow">
-            <input type="number" name="system.costs.{{index}}" value="{{cost}}" placeholder="{{localize 'BNW.Placeholder.Cost'}}" />
-            <button type="button" class="cost-remove" data-index="{{index}}">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        {{/each}}
-        <button type="button" class="cost-add">
-          <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddCost'}}
-        </button>
-      </div>
+      <label>{{localize 'BNW.Label.Cost'}}</label>
+      <input type="number" name="system.cost" value="{{system.cost}}" placeholder="{{localize 'BNW.Placeholder.Cost'}}" />
     </div>
     <div class="form-group stacked">
       <label>{{localize 'BNW.Label.Description'}}</label>
