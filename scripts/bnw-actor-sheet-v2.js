@@ -58,14 +58,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const form = this.element.querySelector('[data-application-part="form"]');
     if (form) {
       const activeTab = form.querySelector('.tab.active');
-      if (!activeTab) {
-        const firstTab = form.querySelector('.tab[data-group="primary"]');
-        if (firstTab) {
-          firstTab.classList.add('active');
-          const tabName = firstTab.dataset.tab;
-          const tabLink = form.querySelector(`.sheet-tabs [data-tab="${tabName}"]`);
-          if (tabLink) tabLink.classList.add('active');
-          console.log('BNW | Manually activated first tab:', tabName);
+      
+      // Determine which tab to activate
+      const tabToActivate = this._activeTab || 'traits';
+      
+      if (!activeTab || activeTab.dataset.tab !== tabToActivate) {
+        // Remove active from all tabs
+        form.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        form.querySelectorAll('.sheet-tabs .item').forEach(link => link.classList.remove('active'));
+        
+        // Activate the correct tab
+        const tab = form.querySelector(`.tab[data-tab="${tabToActivate}"]`);
+        const tabLink = form.querySelector(`.sheet-tabs [data-tab="${tabToActivate}"]`);
+        
+        if (tab) {
+          tab.classList.add('active');
+          console.log('BNW | Activated tab on render:', tabToActivate);
+        }
+        if (tabLink) {
+          tabLink.classList.add('active');
         }
       }
     }
@@ -357,6 +368,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   _onChangeTab(event, target) {
     const tabName = target.dataset.tab;
     const group = target.dataset.group || 'primary';
+    
+    // Store the active tab
+    this._activeTab = tabName;
     
     console.log('BNW | Changing tab to:', tabName);
     
