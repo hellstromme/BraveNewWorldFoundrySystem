@@ -1,33 +1,35 @@
 {{!-- Application V2 Item Sheet Template - Quirk --}}
-<header class="sheet-header flexrow">
-  <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
-  <div class="header-fields">
-    <h1 class="item-name">
-      <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Quirk'}}" />
-    </h1>
-    <div class="details-grid">
-      <label>
-        <span>{{localize 'BNW.Label.QuirkType'}}</span>
-        <select name="system.quirkType">
-          <option value="standard" {{#if (eq system.quirkType 'standard')}}selected{{/if}}>{{localize 'BNW.QuirkType.Standard'}}</option>
-          <option value="social" {{#if (eq system.quirkType 'social')}}selected{{/if}}>{{localize 'BNW.QuirkType.Social'}}</option>
-        </select>
-      </label>
-      <label>
-        <span>{{localize 'BNW.Label.Requirements'}}</span>
-        <input type="text" name="system.requirements" value="{{system.requirements}}" placeholder="{{localize 'BNW.Placeholder.Requirements'}}" />
-      </label>
+<div>
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Quirk'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.QuirkType'}}</span>
+          <select name="system.quirkType">
+            <option value="standard" {{#if (eq system.quirkType 'standard')}}selected{{/if}}>{{localize 'BNW.QuirkType.Standard'}}</option>
+            <option value="social" {{#if (eq system.quirkType 'social')}}selected{{/if}}>{{localize 'BNW.QuirkType.Social'}}</option>
+          </select>
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Requirements'}}</span>
+          <input type="text" name="system.requirements" value="{{system.requirements}}" placeholder="{{localize 'BNW.Placeholder.Requirements'}}" />
+        </label>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<section class="sheet-body">
-  <div class="form-group">
-    <label>{{localize 'BNW.Label.Cost'}}</label>
-    <input type="number" name="system.cost" value="{{system.cost}}" placeholder="{{localize 'BNW.Placeholder.Cost'}}" />
-  </div>
-  <div class="form-group stacked">
-    <label>{{localize 'BNW.Label.Description'}}</label>
-    <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.QuirkDescription'}}">{{system.description}}</textarea>
-  </div>
-</section>
+  <section class="sheet-body">
+    <div class="form-group">
+      <label>{{localize 'BNW.Label.Cost'}}</label>
+      <input type="number" name="system.cost" value="{{system.cost}}" placeholder="{{localize 'BNW.Placeholder.Cost'}}" />
+    </div>
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Description'}}</label>
+      <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.QuirkDescription'}}">{{system.description}}</textarea>
+    </div>
+  </section>
+</div>
