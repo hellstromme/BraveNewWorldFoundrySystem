@@ -304,7 +304,15 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       type: type
     };
     
-    await this.document.createEmbeddedDocuments('Item', [itemData]);
+    const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
+    
+    // Open the sheet for the newly created item
+    if (created && created[0]) {
+      created[0].sheet.render(true);
+    }
+    
+    // Re-render the actor sheet to show the new item
+    this.render();
   }
 
   /**
@@ -512,7 +520,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
 
     // Create the item on this actor
     const itemData = item.toObject();
-    return this.document.createEmbeddedDocuments('Item', [itemData]);
+    const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
+    
+    // Re-render to show the new item
+    this.render();
+    
+    return created;
   }
 }
 
