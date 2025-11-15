@@ -1,9 +1,25 @@
 /* Core styling for the Brave New World Foundry system. */
+/* Comic Book Theme - Bold, vibrant, and easy to read */
+
+:root {
+  --bnw-primary-red: #e74c3c;
+  --bnw-primary-blue: #3498db;
+  --bnw-primary-yellow: #f39c12;
+  --bnw-accent-dark: #2c3e50;
+  --bnw-accent-light: #ecf0f1;
+  --bnw-border-thick: 3px;
+  --bnw-shadow-comic: 4px 4px 0px rgba(0, 0, 0, 0.3);
+  --bnw-text-bold: #1a1a1a;
+  --bnw-background-light: #fef9e7;
+  --bnw-success-green: #27ae60;
+  --bnw-danger-red: #c0392b;
+}
 
 .bnw.sheet form {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--bnw-background-light);
 }
 
 /* V2 window-content needs to be flex column and fill space */
@@ -13,6 +29,7 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: var(--bnw-background-light);
 }
 
 /* V2 form part (the div inside window-content) */
@@ -27,12 +44,26 @@
 .bnw.sheet .sheet-header {
   gap: 1rem;
   align-items: center;
+  background: linear-gradient(135deg, var(--bnw-primary-blue) 0%, var(--bnw-primary-yellow) 100%);
+  padding: 1rem;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  box-shadow: var(--bnw-shadow-comic);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
 }
 
 .bnw.sheet .profile-img {
   flex: 0 0 120px;
   height: 120px;
-  border: 0;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+  transform: rotate(-2deg);
+  transition: transform 0.2s;
+}
+
+.bnw.sheet .profile-img:hover {
+  transform: rotate(0deg) scale(1.05);
+  cursor: pointer;
 }
 
 .bnw.sheet .header-fields {
@@ -40,6 +71,32 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.bnw.sheet .header-fields h1 {
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.bnw.sheet .header-fields h1 input {
+  font-weight: 700;
+  color: var(--bnw-text-bold);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  min-height: 2.5rem;
+}
+
+.bnw.sheet .header-fields input[type="text"] {
+  font-weight: 700;
+  color: var(--bnw-text-bold);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
 }
 
 .bnw.sheet .details-grid {
@@ -53,6 +110,10 @@
   flex-direction: column;
   font-size: 0.85rem;
   gap: 0.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bnw-text-bold);
 }
 
 .bnw.sheet .sheet-body {
@@ -72,6 +133,42 @@
   box-sizing: border-box;
   flex-direction: column;
   gap: 0.75rem;
+  background: var(--bnw-background-light);
+}
+
+/* Comic book style tabs */
+.bnw.sheet .sheet-tabs {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  background: var(--bnw-accent-dark);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-bottom: none;
+}
+
+.bnw.sheet .sheet-tabs .item {
+  padding: 0.5rem 1rem;
+  background: var(--bnw-accent-light);
+  border: 2px solid var(--bnw-text-bold);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--bnw-text-bold);
+  clip-path: polygon(5% 0%, 95% 0%, 100% 10%, 100% 90%, 95% 100%, 5% 100%, 0% 90%, 0% 10%);
+}
+
+.bnw.sheet .sheet-tabs .item:hover {
+  background: var(--bnw-primary-yellow);
+  transform: translateY(-2px);
+}
+
+.bnw.sheet .sheet-tabs .item.active {
+  background: var(--bnw-primary-red);
+  color: white;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
 .bnw.sheet .sheet-body .tab:not(.active) {
@@ -89,13 +186,35 @@
 }
 
 .bnw.sheet .trait-card {
-  border: 1px solid var(--color-border-light-primary);
-  border-radius: 6px;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.02);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .trait-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .trait-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .bnw.sheet .trait-header {
@@ -107,7 +226,21 @@
 
 .bnw.sheet .trait-label {
   flex: 1;
-  font-weight: 600;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.1rem;
+  color: var(--bnw-primary-red);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.bnw.sheet .trait-label input {
+  font-weight: 900;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
+  color: var(--bnw-primary-red);
 }
 
 .bnw.sheet .trait-value {
@@ -118,16 +251,51 @@
   gap: 0.25rem;
 }
 
+.bnw.sheet .trait-value span {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--bnw-accent-dark);
+}
+
+.bnw.sheet .trait-value input {
+  width: 60px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  background: white;
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-primary-blue);
+}
+
 .bnw.sheet .trait-skills {
   width: 100%;
   border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid var(--bnw-text-bold);
 }
 
 .bnw.sheet .trait-skills th,
 .bnw.sheet .trait-skills td {
-  padding: 0.25rem;
+  padding: 0.35rem 0.5rem;
   text-align: left;
-  border-bottom: 1px solid var(--color-border-light-tertiary);
+  border-bottom: 2px solid var(--bnw-text-bold);
+}
+
+.bnw.sheet .trait-skills th {
+  background: var(--bnw-accent-dark);
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+}
+
+.bnw.sheet .trait-skills tbody tr {
+  transition: background 0.2s;
+}
+
+.bnw.sheet .trait-skills tbody tr:hover {
+  background: rgba(243, 156, 18, 0.1);
 }
 
 .bnw.sheet .trait-skills tbody tr:last-child td {
@@ -144,16 +312,27 @@
 }
 
 .bnw.sheet .trait-skills .skill-controls button {
-  border: none;
-  background: var(--color-border-light-primary);
-  color: var(--color-text-dark-primary);
-  padding: 0.25rem 0.5rem;
+  border: 2px solid var(--bnw-text-bold);
+  background: var(--bnw-primary-yellow);
+  color: var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
 }
 
 .bnw.sheet .trait-skills .skill-controls button:hover {
-  background: var(--color-border-light-highlight);
+  background: var(--bnw-primary-red);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .trait-skills .skill-controls button:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
 .bnw.sheet .powers-list {
@@ -166,12 +345,42 @@
 }
 
 .bnw.sheet .powers-list .item {
-  border: 1px solid var(--color-border-light-primary);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
   border-radius: 6px;
-  padding: 0.5rem;
+  padding: 0.75rem;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.02);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .powers-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .powers-list .item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bnw.sheet .powers-list .item h4 {
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
+  margin: 0 0 0.25rem 0;
 }
 
 .bnw.sheet .powers-list .item .item-name {
@@ -192,8 +401,21 @@
 }
 
 .bnw.sheet .powers-list .item .item-controls a {
-  padding: 0.25rem 0.35rem;
+  padding: 0.35rem 0.5rem;
   border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .powers-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
 
 .bnw.sheet .form-group {
@@ -212,28 +434,72 @@
 .bnw.sheet .form-group input,
 .bnw.sheet .form-group select,
 .bnw.sheet .form-group textarea {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
+  font-weight: 600;
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .details-grid input:focus,
+.bnw.sheet .trait-skills input:focus,
+.bnw.sheet .form-group input:focus,
+.bnw.sheet .form-group select:focus,
+.bnw.sheet .form-group textarea:focus {
+  outline: none;
+  border-color: var(--bnw-primary-blue);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
 .chat-message .bnw-roll-card {
-  border: 1px solid var(--color-border-light-primary);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.03);
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(155, 89, 182, 0.15) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone pattern for chat cards */
+.chat-message .bnw-roll-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 10px 10px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chat-message .bnw-roll-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .chat-message .bnw-roll-card header h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--bnw-primary-red);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
 .chat-message .bnw-roll-card .subtitle {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--color-text-dark-secondary);
+  color: var(--bnw-accent-dark);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .chat-message .bnw-roll-card .dice-list {
@@ -244,13 +510,22 @@
 
 .chat-message .bnw-roll-card .dice-list .die {
   display: inline-flex;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  background: var(--color-border-light-primary);
-  font-weight: 600;
+  background: white;
+  border: 2px solid var(--bnw-text-bold);
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--bnw-primary-blue);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.chat-message .bnw-roll-card .dice-list .die:hover {
+  transform: rotate(-5deg) scale(1.1);
 }
 
 .chat-message .bnw-roll-card .result-summary {
@@ -262,35 +537,47 @@
 .chat-message .bnw-roll-card .result-summary .label {
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: var(--color-text-dark-secondary);
+  color: var(--bnw-accent-dark);
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .chat-message .bnw-roll-card .result-summary .value {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--bnw-primary-blue);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
 }
 
 .chat-message .bnw-roll-card .outcome {
   text-align: center;
-  padding: 0.35rem;
-  border-radius: 4px;
-  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-weight: 900;
   text-transform: uppercase;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
 .chat-message .bnw-roll-card .outcome.success {
-  background: rgba(46, 204, 113, 0.2);
-  color: #1e824c;
+  background: var(--bnw-success-green);
+  color: white;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
 .chat-message .bnw-roll-card .outcome.failure {
-  background: rgba(231, 76, 60, 0.2);
-  color: #96281b;
+  background: var(--bnw-danger-red);
+  color: white;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
 .chat-message .bnw-roll-card footer {
   font-size: 0.8rem;
-  color: var(--color-text-dark-secondary);
+  color: var(--bnw-accent-dark);
+  font-weight: 600;
+  font-style: italic;
 }
 
 .bnw-dialog .form-group {
@@ -316,12 +603,34 @@
 }
 
 .bnw.sheet .quirks-list .item {
-  border: 1px solid var(--color-border-light-primary);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
   border-radius: 6px;
-  padding: 0.5rem;
+  padding: 0.75rem;
   align-items: flex-start;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.02);
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .quirks-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .quirks-list .item > * {
+  position: relative;
+  z-index: 1;
 }
 
 .bnw.sheet .quirks-list .item .item-name {
@@ -330,6 +639,10 @@
 
 .bnw.sheet .quirks-list .item .item-name h4 {
   margin: 0 0 0.25rem 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
 }
 
 .bnw.sheet .quirks-list .item .item-name p {
@@ -338,14 +651,16 @@
 }
 
 .bnw.sheet .quirks-list .item .item-name .costs {
-  color: var(--color-text-dark-primary);
-  font-weight: 500;
+  color: var(--bnw-primary-blue);
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .bnw.sheet .quirks-list .item .item-name .quirk-type,
 .bnw.sheet .quirks-list .item .item-name .requirements {
-  color: var(--color-text-dark-secondary);
+  color: var(--bnw-accent-dark);
   font-style: italic;
+  font-weight: 600;
 }
 
 .bnw.sheet .negative-quirks-total {
@@ -359,6 +674,31 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
+}
+
+.bnw.sheet .item-controls.header button {
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: var(--bnw-shadow-comic);
+  transition: all 0.2s;
+}
+
+.bnw.sheet .item-controls.header button:hover {
+  background: var(--bnw-primary-red);
+  color: white;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .item-controls.header button:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
 }
 
 /* Quirk item sheet cost management */
@@ -381,15 +721,21 @@
 .bnw.sheet .cost-item button,
 .bnw.sheet .cost-add {
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--color-border-light-primary);
-  background: var(--color-bg-btn);
+  border: 2px solid var(--bnw-text-bold);
+  background: var(--bnw-primary-yellow);
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
 }
 
 .bnw.sheet .cost-item button:hover,
 .bnw.sheet .cost-add:hover {
-  background: var(--color-border-light-highlight);
+  background: var(--bnw-primary-red);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
 
 .bnw.sheet .tricks-list {
@@ -402,12 +748,34 @@
 }
 
 .bnw.sheet .tricks-list .item {
-  border: 1px solid var(--color-border-light-primary);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
   border-radius: 6px;
-  padding: 0.5rem;
+  padding: 0.75rem;
   align-items: flex-start;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.02);
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .tricks-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .tricks-list .item > * {
+  position: relative;
+  z-index: 1;
 }
 
 .bnw.sheet .tricks-list .item .item-name {
@@ -416,9 +784,144 @@
 
 .bnw.sheet .tricks-list .item .item-name h4 {
   margin: 0 0 0.25rem 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
 }
 
 .bnw.sheet .tricks-list .item .item-name p {
   margin: 0.25rem 0;
   font-size: 0.85rem;
+}
+
+/* Window title bar styling */
+.bnw.sheet .window-header {
+  background: linear-gradient(135deg, var(--bnw-primary-red) 0%, var(--bnw-accent-dark) 100%);
+  border-bottom: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  box-shadow: 0 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .window-title {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: white;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Additional comic book effects */
+.bnw.sheet .form-group label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bnw-text-bold);
+  font-size: 0.85rem;
+}
+
+.bnw.sheet .negative-quirks-total {
+  font-size: 0.9rem;
+  color: var(--bnw-accent-dark);
+  padding: 0.75rem;
+  background: rgba(231, 76, 60, 0.1);
+  border: 2px solid var(--bnw-danger-red);
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Add emphasis to roll buttons */
+.bnw.sheet button[data-action="rollSkill"],
+.bnw.sheet a[data-action="rollPower"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.bnw.sheet button[data-action="rollSkill"]::after,
+.bnw.sheet a[data-action="rollPower"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.bnw.sheet button[data-action="rollSkill"]:hover::after,
+.bnw.sheet a[data-action="rollPower"]:hover::after {
+  width: 100px;
+  height: 100px;
+}
+
+/* Starburst effect for successful rolls */
+@keyframes starburst {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+/* Comic book speech bubble effect for headings */
+.bnw.sheet h1,
+.bnw.sheet h2,
+.bnw.sheet h3 {
+  font-family: inherit;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Emphasis on power/quirk/trick item names */
+.bnw.sheet .item-name h4 {
+  position: relative;
+  display: inline-block;
+}
+
+/* Add visual interest to empty states */
+.bnw.sheet .trait-skills tbody tr .empty {
+  font-style: italic;
+  color: var(--bnw-accent-dark);
+  font-weight: 600;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Dialog styling */
+.bnw-dialog {
+  background: var(--bnw-background-light);
+}
+
+.bnw-dialog .window-header {
+  background: linear-gradient(135deg, var(--bnw-primary-blue) 0%, var(--bnw-primary-yellow) 100%);
+  border-bottom: var(--bnw-border-thick) solid var(--bnw-text-bold);
+}
+
+.bnw-dialog .dialog-buttons button {
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.bnw-dialog .dialog-buttons button:hover {
+  background: var(--bnw-primary-red);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
