@@ -38,6 +38,7 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.power = game.i18n.localize('BNW.ItemType.Power');
   CONFIG.Item.typeLabels.trick = game.i18n.localize('BNW.ItemType.Trick');
   CONFIG.Item.typeLabels.quirk = game.i18n.localize('BNW.ItemType.Quirk');
+  CONFIG.Item.typeLabels.closeCombatWeapon = game.i18n.localize('BNW.ItemType.CloseCombatWeapon');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -81,6 +82,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/trick-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/close-combat-weapon-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
@@ -124,6 +126,12 @@ Hooks.once('init', async function () {
     types: ['quirk'],
     makeDefault: true,
     label: "BNW.Sheet.Item.Quirk.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldCloseCombatWeaponSheetV2, {
+    types: ['closeCombatWeapon'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.CloseCombatWeapon.V2"
   });
 });
 

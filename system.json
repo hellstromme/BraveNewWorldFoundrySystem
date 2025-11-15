@@ -58,6 +58,9 @@
       },
       "quirk": {
         "label": "BNW.ItemType.Quirk"
+      },
+      "closeCombatWeapon": {
+        "label": "BNW.ItemType.CloseCombatWeapon"
       }
     }
   },

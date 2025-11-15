@@ -45,6 +45,7 @@
   "BNW.ItemType.Power": "Power",
   "BNW.ItemType.Trick": "Trick",
   "BNW.ItemType.Quirk": "Quirk",
+  "BNW.ItemType.CloseCombatWeapon": "Close Combat Weapon",
   "BNW.Item.Trick": "Trick",
   "BNW.Label.RequiresPower": "Requires Power",
   "BNW.Label.RequiredPowerName": "Required Power Name",
@@ -69,6 +70,15 @@
   "BNW.Warning.TooManyNegativeQuirks": "Cannot add quirk - would exceed the limit of 10 negative quirk points (current: {current}, attempting to add: {adding})",
   "BNW.Sheet.Actor.V2": "BNW Actor Sheet (V2)",
   "BNW.Sheet.Item.V2": "BNW Item Sheet (V2)",
+  "BNW.Sheet.Item.CloseCombatWeapon.V2": "BNW Close Combat Weapon Sheet (V2)",
   "BNW.Dialog.DeleteItem": "Delete Item?",
-  "BNW.Dialog.DeleteItemContent": "Are you sure you want to delete {name}?"
+  "BNW.Dialog.DeleteItemContent": "Are you sure you want to delete {name}?",
+  "BNW.Label.DefensiveBonus": "Defensive Bonus",
+  "BNW.Label.Quickness": "Quickness",
+  "BNW.Label.DamageType": "Damage Type",
+  "BNW.Label.DamageModifier": "Damage Modifier",
+  "BNW.Label.CostDollars": "Cost ($)",
+  "BNW.DamageType.Strength": "Strength",
+  "BNW.DamageType.Stun": "Stun",
+  "BNW.DamageType.None": "None"
 }

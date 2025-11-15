@@ -225,7 +225,19 @@ class BraveNewWorldQuirkSheetV2 extends BraveNewWorldItemSheetV2 {
   };
 }
 
+/**
+ * Close Combat Weapon Item Sheet
+ */
+class BraveNewWorldCloseCombatWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/close-combat-weapon-sheet-v2.hbs"
+    }
+  };
+}
+
 globalThis.BraveNewWorldItemSheetV2 = BraveNewWorldItemSheetV2;
 globalThis.BraveNewWorldPowerSheetV2 = BraveNewWorldPowerSheetV2;
 globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
 globalThis.BraveNewWorldQuirkSheetV2 = BraveNewWorldQuirkSheetV2;
+globalThis.BraveNewWorldCloseCombatWeaponSheetV2 = BraveNewWorldCloseCombatWeaponSheetV2;

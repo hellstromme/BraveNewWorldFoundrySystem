@@ -1,0 +1,48 @@
+<form class="bnw item-sheet close-combat-weapon">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" alt="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="charname">
+        <input name="name" type="text" value="{{item.name}}" placeholder="Weapon Name" />
+      </h1>
+    </div>
+  </header>
+
+  <div class="sheet-body">
+    <div class="form-group">
+      <label>{{localize "BNW.Label.DefensiveBonus"}}</label>
+      <input type="number" name="system.defensiveBonus" value="{{system.defensiveBonus}}" placeholder="0" />
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "BNW.Label.Quickness"}}</label>
+      <input type="number" name="system.quickness" value="{{system.quickness}}" placeholder="0" />
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "BNW.Label.DamageType"}}</label>
+      <select name="system.damageType">
+        <option value="strength" {{#if (eq system.damageType "strength")}}selected{{/if}}>{{localize "BNW.DamageType.Strength"}}</option>
+        <option value="stun" {{#if (eq system.damageType "stun")}}selected{{/if}}>{{localize "BNW.DamageType.Stun"}}</option>
+        <option value="none" {{#if (eq system.damageType "none")}}selected{{/if}}>{{localize "BNW.DamageType.None"}}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "BNW.Label.DamageModifier"}}</label>
+      <input type="number" name="system.damageModifier" value="{{system.damageModifier}}" placeholder="0" />
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "BNW.Label.CostDollars"}}</label>
+      <input type="number" name="system.cost" value="{{system.cost}}" placeholder="0" step="1" min="0" />
+    </div>
+
+    <div class="form-group stacked">
+      <label>{{localize "BNW.Label.Description"}}</label>
+      <div class="editor-content" data-edit="system.description">
+        {{{editor system.description target="system.description" button=true engine="prosemirror" collaborate=false}}}
+      </div>
+    </div>
+  </div>
+</form>

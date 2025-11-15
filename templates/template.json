@@ -131,6 +131,18 @@
         "quirkType": "standard",
         "requirements": ""
       }
+    },
+    "closeCombatWeapon": {
+      "type": "closeCombatWeapon",
+      "img": "icons/svg/sword.svg",
+      "system": {
+        "defensiveBonus": 0,
+        "quickness": 0,
+        "damageType": "strength",
+        "damageModifier": 0,
+        "cost": 0,
+        "description": ""
+      }
     }
   }
 }
