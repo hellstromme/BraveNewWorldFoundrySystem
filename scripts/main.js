@@ -75,6 +75,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/actors/parts/powers.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/tricks.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/quirks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/weapons.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/notes.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet-v2.hbs`,
