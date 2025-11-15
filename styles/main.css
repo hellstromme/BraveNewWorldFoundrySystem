@@ -80,6 +80,17 @@
   text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
 }
 
+.bnw.sheet .header-fields h1 input {
+  font-weight: 700;
+  color: var(--bnw-text-bold);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  min-height: 2.5rem;
+}
+
 .bnw.sheet .header-fields input[type="text"] {
   font-weight: 700;
   color: var(--bnw-text-bold);
