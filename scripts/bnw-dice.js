@@ -141,7 +141,7 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
  * @param {object} params
  * @param {Actor} params.actor
  * @param {string} params.traitKey
- * @param {string} params.skillKey
+ * @param {string} [params.skillId] - Optional skill item ID
  * @param {number} [params.target]
  * @param {number} [params.bonusDice=0]
  * @param {string} [params.label]
@@ -150,7 +150,7 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
 BNW.dice.rollTraitSkill = async function ({
   actor,
   traitKey,
-  skillKey,
+  skillId = null,
   target = null,
   bonusDice = 0,
   label = '',
@@ -168,29 +168,37 @@ BNW.dice.rollTraitSkill = async function ({
     return null;
   }
 
-  let skill = null;
-  if (skillKey) {
-    skill = foundry.utils.getProperty(systemData, `skills.${skillKey}`) ?? null;
-    if (!skill) {
-      ui.notifications?.warn?.(game?.i18n?.format?.('BNW.Warning.UnknownSkill', { skill: skillKey }) ?? `Unknown skill: ${skillKey}`);
+  // Get trait configuration for label
+  const traitConfig = CONFIG.BNW?.traits?.[traitKey] ?? { label: traitKey };
+  const traitLabel = traitConfig.label ?? traitKey;
+
+  // Look up skill item if provided
+  let skillBonus = Number(trait?.default ?? 0);
+  let skillLabel = null;
+  let skillItem = null;
+
+  if (skillId) {
+    skillItem = actor.items.get(skillId);
+    if (skillItem && skillItem.type === 'skill') {
+      skillBonus = Number(skillItem.system?.bonus ?? 0);
+      skillLabel = skillItem.name;
+    } else {
+      console.warn('BNW | Skill item not found:', skillId);
     }
   }
 
-  const traitValue = Number(trait?.value ?? 0);
-  const skillValue = Number(skill?.value ?? 0);
+  const traitDice = Number(trait?.dice ?? 3);
   const bonusValue = Number(bonusDice ?? 0);
-  let pool = traitValue + skillValue + bonusValue;
-  if (!Number.isFinite(pool) || pool < 1) pool = 1;
 
   const defaultTarget = Number(target ?? 0) || 7;
   const resolvedTarget = target ?? await BNW.dice.promptTargetNumber({
     defaultTarget,
-    traitLabel: trait?.label ?? traitKey,
-    skillLabel: skill?.label ?? skillKey
+    traitLabel: traitLabel,
+    skillLabel: skillLabel
   });
   if (resolvedTarget == null) return null;
 
-  const formula = `${pool}d6x=6`;
+  const formula = `${traitDice}d6x=6`;
   let roll = new Roll(formula);
 
   // In Foundry v13+, roll.evaluate() no longer requires the async parameter
@@ -232,19 +240,24 @@ BNW.dice.rollTraitSkill = async function ({
   }
 
   const highest = Math.max(...diceResults);
-  const success = highest >= resolvedTarget;
+  const totalBonus = skillBonus + bonusValue;
+  const finalResult = highest + totalBonus;
+  const success = finalResult >= resolvedTarget;
 
   const data = {
     actorName: actor.name,
-    traitLabel: trait?.label ?? traitKey,
-    skillLabel: skill?.label ?? skillKey ?? label,
-    pool,
+    traitLabel: traitLabel,
+    skillLabel: skillLabel ?? label,
+    traitDice: traitDice,
+    skillBonus: skillBonus,
+    bonusDice: bonusValue > 0 ? bonusValue : null,
+    totalBonus: totalBonus > 0 ? totalBonus : null,
     dice: diceResults,
     highest,
+    finalResult,
     target: resolvedTarget,
     success,
-    bonusDice: bonusValue > 0 ? bonusValue : null,
-    title: label || (skill?.label ? `${skill.label} (${trait?.label ?? traitKey})` : `${trait?.label ?? traitKey}`)
+    title: label || (skillLabel ? `${skillLabel} (${traitLabel})` : traitLabel)
   };
 
   const systemBasePath =
@@ -262,10 +275,12 @@ BNW.dice.rollTraitSkill = async function ({
     flags: {
       bravenewworld: {
         trait: traitKey,
-        skill: skillKey,
+        skillId: skillId,
         target: resolvedTarget,
         highest,
-        pool,
+        finalResult,
+        traitDice,
+        skillBonus,
         bonusDice: bonusValue,
         itemId: sourceItem?.id ?? null
       }
@@ -291,13 +306,13 @@ BNW.dice.rollWeaponAttack = async function ({ actor, weapon, defenseRating = nul
   }
 
   const attackTrait = weapon.system?.attackTrait ?? '';
-  const attackSkill = weapon.system?.attackSkill ?? '';
+  const attackSkillId = weapon.system?.attackSkill ?? '';
 
   if (!attackTrait) {
     ui.notifications?.warn?.('Weapon must have an attack trait selected.');
     return null;
   }
-  if (!attackSkill) {
+  if (!attackSkillId) {
     ui.notifications?.warn?.('Weapon must have an attack skill selected.');
     return null;
   }
@@ -315,7 +330,7 @@ BNW.dice.rollWeaponAttack = async function ({ actor, weapon, defenseRating = nul
   return BNW.dice.rollTraitSkill({
     actor,
     traitKey: attackTrait,
-    skillKey: attackSkill,
+    skillId: attackSkillId,
     target: resolvedDefense,
     bonusDice: 0,
     label: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Attack') ?? 'Attack'}`,
@@ -351,8 +366,11 @@ BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
     return null;
   }
 
-  const traitValue = Number(trait?.value ?? 0);
-  let pool = Math.max(traitValue, 1);
+  const traitDice = Number(trait?.dice ?? 0);
+  let pool = Math.max(traitDice, 1);
+
+  // Get trait configuration for label
+  const traitConfig = CONFIG.BNW?.traits?.[damageType] ?? { label: damageType };
 
   const formula = `${pool}d6x=6`;
   let roll = new Roll(formula);
@@ -400,7 +418,7 @@ BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
   const data = {
     actorName: actor.name,
     weaponName: weapon.name,
-    traitLabel: trait?.label ?? damageType,
+    traitLabel: traitConfig.label ?? damageType,
     pool,
     dice: diceResults,
     highest,

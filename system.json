@@ -61,6 +61,9 @@
       },
       "closeCombatWeapon": {
         "label": "BNW.ItemType.CloseCombatWeapon"
+      },
+      "skill": {
+        "label": "BNW.ItemType.Skill"
       }
     }
   },

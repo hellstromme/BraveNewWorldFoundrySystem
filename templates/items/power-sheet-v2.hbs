@@ -41,7 +41,7 @@
           <select name="system.skill">
             <option value="">&mdash;</option>
             {{#each skillOptions as |skill|}}
-              <option value="{{skill.key}}" {{#if (eq ../system.skill skill.key)}}selected{{/if}}>{{skill.label}}</option>
+              <option value="{{skill.id}}" {{#if (eq ../system.skill skill.id)}}selected{{/if}}>{{skill.label}}</option>
             {{/each}}
           </select>
         </label>

@@ -1,35 +1,26 @@
-const BNW_DEFAULT_TRAIT_KEYS = Object.freeze(['strength', 'speed', 'smarts', 'spirit']);
-
-const BNW_DEFAULT_TRAIT_LABELS = Object.freeze({
-  strength: 'Strength',
-  speed: 'Speed',
-  smarts: 'Smarts',
-  spirit: 'Spirit'
-});
-
-const BNW_DEFAULT_SKILLS = Object.freeze({
-  athletics: { label: 'Athletics', trait: 'strength', value: 2 },
-  brawl: { label: 'Brawl', trait: 'strength', value: 2 },
-  might: { label: 'Might', trait: 'strength', value: 2 },
-  stealth: { label: 'Stealth', trait: 'speed', value: 2 },
-  investigation: { label: 'Investigation', trait: 'smarts', value: 2 },
-  knowledge: { label: 'Knowledge', trait: 'smarts', value: 2 },
-  science: { label: 'Science', trait: 'smarts', value: 2 },
-  technology: { label: 'Technology', trait: 'smarts', value: 2 },
-  leadership: { label: 'Leadership', trait: 'spirit', value: 2 },
-  persuasion: { label: 'Persuasion', trait: 'spirit', value: 2 },
-  streetwise: { label: 'Streetwise', trait: 'spirit', value: 2 },
-  willpower: { label: 'Willpower', trait: 'spirit', value: 2 }
-});
-
-
-
 Hooks.once('init', async function () {
   console.log('BNW | Initializing Brave New World system');
 
+  // Register trait configuration setting
+  game.settings.register('bravenewworld', 'traits', {
+    name: "BNW.Settings.Traits.Name",
+    hint: "BNW.Settings.Traits.Hint",
+    scope: "world",
+    config: false,  // Hidden from UI for now, can enable later
+    type: Object,
+    default: {
+      strength: { label: "Strength", dice: 3, default: 0 },
+      speed: { label: "Speed", dice: 3, default: 0 },
+      smarts: { label: "Smarts", dice: 3, default: 0 },
+      spirit: { label: "Spirit", dice: 3, default: 0 }
+    },
+    onChange: (value) => {
+      CONFIG.BNW.traits = value;
+    }
+  });
+
   CONFIG.BNW = CONFIG.BNW ?? {};
-  CONFIG.BNW.traits = CONFIG.BNW.traits ?? Array.from(BNW_DEFAULT_TRAIT_KEYS);
-  CONFIG.BNW.defaultSkills = CONFIG.BNW.defaultSkills ?? BNW_DEFAULT_SKILLS;
+  CONFIG.BNW.traits = game.settings.get('bravenewworld', 'traits');
 
   CONFIG.Actor.typeLabels = CONFIG.Actor.typeLabels ?? {};
   CONFIG.Actor.typeLabels.delta = game.i18n.localize('BNW.ActorType.Delta');
@@ -39,6 +30,7 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.trick = game.i18n.localize('BNW.ItemType.Trick');
   CONFIG.Item.typeLabels.quirk = game.i18n.localize('BNW.ItemType.Quirk');
   CONFIG.Item.typeLabels.closeCombatWeapon = game.i18n.localize('BNW.ItemType.CloseCombatWeapon');
+  CONFIG.Item.typeLabels.skill = game.i18n.localize('BNW.ItemType.Skill');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -59,6 +51,14 @@ Hooks.once('init', async function () {
       }
 
       return false;
+    });
+  }
+
+  // Add helper to filter skills by trait
+  if (!Handlebars.helpers.filterSkillsByTrait) {
+    Handlebars.registerHelper('filterSkillsByTrait', (skills, traitKey) => {
+      if (!Array.isArray(skills)) return [];
+      return skills.filter(s => s.system?.trait === traitKey);
     });
   }
 
@@ -84,6 +84,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/close-combat-weapon-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/skill-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
@@ -133,6 +134,12 @@ Hooks.once('init', async function () {
     types: ['closeCombatWeapon'],
     makeDefault: true,
     label: "BNW.Sheet.Item.CloseCombatWeapon.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldSkillSheetV2, {
+    types: ['skill'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Skill.V2"
   });
 });
 

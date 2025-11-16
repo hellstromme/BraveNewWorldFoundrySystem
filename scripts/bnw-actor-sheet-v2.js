@@ -147,21 +147,28 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       hasSkills: !!context.system.skills
     });
     
+    // Check if actor needs trait initialization and save if needed
+    const needsInit = await this._ensureTraitsInitialized();
+    if (needsInit) {
+      // Re-clone after initialization
+      context.system = foundry.utils.deepClone(this.document.system);
+    }
+    
     this._initializeDefaults(context.system);
     
     context.traits = this._prepareTraits(context.system.traits);
-    context.skillsByTrait = this._prepareSkills(context.system.skills, context.traits);
     
     context.powers = this.document.items.filter(i => i.type === 'power');
     context.tricks = this.document.items.filter(i => i.type === 'trick');
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
     context.weapons = this.document.items.filter(i => i.type === 'closeCombatWeapon');
+    context.skills = this.document.items.filter(i => i.type === 'skill');
     
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
     
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
-      skillsCount: Object.keys(context.skillsByTrait).length,
+      skillsCount: context.skills.length,
       powersCount: context.powers.length,
       tricksCount: context.tricks.length,
       quirksCount: context.quirks.length,
@@ -175,6 +182,46 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
   /*  Data Preparation Helpers                    */
   /* -------------------------------------------- */
+
+  /**
+   * Ensure actor has traits initialized in the correct format
+   * @returns {Promise<boolean>} True if traits were initialized and saved
+   * @private
+   */
+  async _ensureTraitsInitialized() {
+    const system = this.document.system;
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    let needsUpdate = false;
+    const updates = {};
+    
+    // Check if traits object exists
+    if (!system.traits || typeof system.traits !== 'object') {
+      updates['system.traits'] = {};
+      needsUpdate = true;
+    }
+    
+    // Check each trait from config
+    for (const [traitKey, traitConfig] of Object.entries(configTraits)) {
+      const actorTrait = system.traits?.[traitKey];
+      
+      // Check if trait is missing or has old format (has 'value' or 'label' instead of 'dice')
+      if (!actorTrait || actorTrait.value !== undefined || actorTrait.label !== undefined || actorTrait.dice === undefined) {
+        updates[`system.traits.${traitKey}`] = {
+          dice: traitConfig.dice ?? 3,
+          default: traitConfig.default ?? 0
+        };
+        needsUpdate = true;
+      }
+    }
+    
+    if (needsUpdate) {
+      console.log('BNW | Initializing traits for actor:', this.document.name, updates);
+      await this.document.update(updates);
+      return true;
+    }
+    
+    return false;
+  }
 
   /**
    * Initialize default values for system data
@@ -194,19 +241,19 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     foundry.utils.mergeObject(system.details, defaultDetails, { insertKeys: false });
     
     system.traits ??= {};
-    system.skills ??= {};
     system.notes ??= '';
     
-    const defaultSkills = CONFIG.BNW?.defaultSkills ?? {};
-    if (foundry.utils.isEmpty(system.skills) && !foundry.utils.isEmpty(defaultSkills)) {
-      system.skills = foundry.utils.deepClone(defaultSkills);
-    }
-    
-    for (const traitKey of CONFIG.BNW?.traits ?? []) {
-      system.traits[traitKey] ??= { 
-        label: this._capitalize(traitKey), 
-        value: 0 
-      };
+    // Initialize traits from config
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    for (const [traitKey, traitConfig] of Object.entries(configTraits)) {
+      if (!system.traits[traitKey]) {
+        system.traits[traitKey] = {
+          dice: traitConfig.dice ?? 3,
+          default: traitConfig.default ?? 0
+        };
+      }
+      system.traits[traitKey].dice ??= traitConfig.dice ?? 3;
+      system.traits[traitKey].default ??= traitConfig.default ?? 0;
     }
   }
 
@@ -217,54 +264,17 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   _prepareTraits(traits = {}) {
-    return Object.entries(traits).map(([key, data]) => ({
-      key,
-      label: data?.label ?? this._capitalize(key),
-      value: Number(data?.value ?? 0)
-    }));
-  }
-
-  /**
-   * Prepare skill data grouped by trait
-   * @param {object} skills
-   * @param {Array} traits
-   * @returns {object}
-   * @private
-   */
-  _prepareSkills(skills = {}, traits = []) {
-    const groups = {};
-    for (const trait of traits) {
-      groups[trait.key] = [];
-    }
-
-    const defaultTraitKey = traits[0]?.key ?? CONFIG.BNW?.traits?.[0] ?? 'strength';
-
-    for (const [key, data] of Object.entries(skills)) {
-      const traitKey = data?.trait ?? defaultTraitKey;
-      const trait = traits.find(t => t.key === traitKey) ?? { key: traitKey, value: 0 };
-      const traitValue = Number(trait?.value ?? 0);
-      const skillValue = Number(data?.value ?? 0);
-      const pool = Math.max(traitValue + skillValue, 1);
-      
-      const skillData = {
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    
+    return Object.entries(configTraits).map(([key, config]) => {
+      const actorTrait = traits[key] ?? {};
+      return {
         key,
-        label: data?.label ?? this._capitalize(key),
-        trait: traitKey,
-        value: skillValue,
-        pool
+        label: config.label ?? this._capitalize(key),
+        dice: Number(actorTrait?.dice ?? config.dice ?? 3),
+        default: Number(actorTrait?.default ?? config.default ?? 0)
       };
-
-      if (!groups[traitKey]) groups[traitKey] = [];
-      groups[traitKey].push(skillData);
-    }
-
-    for (const trait of traits) {
-      groups[trait.key] = (groups[trait.key] ?? []).sort((a, b) => 
-        a.label.localeCompare(b.label)
-      );
-    }
-
-    return groups;
+    });
   }
 
   /**
@@ -306,12 +316,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   async _onRollSkill(event, target) {
-    const { trait, skill } = target.dataset;
+    const { trait, skillId } = target.dataset;
     
     await BNW.dice.rollTraitSkill({
       actor: this.document,
       traitKey: trait,
-      skillKey: skill
+      skillId: skillId
     });
   }
 
@@ -327,19 +337,17 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     if (!item) return;
 
     const traitKey = item.system?.trait ?? '';
-    const skillKey = item.system?.skill ?? '';
+    const skillId = item.system?.skill ?? '';
 
     await BNW.dice.rollTraitSkill({
       actor: this.document,
       traitKey,
-      skillKey,
+      skillId,
       bonusDice: Number(item.system?.dice ?? 0),
       label: item.name,
       sourceItem: item
     });
-  }
-
-  /**
+  }  /**
    * Handle weapon attack roll
    * @param {Event} event
    * @param {HTMLElement} target
@@ -380,12 +388,17 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   async _onCreateItem(event, target) {
-    const { type } = target.dataset;
+    const { type, trait } = target.dataset;
     
     const itemData = {
       name: `New ${type.capitalize()}`,
       type: type
     };
+    
+    // If creating a skill with a specific trait, set it
+    if (type === 'skill' && trait) {
+      itemData.system = { trait: trait };
+    }
     
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     

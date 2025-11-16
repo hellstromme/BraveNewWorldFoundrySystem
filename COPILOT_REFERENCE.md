@@ -1,6 +1,6 @@
 # Brave New World Foundry VTT System - Developer Reference
 
-**Last Updated**: 2025-11-15  
+**Last Updated**: 2025-11-16  
 **Foundry VTT Version**: 13 (minimum/verified/maximum)  
 **Framework**: Application V2 (fully migrated)  
 **Status**: Production Ready ✅
@@ -19,11 +19,11 @@
 ```
 scripts/
 ├── main.js                    # System initialization & config
-├── bnw-actor-sheet-v2.js     # V2 Actor sheet (570 lines) [DEFAULT]
-├── bnw-item-sheet-v2.js      # V2 Item sheets (231 lines) [DEFAULT]
-├── bnw-actor-sheet.js        # V1 Actor sheet (legacy, 232 lines)
-├── bnw-item-sheet.js         # V1 Item sheet (legacy, 142 lines)
-└── bnw-dice.js               # Dice rolling system (275 lines)
+├── bnw-actor-sheet-v2.js     # V2 Actor sheet (DEFAULT)
+├── bnw-item-sheet-v2.js      # V2 Item sheets (DEFAULT)
+├── bnw-actor-sheet.js        # V1 Actor sheet (legacy)
+├── bnw-item-sheet.js         # V1 Item sheet (legacy)
+└── bnw-dice.js               # Dice rolling system
 
 templates/
 ├── actors/
@@ -36,12 +36,15 @@ templates/
 │       ├── powers.hbs        # Powers tab
 │       ├── tricks.hbs        # Tricks tab
 │       ├── quirks.hbs        # Quirks tab
+│       ├── weapons.hbs       # Weapons tab
 │       └── notes.hbs         # Notes tab
 ├── items/
+│   ├── skill-sheet-v2.hbs    # V2 skill item [NEW]
 │   ├── power-sheet-v2.hbs    # V2 power item
 │   ├── trick-sheet-v2.hbs    # V2 trick item
 │   ├── quirk-sheet-v2.hbs    # V2 quirk item
-│   └── [power|trick|quirk]-sheet.hbs  # V1 versions
+│   ├── close-combat-weapon-sheet-v2.hbs  # V2 weapon item
+│   └── [type]-sheet.hbs      # V1 versions
 ├── chat/
 │   └── skill-roll-card.hbs   # Chat message for rolls
 └── template.json             # Actor/Item data model definitions
@@ -50,7 +53,7 @@ styles/
 └── main.css                  # All system styles (flexbox-based)
 
 lang/
-└── en.json                   # English localization (74 keys)
+└── en.json                   # English localization (90+ keys)
 
 packs/
 └── bnw-items.db             # Item compendium
@@ -59,6 +62,37 @@ packs/
 ---
 
 ## Architecture Overview
+
+### Trait & Skill System (Nov 2025 Redesign)
+
+**Key Design Decision**: Traits are system configuration + Skills are Item documents
+
+#### Traits
+- **Stored in**: `game.settings` (world-level configuration) → `CONFIG.BNW.traits`
+- **Structure**: Each trait has `{ label, dice, default }`
+  - `label`: Display name (e.g., "Strength")
+  - `dice`: Default dice count for trait (e.g., 3)
+  - `default`: Default bonus when no skill applies (e.g., 0)
+- **Actor Storage**: Each actor stores personalized `system.traits.<traitKey>.dice` and `.default` values
+- **Default Traits**: Strength, Speed, Smarts, Spirit
+
+#### Skills
+- **Stored as**: Item documents (type `skill`)
+- **Benefits**:
+  - Can be stored in compendiums and shared across actors
+  - Can be dragged/dropped like other items
+  - Proper CRUD operations with sheets
+  - Reusable across campaigns
+- **Structure**: 
+  - `system.trait`: Key of associated trait (e.g., "strength")
+  - `system.bonus`: Numeric bonus to add to rolls (e.g., 2)
+  - `system.summary`: Optional description
+  - `system.notes`: Long-form notes
+
+#### Roll Mechanics
+- **Old System**: `pool = trait.value + skill.value` (variable dice pool)
+- **New System**: `[trait.dice]d6 + [skill.bonus || trait.default]` (fixed trait dice + bonus)
+- **Example**: Strength 3 dice + Athletics +2 bonus = `3d6+2` with exploding 6s
 
 ### Application V2 Migration (Completed Nov 2025)
 - **V2 sheets are DEFAULT** for all actor/item types
@@ -88,7 +122,7 @@ class BraveNewWorldActorSheetV2 extends Base {
 ## Data Models (templates/template.json)
 
 ### Actor Type: `delta`
-Delta heroes with traits, skills, powers, tricks, and quirks.
+Delta heroes with traits, embedded skill/power/trick/quirk/weapon items.
 
 **Core Data Structure**:
 ```json
@@ -103,15 +137,8 @@ Delta heroes with traits, skills, powers, tricks, and quirks.
   },
   "traits": {
     "strength|speed|smarts|spirit": {
-      "label": "Trait Name",
-      "value": 3  // dice count
-    }
-  },
-  "skills": {
-    "skillKey": {
-      "label": "Skill Name",
-      "trait": "strength",  // linked trait key
-      "value": 2  // skill dice count
+      "dice": 3,      // dice count for trait
+      "default": 0    // default bonus when no skill applies
     }
   },
   "notes": ""
@@ -119,17 +146,31 @@ Delta heroes with traits, skills, powers, tricks, and quirks.
 ```
 
 **Default Traits** (4):
-- Strength, Speed, Smarts, Spirit (each starts at 3 dice)
+- Strength, Speed, Smarts, Spirit
+- Each starts at 3 dice, 0 default bonus
+- Trait configuration stored in `CONFIG.BNW.traits` (world settings)
+- Actor sheet auto-initializes missing traits on first open
 
-**Default Skills** (12):
-- **Strength**: Athletics, Brawl, Might
-- **Speed**: Stealth
-- **Smarts**: Investigation, Knowledge, Science, Technology
-- **Spirit**: Leadership, Persuasion, Streetwise, Willpower
-
-All start at 2 dice by default.
+**Skills**: No longer in actor data model - now Item documents (see below)
 
 ### Item Types
+
+#### `skill` [NEW]
+Skills as reusable Item documents linked to traits.
+```json
+{
+  "trait": "strength",  // associated trait key
+  "bonus": 2,           // bonus to add to rolls
+  "summary": "",        // short description
+  "notes": ""           // long-form notes
+}
+```
+
+**Benefits**:
+- Can be stored in compendiums
+- Reusable across actors/campaigns
+- Proper CRUD with dedicated sheet
+- Drag-drop functionality
 
 #### `power`
 Super-powered abilities with dice bonuses and trait/skill associations.
@@ -139,11 +180,13 @@ Super-powered abilities with dice bonuses and trait/skill associations.
   "activation": "standard|quick|free",
   "cost": 0,
   "dice": 0,           // bonus dice to add to rolls
-  "trait": "strength", // associated trait
-  "skill": "athletics", // associated skill
+  "trait": "strength", // associated trait KEY
+  "skillId": "uuid",   // associated skill ITEM ID
   "notes": ""
 }
 ```
+
+**Important**: Powers reference skills by Item ID, not by key
 
 #### `trick`
 Special techniques that may require a specific power.
@@ -169,15 +212,28 @@ Character quirks with costs (positive or negative).
 
 **Business Rule**: Total negative quirk cost cannot exceed -10 per character.
 
+#### `close-combat-weapon`
+Melee weapons with damage and skill associations.
+```json
+{
+  "damage": "1d6",
+  "skillId": "uuid",     // associated skill ITEM ID
+  "summary": "",
+  "notes": ""
+}
+```
+
 ---
 
 ## Dice System (BNW.dice)
 
 ### Core Mechanics
-1. **Dice Pool** = Trait Dice + Skill Dice + Bonus Dice (minimum 1d6)
+1. **Dice Formula** = `[Trait Dice]d6 + [Skill Bonus or Trait Default]` (minimum 1d6)
 2. **Exploding Dice**: 6s explode (`Xd6x=6`)
 3. **Success Check**: Highest die ≥ Target Number (default 7)
-4. **Results**: Show all dice, highest result, success/failure
+4. **Results**: Show all dice, highest result, bonus applied, success/failure
+
+**Example**: Strength 3 dice + Athletics +2 = `3d6+2` → roll 3 exploding d6, add +2 to result
 
 ### API
 
@@ -189,7 +245,7 @@ Primary rolling function exposed on `game.bnw.dice`.
 {
   actor: Actor,           // REQUIRED: The actor rolling
   traitKey: string,       // REQUIRED: Trait key (e.g., "strength")
-  skillKey: string,       // REQUIRED: Skill key (e.g., "athletics")
+  skillId: string|null,   // OPTIONAL: Skill Item ID (uses trait default if null)
   target: number|null,    // OPTIONAL: Target number (prompts if null)
   bonusDice: number,      // OPTIONAL: Extra dice to add (default 0)
   label: string,          // OPTIONAL: Custom label for roll
@@ -197,15 +253,20 @@ Primary rolling function exposed on `game.bnw.dice`.
 }
 ```
 
+**Changed from V1**: 
+- Was: `skillKey` (string key from actor.system.skills)
+- Now: `skillId` (Item document ID, or null to use trait default)
+
 **Returns**: Promise\<ChatMessage\> or null
 
 **Flow**:
-1. Validates actor, trait, and skill exist
-2. Calculates pool: trait.value + skill.value + bonusDice (min 1)
-3. Prompts for target number if not provided (using DialogV2 or Dialog)
-4. Evaluates roll with `Roll` class
-5. Renders chat card from `templates/chat/skill-roll-card.hbs`
-6. Posts message with flags for automation
+1. Validates actor and trait exist
+2. Looks up skill Item by ID (if provided)
+3. Calculates: `traitDice d6 + (skillBonus || traitDefault)`
+4. Prompts for target number if not provided
+5. Evaluates roll with `Roll` class (exploding 6s)
+6. Renders chat card from `templates/chat/skill-roll-card.hbs`
+7. Posts message with flags for automation
 
 #### `BNW.dice.promptTargetNumber(options)`
 Shows dialog to get target number from user.
@@ -227,28 +288,81 @@ Chat messages include flags for automation:
 flags: {
   bravenewworld: {
     trait: "strength",
-    skill: "athletics",
+    skillId: "uuid-or-null",  // skill Item ID or null if using trait default
     target: 7,
     highest: 9,
-    pool: 5,
-    bonusDice: 0,
-    itemId: "uuid-here" // if rolled from power
+    traitDice: 3,             // number of d6 rolled
+    bonus: 2,                 // bonus added to roll
+    bonusDice: 0,             // extra dice from powers
+    itemId: "uuid-here"       // if rolled from power/weapon
   }
 }
 ```
 
 ---
 
+## System Configuration (CONFIG.BNW)
+
+Set up in `main.js` during `init` hook:
+
+```javascript
+// Trait configuration stored in world settings
+game.settings.register('bravenewworld', 'traits', {
+  name: 'Trait Configuration',
+  scope: 'world',
+  config: false,
+  type: Object,
+  default: {
+    strength: { label: 'Strength', dice: 3, default: 0 },
+    speed: { label: 'Speed', dice: 3, default: 0 },
+    smarts: { label: 'Smarts', dice: 3, default: 0 },
+    spirit: { label: 'Spirit', dice: 3, default: 0 }
+  }
+});
+
+// Load traits into CONFIG for easy access
+CONFIG.BNW = {
+  traits: game.settings.get('bravenewworld', 'traits'),
+  systemBasePath: 'systems/bravenewworld',
+  templatePath: 'systems/bravenewworld/templates'
+};
+
+CONFIG.Actor.typeLabels = {
+  delta: game.i18n.localize('BNW.ActorType.Delta')
+};
+
+CONFIG.Item.typeLabels = {
+  skill: game.i18n.localize('BNW.ItemType.Skill'),
+  power: game.i18n.localize('BNW.ItemType.Power'),
+  trick: game.i18n.localize('BNW.ItemType.Trick'),
+  quirk: game.i18n.localize('BNW.ItemType.Quirk'),
+  'close-combat-weapon': game.i18n.localize('BNW.ItemType.CloseCombatWeapon')
+};
+```
+
+**Key Change**: No more `CONFIG.BNW.defaultSkills` - skills are now Items
+
 ## V2 Actor Sheet (BraveNewWorldActorSheetV2)
 
 ### Key Features
-- **5-tab interface**: Traits & Skills, Powers, Tricks, Quirks, Notes
+- **6-tab interface**: Traits & Skills, Powers, Tricks, Quirks, Weapons, Notes
 - **Auto-save on change** (submitOnChange: true)
-- **Drag-drop items** from compendiums/sidebar
-- **Inline item creation** with auto-editor opening
+- **Drag-drop items** from compendiums/sidebar (skills, powers, tricks, quirks, weapons)
+- **Inline skill creation** per trait with auto-editor opening
+- **Inline item creation** for powers, tricks, quirks, weapons
 - **Manual tab management** (CSS-based show/hide)
 - **Proper flexbox scrolling** (critical for V2)
 - **Document hooks** for embedded item changes
+- **Auto-initialization** of missing traits on first sheet open
+
+### Actor Trait Initialization
+The `_ensureTraitsInitialized()` method automatically:
+1. Checks if actor has all traits from `CONFIG.BNW.traits`
+2. Adds any missing traits with default dice/bonus values
+3. Saves changes to actor document
+4. Called during `_prepareContext()` before rendering
+
+This ensures actors created before trait configuration changes get updated automatically.
 
 ### Configuration
 ```javascript
@@ -257,13 +371,13 @@ static DEFAULT_OPTIONS = {
   position: { width: 720, height: 720 },
   window: { resizable: true },
   actions: {
-    rollSkill: _onRollSkill,
-    rollPower: _onRollPower,
-    createItem: _onCreateItem,
-    editItem: _onEditItem,
-    deleteItem: _onDeleteItem,
-    editImage: _onEditImage,
-    changeTab: _onChangeTab
+    rollSkill: _onRollSkill,           // Roll trait + skill
+    createSkill: _onCreateSkill,       // Create skill for trait
+    createItem: _onCreateItem,         // Create power/trick/quirk/weapon
+    editItem: _onEditItem,             // Open item editor
+    deleteItem: _onDeleteItem,         // Delete with confirmation
+    editImage: _onEditImage,           // Open FilePicker
+    changeTab: _onChangeTab            // Switch tab
   },
   form: {
     handler: _onSubmitForm,
@@ -278,13 +392,13 @@ static DEFAULT_OPTIONS = {
 ### Actions (Click Handlers)
 All actions use `data-action` attributes in templates:
 
-- `data-action="rollSkill" data-trait="X" data-skill="Y"` - Roll trait+skill
-- `data-action="rollPower" data-item-id="uuid"` - Roll power with bonus dice
-- `data-action="createItem" data-type="power|trick|quirk"` - Create new item
+- `data-action="rollSkill" data-trait="X" data-skill-id="uuid"` - Roll trait+skill (or trait default if no skill-id)
+- `data-action="createSkill" data-trait="X"` - Create new skill for trait
+- `data-action="createItem" data-type="power|trick|quirk|close-combat-weapon"` - Create new item
 - `data-action="editItem" data-item-id="uuid"` - Open item editor
 - `data-action="deleteItem" data-item-id="uuid"` - Delete with confirmation
 - `data-action="editImage"` - Open FilePicker for image
-- `data-action="changeTab" data-tab="traits|powers|tricks|quirks|notes"` - Switch tab
+- `data-action="changeTab" data-tab="traits|powers|tricks|quirks|weapons|notes"` - Switch tab
 
 ### Template Context
 The `_prepareContext()` method provides:
@@ -292,18 +406,30 @@ The `_prepareContext()` method provides:
 {
   actor: this.document,
   system: actor.system,
-  traits: Object.entries(system.traits).map(...),
-  skills: Object.entries(system.skills).map(...),
+  traits: Object.entries(CONFIG.BNW.traits).map(([key, config]) => ({
+    key,
+    label: config.label,
+    dice: actor.system.traits[key]?.dice ?? config.dice,
+    default: actor.system.traits[key]?.default ?? config.default
+  })),
+  skills: actor.items.filter(i => i.type === 'skill'),
   powers: actor.items.filter(i => i.type === 'power'),
   tricks: actor.items.filter(i => i.type === 'trick'),
   quirks: actor.items.filter(i => i.type === 'quirk'),
+  weapons: actor.items.filter(i => i.type === 'close-combat-weapon'),
   hasPowers: powers.length > 0,
   hasTricks: tricks.length > 0,
   hasQuirks: quirks.length > 0,
+  hasWeapons: weapons.length > 0,
   totalNegativeQuirks: sum of negative quirk costs,
   enrichedNotes: await TextEditor.enrichHTML(notes)
 }
 ```
+
+**Key Changes from V1**:
+- No `skills` property in context (filtered from actor.items instead)
+- Traits built from CONFIG.BNW.traits + actor overrides
+- `filterSkillsByTrait` Handlebars helper used in template to filter skills per trait
 
 ### Embedded Document Hooks
 Listens to `createItem`, `updateItem`, `deleteItem` hooks to auto-re-render when items change:
@@ -337,9 +463,15 @@ Generic base for all items with:
 - Trait/skill dropdown population (from parent actor)
 
 ### Specialized Classes
-Each item type has its own class that just sets the template:
+Each item type has its own class that sets the template:
 
 ```javascript
+class BraveNewWorldSkillSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: { template: ".../skill-sheet-v2.hbs" }
+  };
+}
+
 class BraveNewWorldPowerSheetV2 extends BraveNewWorldItemSheetV2 {
   static PARTS = {
     form: { template: ".../power-sheet-v2.hbs" }
@@ -357,7 +489,44 @@ class BraveNewWorldQuirkSheetV2 extends BraveNewWorldItemSheetV2 {
     form: { template: ".../quirk-sheet-v2.hbs" }
   };
 }
+
+class BraveNewWorldCloseCombatWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
+  static PARTS = {
+    form: { template: ".../close-combat-weapon-sheet-v2.hbs" }
+  };
+}
 ```
+
+**Important Methods in Base Class**:
+
+#### `_prepareTraitOptions()`
+Builds trait dropdown options from `CONFIG.BNW.traits`:
+```javascript
+_prepareTraitOptions() {
+  const traits = CONFIG.BNW.traits;
+  return Object.entries(traits).map(([key, config]) => ({
+    value: key,
+    label: config.label
+  }));
+}
+```
+
+#### `_prepareSkillOptions()`
+Builds skill dropdown options from parent actor's skill items:
+```javascript
+_prepareSkillOptions() {
+  const actor = this.document.parent;
+  if (!actor) return [];
+  
+  const skills = actor.items.filter(i => i.type === 'skill');
+  return skills.map(skill => ({
+    value: skill.id,
+    label: skill.name
+  }));
+}
+```
+
+**Key Change**: Skills now use Item IDs as dropdown values, not string keys
 
 ### Form Handling (V2 Pattern)
 ```javascript
@@ -415,6 +584,19 @@ Handlebars.registerHelper('hasEntries', (value) => {
   if (value && typeof value === 'object') return Object.keys(value).length > 0;
   return false;
 });
+
+// NEW: Filter skills by trait key
+Handlebars.registerHelper('filterSkillsByTrait', function(skills, traitKey) {
+  if (!skills || !Array.isArray(skills)) return [];
+  return skills.filter(skill => skill.system?.trait === traitKey);
+});
+```
+
+**Key Addition**: `filterSkillsByTrait` enables trait-based skill filtering in templates:
+```handlebars
+{{#each (filterSkillsByTrait skills trait.key) as |skill|}}
+  <!-- skill row -->
+{{/each}}
 ```
 
 ---
@@ -464,11 +646,14 @@ foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorld
 - ✅ Tab state persists across renders
 - ✅ Form fields auto-save on change
 - ✅ Portrait image can be edited
-- ✅ Traits can be edited (label and value)
-- ✅ Skills can be edited (label, trait, value)
+- ✅ Traits display with dice and default bonus
+- ✅ Traits auto-initialize on first sheet open
+- ✅ Skills display per trait (filtered correctly)
+- ✅ Add Skill button creates skill for specific trait
 - ✅ Skill roll buttons work (prompts for target)
+- ✅ Trait default rolls work (when no skill specified)
 - ✅ Items can be dragged onto sheet
-- ✅ Add Power/Trick/Quirk buttons work
+- ✅ Add Power/Trick/Quirk/Weapon buttons work
 - ✅ New item editor opens automatically
 - ✅ Item editor appears above actor sheet (z-index)
 - ✅ Items can be edited from list
@@ -478,20 +663,25 @@ foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorld
 - ✅ Negative quirk limit (10) enforced
 
 ### Item Sheets
+- ✅ Skill sheet opens and saves
 - ✅ Power sheet opens and saves
 - ✅ Trick sheet opens and saves
 - ✅ Quirk sheet opens and saves
-- ✅ Trait dropdowns populated from actor
-- ✅ Skill dropdowns populated from actor
+- ✅ Weapon sheet opens and saves
+- ✅ Trait dropdowns populated from CONFIG.BNW.traits
+- ✅ Skill dropdowns populated from actor's skill items
+- ✅ Skill dropdown uses Item IDs as values (not keys)
 - ✅ Image editing works
 
 ### Dice Rolling
 - ✅ Skill rolls prompt for target number
-- ✅ Dice pool calculated correctly (trait + skill + bonus)
+- ✅ Dice formula calculated correctly (trait dice d6 + skill bonus)
+- ✅ Trait default rolls work (when no skill)
 - ✅ Exploding 6s work
 - ✅ Highest die identified
+- ✅ Bonus applied to result correctly
 - ✅ Success/failure determined correctly
-- ✅ Chat card displays all information
+- ✅ Chat card displays all information (dice, bonus, result)
 - ✅ Power rolls include bonus dice
 - ✅ Roll flags set correctly for automation
 
@@ -520,29 +710,51 @@ foundry.documents.collections.Items.registerSheet('bravenewworld', BraveNewWorld
 ## Common Tasks
 
 ### Adding a New Trait
-1. Update `system.json` documentTypes if needed
-2. Add to actor's `system.traits` object
-3. Update localization keys in `lang/en.json`
-4. Trait automatically appears in actor sheet
+1. Update `CONFIG.BNW.traits` in system settings (or modify default in main.js)
+2. Add localization key in `lang/en.json` if needed
+3. Trait automatically appears in actor sheets on next open
+4. Existing actors auto-initialize the new trait with defaults
 
 ### Adding a New Skill
-1. Add to actor's `system.skills` object
-2. Set `trait` key to link it to a trait
-3. Update localization if needed
-4. Skill automatically appears under its trait
+**For a specific actor**:
+1. Open actor sheet
+2. Click "Add Skill" next to the desired trait
+3. Fill in skill name and bonus
+4. Save - skill appears in trait's table
+
+**For compendium/reuse**:
+1. Create skill Item in Items directory or compendium
+2. Set trait association and bonus
+3. Drag onto actor sheets as needed
+
+### Modifying Trait Defaults
+Edit the settings registration in `main.js`:
+```javascript
+game.settings.register('bravenewworld', 'traits', {
+  default: {
+    strength: { label: 'Strength', dice: 3, default: 0 },
+    // ... modify dice or default values
+  }
+});
+```
+
+Existing actors keep their values; new actors use new defaults.
 
 ### Adding a New Item Type
 1. Define template in `templates/template.json`
 2. Create V2 sheet class in `bnw-item-sheet-v2.js`
 3. Create template in `templates/items/[type]-sheet-v2.hbs`
 4. Register sheet in `main.js`
-5. Add localization keys
+5. Add to `system.json` documentTypes.Item
+6. Add localization keys
+7. Add tab to actor sheet if needed
 
 ### Customizing Roll Behavior
 Edit `BNW.dice.rollTraitSkill()` in `scripts/bnw-dice.js`:
-- Change dice formula (currently `Xd6x=6`)
+- Change dice formula (currently `Xd6x=6 + bonus`)
 - Modify success determination logic
 - Customize chat card template
+- Add automation hooks via flags
 
 ### Adding New Actor Sheet Actions
 1. Add method to `BraveNewWorldActorSheetV2` class
@@ -565,10 +777,11 @@ Capitalizes first letter of string.
 ## Known Limitations
 
 1. **Delta Prime Actor Type**: Not yet migrated to V2 (uses V1 sheet)
-2. **Compendium Content**: Only `bnw-items.db` included; no actors/journals yet
-3. **Automation**: Basic roll mechanics only; no advanced automation hooks
+2. **Compendium Content**: Only `bnw-items.db` included; limited pre-made skills/powers
+3. **Automation**: Basic roll mechanics only; no advanced automation hooks for damage/effects
 4. **Macros**: `game.bnw.dice` API available but no pre-built macros
 5. **i18n**: Only English localization currently available
+6. **Skill Migration**: Old actors with skills in `system.skills` need manual conversion to Items
 
 ---
 

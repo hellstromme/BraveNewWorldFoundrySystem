@@ -222,6 +222,66 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.bnw.sheet .trait-header h3 {
+  flex: 1;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.2rem;
+  color: var(--bnw-primary-red);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+.bnw.sheet .trait-values {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bnw.sheet .trait-values label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bnw.sheet .trait-values label span {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--bnw-accent-dark);
+}
+
+.bnw.sheet .trait-values input {
+  width: 50px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: white;
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-primary-blue);
+  padding: 0.25rem;
+}
+
+.bnw.sheet .trait-values button.roll-default {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.bnw.sheet .trait-values button.roll-default:hover {
+  background: var(--bnw-accent-yellow);
+  color: var(--bnw-text-bold);
+  transform: scale(1.1);
 }
 
 .bnw.sheet .trait-label {
@@ -265,6 +325,125 @@
   background: white;
   border: 2px solid var(--bnw-text-bold);
   color: var(--bnw-primary-blue);
+}
+
+.bnw.sheet .trait-skills {
+  margin-top: 0.5rem;
+}
+
+.bnw.sheet .skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  background: var(--bnw-accent-dark);
+  border: 2px solid var(--bnw-text-bold);
+  border-bottom: none;
+}
+
+.bnw.sheet .skill-header h4 {
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.bnw.sheet .skill-header button {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.bnw.sheet .skill-header button:hover {
+  background: var(--bnw-accent-yellow);
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--bnw-text-bold);
+  font-size: 0.85rem;
+}
+
+.bnw.sheet .skills-table th,
+.bnw.sheet .skills-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--bnw-text-light);
+}
+
+.bnw.sheet .skills-table th {
+  background: var(--bnw-accent-light);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
+}
+
+.bnw.sheet .skills-table tbody tr:hover {
+  background: rgba(52, 152, 219, 0.15);
+}
+
+.bnw.sheet .skills-table tbody tr {
+  border: 1px solid transparent;
+}
+
+.bnw.sheet .skills-table .skill-name {
+  font-weight: 600;
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .skills-table .skill-bonus {
+  text-align: center;
+  font-weight: 700;
+  color: var(--bnw-primary-blue);
+  width: 50px;
+}
+
+.bnw.sheet .skills-table .skill-controls {
+  text-align: right;
+  white-space: nowrap;
+  width: 110px;
+}
+
+.bnw.sheet .skills-table .skill-controls button {
+  background: transparent;
+  border: 1px solid var(--bnw-text-light);
+  color: var(--bnw-text-bold);
+  padding: 0.2rem 0.4rem;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bnw.sheet .skills-table .skill-controls button:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border-color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .trait-skills p.empty {
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--bnw-text-light);
+  font-style: italic;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  margin: 0;
 }
 
 .bnw.sheet .trait-skills {

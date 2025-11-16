@@ -54,10 +54,10 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     
     const actor = this.document?.parent ?? null;
     const currentTrait = context.system?.trait ?? '';
-    const currentSkill = context.system?.skill ?? '';
+    const currentSkillId = context.system?.skill ?? '';
 
     context.traitOptions = this._prepareTraitOptions(actor, currentTrait);
-    context.skillOptions = this._prepareSkillOptions(actor, currentSkill, context.traitOptions);
+    context.skillOptions = this._prepareSkillOptions(actor, currentSkillId);
     
     return context;
   }
@@ -72,15 +72,10 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   _prepareTraitOptions(actor, currentTrait) {
     const options = new Map();
 
-    for (const key of CONFIG.BNW?.traits ?? []) {
-      options.set(key, this._capitalize(key));
-    }
-
-    if (actor) {
-      const actorTraits = foundry.utils.getProperty(actor, 'system.traits') ?? {};
-      for (const [key, data] of Object.entries(actorTraits)) {
-        options.set(key, data?.label ?? this._capitalize(key));
-      }
+    // Get traits from CONFIG.BNW.traits (now an object, not array)
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    for (const [key, data] of Object.entries(configTraits)) {
+      options.set(key, data?.label ?? this._capitalize(key));
     }
 
     if (currentTrait && !options.has(currentTrait)) {
@@ -95,38 +90,34 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   /**
    * Prepare skill options for dropdown
    * @param {Actor} actor
-   * @param {string} currentSkill
-   * @param {Array} traitOptions
+   * @param {string} currentSkillId
    * @returns {Array}
    * @private
    */
-  _prepareSkillOptions(actor, currentSkill, traitOptions = []) {
-    const traitLabelMap = new Map(traitOptions.map(o => [o.key, o.label]));
-    const defaultTraitKey = traitOptions[0]?.key ?? 'strength';
-    const options = new Map();
-
-    const mergeSkills = (skills = {}) => {
-      for (const [key, data] of Object.entries(skills)) {
-        const baseLabel = data?.label ?? this._capitalize(key);
-        const traitKey = data?.trait ?? defaultTraitKey;
-        const traitLabel = traitLabelMap.get(traitKey) ?? '';
-        const label = traitLabel ? `${baseLabel} (${traitLabel})` : baseLabel;
-        options.set(key, { key, label });
-      }
-    };
-
-    mergeSkills(CONFIG.BNW?.defaultSkills ?? {});
+  _prepareSkillOptions(actor, currentSkillId) {
+    const options = [];
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    
     if (actor) {
-      mergeSkills(foundry.utils.getProperty(actor, 'system.skills') ?? {});
+      const skills = actor.items.filter(i => i.type === 'skill');
+      
+      for (const skill of skills) {
+        const traitKey = skill.system?.trait ?? '';
+        const traitLabel = configTraits[traitKey]?.label ?? traitKey;
+        const label = `${skill.name} (${traitLabel})`;
+        
+        options.push({
+          id: skill.id,
+          label: label,
+          trait: traitKey
+        });
+      }
     }
-
-    if (currentSkill && !options.has(currentSkill)) {
-      const label = this._capitalize(currentSkill);
-      options.set(currentSkill, { key: currentSkill, label });
-    }
-
-    return Array.from(options.values())
-      .sort((a, b) => a.label.localeCompare(b.label));
+    
+    // Sort by label
+    options.sort((a, b) => a.label.localeCompare(b.label));
+    
+    return options;
   }
 
   /**
@@ -214,8 +205,35 @@ class BraveNewWorldCloseCombatWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
   };
 }
 
+/**
+ * Skill Item Sheet
+ */
+class BraveNewWorldSkillSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/skill-sheet-v2.hbs"
+    }
+  };
+
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    
+    // Get trait options from system config
+    context.traitOptions = Object.entries(CONFIG.BNW?.traits ?? {}).map(([key, data]) => ({
+      key,
+      label: data?.label ?? key
+    }));
+    
+    return context;
+  }
+}
+
 globalThis.BraveNewWorldItemSheetV2 = BraveNewWorldItemSheetV2;
 globalThis.BraveNewWorldPowerSheetV2 = BraveNewWorldPowerSheetV2;
 globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
 globalThis.BraveNewWorldQuirkSheetV2 = BraveNewWorldQuirkSheetV2;
 globalThis.BraveNewWorldCloseCombatWeaponSheetV2 = BraveNewWorldCloseCombatWeaponSheetV2;
+globalThis.BraveNewWorldSkillSheetV2 = BraveNewWorldSkillSheetV2;

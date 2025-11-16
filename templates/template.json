@@ -14,82 +14,20 @@
         },
         "traits": {
           "strength": {
-            "label": "Strength",
-            "value": 3
+            "dice": 3,
+            "default": 0
           },
           "speed": {
-            "label": "Speed",
-            "value": 3
+            "dice": 3,
+            "default": 0
           },
           "smarts": {
-            "label": "Smarts",
-            "value": 3
+            "dice": 3,
+            "default": 0
           },
           "spirit": {
-            "label": "Spirit",
-            "value": 3
-          }
-        },
-        "skills": {
-          "athletics": {
-            "label": "Athletics",
-            "trait": "strength",
-            "value": 2
-          },
-          "brawl": {
-            "label": "Brawl",
-            "trait": "strength",
-            "value": 2
-          },
-          "might": {
-            "label": "Might",
-            "trait": "strength",
-            "value": 2
-          },
-          "stealth": {
-            "label": "Stealth",
-            "trait": "speed",
-            "value": 2
-          },
-          "investigation": {
-            "label": "Investigation",
-            "trait": "smarts",
-            "value": 2
-          },
-          "knowledge": {
-            "label": "Knowledge",
-            "trait": "smarts",
-            "value": 2
-          },
-          "science": {
-            "label": "Science",
-            "trait": "smarts",
-            "value": 2
-          },
-          "technology": {
-            "label": "Technology",
-            "trait": "smarts",
-            "value": 2
-          },
-          "leadership": {
-            "label": "Leadership",
-            "trait": "spirit",
-            "value": 2
-          },
-          "persuasion": {
-            "label": "Persuasion",
-            "trait": "spirit",
-            "value": 2
-          },
-          "streetwise": {
-            "label": "Streetwise",
-            "trait": "spirit",
-            "value": 2
-          },
-          "willpower": {
-            "label": "Willpower",
-            "trait": "spirit",
-            "value": 2
+            "dice": 3,
+            "default": 0
           }
         },
         "powers": [],
@@ -108,7 +46,7 @@
         "cost": 0,
         "dice": 0,
         "trait": "strength",
-        "skill": "athletics",
+        "skill": "",
         "notes": ""
       }
     },
@@ -139,11 +77,21 @@
         "defensiveBonus": 0,
         "quickness": 0,
         "attackTrait": "strength",
-        "attackSkill": "brawl",
+        "attackSkill": "",
         "damageType": "strength",
         "damageModifier": 0,
         "cost": 0,
         "description": ""
+      }
+    },
+    "skill": {
+      "type": "skill",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "trait": "strength",
+        "bonus": 2,
+        "summary": "",
+        "notes": ""
       }
     }
   }

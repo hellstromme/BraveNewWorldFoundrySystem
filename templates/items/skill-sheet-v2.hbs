@@ -1,0 +1,36 @@
+{{!-- Application V2 Item Sheet Template - Skill --}}
+<div>
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Skill'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.Trait'}}</span>
+          <select name="system.trait">
+            {{#each traitOptions as |trait|}}
+              <option value="{{trait.key}}" {{#if (eq ../system.trait trait.key)}}selected{{/if}}>{{trait.label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Bonus'}}</span>
+          <input type="number" name="system.bonus" value="{{system.bonus}}" min="0" />
+        </label>
+        <label>
+          <span>{{localize 'BNW.Label.Summary'}}</span>
+          <input type="text" name="system.summary" value="{{system.summary}}" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Notes'}}</label>
+      <textarea name="system.notes" placeholder="{{localize 'BNW.Placeholder.SkillDescription'}}">{{system.notes}}</textarea>
+    </div>
+  </section>
+</div>
