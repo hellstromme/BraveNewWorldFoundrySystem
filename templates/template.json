@@ -30,6 +30,14 @@
             "default": 0
           }
         },
+        "wounds": {
+          "head": 0,
+          "leftArm": 0,
+          "rightArm": 0,
+          "torso": 0,
+          "leftLeg": 0,
+          "rightLeg": 0
+        },
         "powers": [],
         "gear": [],
         "notes": ""

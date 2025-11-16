@@ -32,8 +32,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab
     },
     form: {
-      handler: BraveNewWorldActorSheetV2.prototype._onSubmitForm,
-      submitOnChange: true
+      submitOnChange: false
     },
     dragDrop: [
       { dragSelector: '.item[data-item-id]', dropSelector: 'form' }
@@ -142,29 +141,22 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     
     console.log('BNW Actor | Preparing context', {
       actorName: this.document.name,
-      systemData: context.system,
       hasTraits: !!context.system.traits,
       hasSkills: !!context.system.skills
     });
     
-    // Check if actor needs trait initialization and save if needed
-    const needsInit = await this._ensureTraitsInitialized();
-    if (needsInit) {
-      // Re-clone after initialization
-      context.system = foundry.utils.deepClone(this.document.system);
-    }
-    
+    // Initialize defaults in the cloned context only (no saves)
     this._initializeDefaults(context.system);
     
+    // Prepare data for display
     context.traits = this._prepareTraits(context.system.traits);
-    
     context.powers = this.document.items.filter(i => i.type === 'power');
     context.tricks = this.document.items.filter(i => i.type === 'trick');
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
     context.weapons = this.document.items.filter(i => i.type === 'closeCombatWeapon');
     context.skills = this.document.items.filter(i => i.type === 'skill');
-    
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
+    context.woundsData = this._prepareWounds(context.system);
     
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
@@ -184,51 +176,13 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
 
   /**
-   * Ensure actor has traits initialized in the correct format
-   * @returns {Promise<boolean>} True if traits were initialized and saved
-   * @private
-   */
-  async _ensureTraitsInitialized() {
-    const system = this.document.system;
-    const configTraits = CONFIG.BNW?.traits ?? {};
-    let needsUpdate = false;
-    const updates = {};
-    
-    // Check if traits object exists
-    if (!system.traits || typeof system.traits !== 'object') {
-      updates['system.traits'] = {};
-      needsUpdate = true;
-    }
-    
-    // Check each trait from config
-    for (const [traitKey, traitConfig] of Object.entries(configTraits)) {
-      const actorTrait = system.traits?.[traitKey];
-      
-      // Check if trait is missing or has old format (has 'value' or 'label' instead of 'dice')
-      if (!actorTrait || actorTrait.value !== undefined || actorTrait.label !== undefined || actorTrait.dice === undefined) {
-        updates[`system.traits.${traitKey}`] = {
-          dice: traitConfig.dice ?? 3,
-          default: traitConfig.default ?? 0
-        };
-        needsUpdate = true;
-      }
-    }
-    
-    if (needsUpdate) {
-      console.log('BNW | Initializing traits for actor:', this.document.name, updates);
-      await this.document.update(updates);
-      return true;
-    }
-    
-    return false;
-  }
-
-  /**
-   * Initialize default values for system data
-   * @param {object} system
+   * Initialize default values for system data in the context clone
+   * This does NOT save to the database - only provides defaults for rendering
+   * @param {object} system - The cloned system data
    * @private
    */
   _initializeDefaults(system) {
+    // Initialize details with empty defaults
     system.details ??= {};
     const defaultDetails = {
       playerName: '',
@@ -240,21 +194,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     };
     foundry.utils.mergeObject(system.details, defaultDetails, { insertKeys: false });
     
-    system.traits ??= {};
-    system.notes ??= '';
-    
     // Initialize traits from config
-    const configTraits = CONFIG.BNW?.traits ?? {};
-    for (const [traitKey, traitConfig] of Object.entries(configTraits)) {
-      if (!system.traits[traitKey]) {
-        system.traits[traitKey] = {
-          dice: traitConfig.dice ?? 3,
-          default: traitConfig.default ?? 0
-        };
+    system.traits ??= {};
+    for (const [key, config] of Object.entries(CONFIG.BNW.traits)) {
+      if (!system.traits[key]) {
+        system.traits[key] = { dice: config.dice, default: config.default };
       }
-      system.traits[traitKey].dice ??= traitConfig.dice ?? 3;
-      system.traits[traitKey].default ??= traitConfig.default ?? 0;
     }
+    
+    // Initialize wounds - only add missing properties, don't overwrite existing values
+    system.wounds ??= {};
+    const woundLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
+    for (const location of woundLocations) {
+      // Only set to 0 if undefined - preserve existing values
+      if (system.wounds[location] === undefined) {
+        system.wounds[location] = 0;
+      }
+    }
+    
+    system.notes ??= '';
   }
 
   /**
@@ -292,6 +250,44 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       }
     }
     return Math.abs(total);
+  }
+
+  /**
+   * Prepare wounds data for rendering
+   * @param {object} system
+   * @returns {Array}
+   * @private
+   */
+  _prepareWounds(system) {
+    // Get strength dice value for max wounds
+    const strengthDice = Number(system.traits?.strength?.dice ?? 3);
+    
+    // Initialize wounds if not present
+    system.wounds ??= {};
+    
+    // Define hit locations with their localization keys
+    const hitLocations = [
+      { key: 'head', labelKey: 'BNW.HitLocation.Head' },
+      { key: 'leftArm', labelKey: 'BNW.HitLocation.LeftArm' },
+      { key: 'rightArm', labelKey: 'BNW.HitLocation.RightArm' },
+      { key: 'torso', labelKey: 'BNW.HitLocation.Torso' },
+      { key: 'leftLeg', labelKey: 'BNW.HitLocation.LeftLeg' },
+      { key: 'rightLeg', labelKey: 'BNW.HitLocation.RightLeg' }
+    ];
+    
+    return hitLocations.map(location => {
+      // Get current wounds, ensure it's a number, and cap at max
+      let current = Number(system.wounds[location.key] ?? 0);
+      current = Math.min(Math.max(0, current), strengthDice);
+      
+      return {
+        key: location.key,
+        label: game.i18n.localize(location.labelKey),
+        current: current,
+        max: strengthDice,
+        isMaxed: current >= strengthDice
+      };
+    });
   }
 
   /**
@@ -509,37 +505,87 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
 
   /**
-   * Handle form submission
-   * In V2, the parameters are: formConfig, event
-   * @param {object} formConfig - Form configuration options
-   * @param {Event} event - The form change event
-   * @private
+   * Handle form input changes - only submit for specific fields
+   * @override
    */
-  async _onSubmitForm(formConfig, event) {
-    // Get the form element from the event
-    const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
+  _onChangeForm(formConfig, event) {
+    super._onChangeForm(formConfig, event);
     
-    if (!form) {
-      console.warn('BNW | No form element found in event');
-      return;
+    // Get the input that changed
+    const target = event.target;
+    
+    // Only auto-submit for wound inputs and other specific fields
+    // Don't submit for tab changes or other UI interactions
+    if (target?.name?.startsWith('system.wounds.') || 
+        target?.name?.startsWith('system.traits.') ||
+        target?.name?.startsWith('system.details.')) {
+      
+      console.log('BNW | Auto-submitting form for:', target.name);
+      
+      // Debounce the submission slightly to avoid rapid consecutive updates
+      if (this._submitTimeout) {
+        clearTimeout(this._submitTimeout);
+      }
+      
+      this._submitTimeout = setTimeout(() => {
+        this.submit();
+        this._submitTimeout = null;
+      }, 300);
+    }
+  }
+
+  /**
+   * Prepare submit data - override to handle wounds in hidden tabs
+   * @override
+   */
+  _prepareSubmitData(event, form, formData) {
+    // Get the expanded object from FormData
+    const submitData = super._prepareSubmitData(event, form, formData);
+    
+    // Manually collect wound values from ALL tabs (including hidden ones)
+    // because display:none prevents them from being in FormData
+    const woundLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
+    
+    // Ensure wounds object exists in submitData
+    if (!submitData.system) submitData.system = {};
+    if (!submitData.system.wounds) submitData.system.wounds = {};
+    
+    for (const location of woundLocations) {
+      const input = form.querySelector(`input[name="system.wounds.${location}"]`);
+      if (input) {
+        const value = Number(input.value);
+        submitData.system.wounds[location] = value;
+      }
     }
     
-    // Extract form data
-    const formData = new FormData(form);
-    const submitData = {};
-    for (const [key, value] of formData.entries()) {
-      submitData[key] = value;
+    // Validate and cap wounds at maximum (strength dice)
+    const strengthDice = Number(this.document.system.traits?.strength?.dice ?? 3);
+    for (const location of woundLocations) {
+      if (submitData.system.wounds[location] !== undefined) {
+        let wounds = Number(submitData.system.wounds[location]);
+        // Cap at max and ensure non-negative
+        submitData.system.wounds[location] = Math.min(Math.max(0, wounds), strengthDice);
+      }
     }
     
-    console.log('BNW Actor | Submitting form data:', submitData);
+    console.log('BNW Actor | Prepared submit data with wounds:', submitData.system?.wounds);
     
-    // Expand dotted notation to nested object
-    const expanded = foundry.utils.expandObject(submitData);
-    
-    // Update without rendering
-    await this.document.update(expanded, { render: false });
-    
-    console.log('BNW Actor | Document updated (no render)');
+    return submitData;
+  }
+
+  /**
+   * Submit a document update based on the processed form data.
+   * This method is called automatically after _prepareSubmitData.
+   * @param {SubmitEvent} event - The originating form submission event
+   * @param {HTMLFormElement} form - The form element that was submitted
+   * @param {object} submitData - Processed and validated form data
+   * @protected
+   * @override
+   */
+  async _processSubmitData(event, form, submitData) {
+    console.log('BNW Actor | _processSubmitData called with:', submitData.system?.wounds);
+    await this.document.update(submitData);
+    console.log('BNW Actor | Document updated successfully');
   }
 
   /* -------------------------------------------- */

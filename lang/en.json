@@ -94,6 +94,7 @@
   "BNW.Action.Roll": "Roll",
   "BNW.Action.RollTrait": "Roll raw trait test",
   "BNW.Tab.Quirks": "Quirks",
+  "BNW.Tab.Combat": "Combat",
   "BNW.Tab.Weapons": "Weapons",
   "BNW.Label.TotalNegativeQuirks": "Total Negative Quirks",
   "BNW.Warning.TooManyNegativeQuirks": "Cannot add quirk - would exceed the limit of 10 negative quirk points (current: {current}, attempting to add: {adding})",
@@ -122,5 +123,13 @@
   "BNW.DamageType.Stun": "Stun",
   "BNW.DamageType.None": "None",
   "BNW.Item.Skill": "Skill",
-  "BNW.Placeholder.SkillDescription": "Describe what this skill covers"
+  "BNW.Placeholder.SkillDescription": "Describe what this skill covers",
+  "BNW.Label.Wounds": "Wounds",
+  "BNW.Label.HitLocation": "Hit Location",
+  "BNW.HitLocation.Head": "Head",
+  "BNW.HitLocation.LeftArm": "Left Arm",
+  "BNW.HitLocation.RightArm": "Right Arm",
+  "BNW.HitLocation.Torso": "Torso",
+  "BNW.HitLocation.LeftLeg": "Left Leg",
+  "BNW.HitLocation.RightLeg": "Right Leg"
 }

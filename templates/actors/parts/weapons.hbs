@@ -1,3 +1,24 @@
+{{!-- Wounds Section --}}
+<div class="wounds-section">
+  <h3>{{localize 'BNW.Label.Wounds'}}</h3>
+  <div class="wounds-grid">
+    {{#each woundsData as |wound|}}
+      <div class="wound-location {{#if wound.isMaxed}}maxed{{/if}}">
+        <label for="wound-{{wound.key}}">{{wound.label}} ({{wound.max}}):</label>
+        <input 
+          type="number" 
+          id="wound-{{wound.key}}"
+          name="system.wounds.{{wound.key}}" 
+          value="{{wound.current}}" 
+          min="0" 
+          max="{{wound.max}}" 
+          data-dtype="Number" />
+      </div>
+    {{/each}}
+  </div>
+</div>
+
+{{!-- Weapons Section --}}
 <div class="item-controls header">
   <button type="button" data-action="createItem" data-type="closeCombatWeapon">
     <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddWeapon'}}

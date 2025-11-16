@@ -160,6 +160,44 @@ Hooks.once('ready', async function () {
 });
 
 /**
+ * Initialize default actor data when a new actor is created
+ */
+Hooks.on('preCreateActor', async (actor, data, options, userId) => {
+  console.log('BNW | preCreateActor hook - Initializing new actor data');
+  
+  const updates = {};
+  
+  // Initialize traits if they don't exist
+  if (!actor.system.traits || Object.keys(actor.system.traits).length === 0) {
+    console.log('BNW | Initializing traits for new actor');
+    const traits = {};
+    for (const [key, config] of Object.entries(CONFIG.BNW.traits)) {
+      traits[key] = { dice: config.dice, default: config.default };
+    }
+    updates['system.traits'] = traits;
+  }
+  
+  // Initialize wounds if they don't exist
+  if (!actor.system.wounds) {
+    console.log('BNW | Initializing wounds for new actor');
+    updates['system.wounds'] = {
+      head: 0,
+      leftArm: 0,
+      rightArm: 0,
+      torso: 0,
+      leftLeg: 0,
+      rightLeg: 0
+    };
+  }
+  
+  // Apply initialization data
+  if (Object.keys(updates).length > 0) {
+    actor.updateSource(updates);
+    console.log('BNW | Initialized new actor with default data:', updates);
+  }
+});
+
+/**
  * Coerce a value to a finite number, or return the fallback value.
  * @param {*} value - The value to coerce
  * @param {number} [fallback=0] - The fallback value if coercion fails
