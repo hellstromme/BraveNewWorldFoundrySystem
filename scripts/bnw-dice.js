@@ -60,6 +60,7 @@ function coerceTargetValue(value) {
  * @returns {Promise<number|null>}
  */
 BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = '', skillLabel = '' } = {}) {
+  console.log('BNW | promptTargetNumber called with defaultTarget:', defaultTarget);
   const title = game?.i18n?.localize?.('BNW.RollPromptTitle') ?? 'Brave New World Test';
   const targetLabel = game?.i18n?.localize?.('BNW.RollPromptTarget') ?? 'Target Number';
   const buttonLabel = game?.i18n?.localize?.('BNW.RollPromptButton') ?? 'Roll Dice';
@@ -76,39 +77,43 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
   `;
 
   const dialogV2 = foundry?.applications?.api?.DialogV2;
+  console.log('BNW | DialogV2 available:', !!dialogV2?.prompt);
   if (dialogV2?.prompt) {
     try {
       const result = await dialogV2.prompt({
-        title,
+        window: { title },
         content,
-        label: buttonLabel,
-        rejectClose: false,
-        submit: (event, form, formData) => {
-          const rawFromData = formData?.get?.('target');
-          if (rawFromData != null) {
-            const parsed = Number(rawFromData);
-            if (Number.isFinite(parsed)) return parsed;
+        ok: {
+          label: buttonLabel,
+          callback: (event, button, dialog) => {
+            const dialogElement = dialog.element ?? dialog;
+            const form = dialogElement.querySelector('form');
+            const input = form?.querySelector('input[name="target"]');
+            if (input?.value != null) {
+              const parsed = Number(input.value);
+              console.log('BNW | DialogV2 input value:', input.value, 'parsed:', parsed);
+              if (Number.isFinite(parsed)) return parsed;
+            }
+            console.log('BNW | DialogV2 returning default:', defaultTarget);
+            return defaultTarget;
           }
-
-          const root = form instanceof HTMLElement ? form : form?.element ?? null;
-          const input = root?.querySelector?.('input[name="target"]');
-          if (input?.value != null) {
-            const parsed = Number(input.value);
-            if (Number.isFinite(parsed)) return parsed;
-          }
-
-          return defaultTarget;
-        }
+        },
+        rejectClose: false
       });
 
-      const coerced = coerceTargetValue(result);
-      if (coerced != null) return coerced;
+      console.log('BNW | DialogV2 result:', result, 'type:', typeof result);
+      if (typeof result === 'number' && Number.isFinite(result)) {
+        console.log('BNW | Returning DialogV2 result:', result);
+        return result;
+      }
+      console.log('BNW | DialogV2 result invalid, returning default:', defaultTarget);
       return defaultTarget;
     } catch (error) {
       console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
     }
   }
 
+  console.log('BNW | Using fallback Dialog.prompt');
   return Dialog.prompt({
     title,
     content,
@@ -129,7 +134,9 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
       }
 
       const rawValue = inputElement?.value;
+      console.log('BNW | Dialog.prompt input value:', rawValue);
       const value = Number(rawValue);
+      console.log('BNW | Dialog.prompt returning:', Number.isFinite(value) ? value : defaultTarget);
       return Number.isFinite(value) ? value : defaultTarget;
     },
     rejectClose: false
@@ -243,6 +250,13 @@ BNW.dice.rollTraitSkill = async function ({
   const totalBonus = skillBonus + bonusValue;
   const finalResult = highest + totalBonus;
   const success = finalResult >= resolvedTarget;
+  
+  // Calculate number of successes: 1 for meeting TN, +1 for every 5 points over
+  let successes = 0;
+  if (success) {
+    const margin = finalResult - resolvedTarget;
+    successes = 1 + Math.floor(margin / 5);
+  }
 
   const data = {
     actorName: actor.name,
@@ -257,6 +271,7 @@ BNW.dice.rollTraitSkill = async function ({
     finalResult,
     target: resolvedTarget,
     success,
+    successes,
     title: label || (skillLabel ? `${skillLabel} (${traitLabel})` : traitLabel)
   };
 
@@ -282,6 +297,7 @@ BNW.dice.rollTraitSkill = async function ({
         traitDice,
         skillBonus,
         bonusDice: bonusValue,
+        successes,
         itemId: sourceItem?.id ?? null
       }
     }

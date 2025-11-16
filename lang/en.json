@@ -59,6 +59,7 @@
   "BNW.Label.TraitDice": "Dice",
   "BNW.Label.DefaultBonus": "Bonus",
   "BNW.Roll.Success": "Success",
+  "BNW.Roll.Successes": "Successes",
   "BNW.Roll.Failure": "Failure",
   "BNW.Warning.UnknownTrait": "Unknown trait: {trait}",
   "BNW.Warning.UnknownSkill": "Unknown skill: {skill}",

@@ -39,7 +39,11 @@
       </div>
       <div class="outcome {{#if success}}success{{else}}failure{{/if}}">
         {{#if success}}
-          {{localize 'BNW.Roll.Success'}}
+          {{#if (gt successes 1)}}
+            {{successes}} {{localize 'BNW.Roll.Successes'}}
+          {{else}}
+            {{localize 'BNW.Roll.Success'}}
+          {{/if}}
         {{else}}
           {{localize 'BNW.Roll.Failure'}}
         {{/if}}

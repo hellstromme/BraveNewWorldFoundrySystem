@@ -810,6 +810,7 @@
   letter-spacing: 1px;
   border: var(--bnw-border-thick) solid var(--bnw-text-bold);
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  grid-column: 1 / -1;
 }
 
 .chat-message .bnw-roll-card .outcome.success {
