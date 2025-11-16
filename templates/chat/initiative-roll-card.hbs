@@ -1,0 +1,42 @@
+<div class="bnw-roll-card">
+  <header>
+    <h2>{{title}}</h2>
+    <p class="subtitle">
+      {{actorName}} &mdash; 
+      Speed ({{speedDice}}d6)
+      {{#if speedDefault}}
+        +{{speedDefault}}
+      {{/if}}
+    </p>
+  </header>
+  <section class="dice-results">
+    <div class="dice-list">
+      {{#each dice as |die|}}
+        <span class="die">{{die}}</span>
+      {{/each}}
+    </div>
+    <div class="result-summary">
+      <div>
+        <span class="label">{{localize 'BNW.Label.Highest'}}</span>
+        <span class="value">{{highest}}</span>
+      </div>
+      {{#if speedDefault}}
+        <div>
+          <span class="label">{{localize 'BNW.Label.Bonus'}}</span>
+          <span class="value">+{{speedDefault}}</span>
+        </div>
+      {{/if}}
+      <div>
+        <span class="label">{{localize 'BNW.Label.Final'}}</span>
+        <span class="value">{{finalResult}}</span>
+      </div>
+      <div>
+        <span class="label">{{localize 'BNW.Label.Target'}}</span>
+        <span class="value">{{target}}</span>
+      </div>
+      <div class="outcome initiative {{#if success}}success{{else}}failure{{/if}}">
+        {{actions}} {{localize 'BNW.Roll.Actions'}}
+      </div>
+    </div>
+  </section>
+</div>

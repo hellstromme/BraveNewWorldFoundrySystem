@@ -25,6 +25,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       rollPower: BraveNewWorldActorSheetV2.prototype._onRollPower,
       rollWeaponAttack: BraveNewWorldActorSheetV2.prototype._onRollWeaponAttack,
       rollWeaponDamage: BraveNewWorldActorSheetV2.prototype._onRollWeaponDamage,
+      rollInitiative: BraveNewWorldActorSheetV2.prototype._onRollInitiative,
       createItem: BraveNewWorldActorSheetV2.prototype._onCreateItem,
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
@@ -32,7 +33,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab
     },
     form: {
-      submitOnChange: false
+      submitOnChange: true
     },
     dragDrop: [
       { dragSelector: '.item[data-item-id]', dropSelector: 'form' }
@@ -378,6 +379,18 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   }
 
   /**
+   * Handle initiative roll
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onRollInitiative(event, target) {
+    await BNW.dice.rollInitiative({
+      actor: this.document
+    });
+  }
+
+  /**
    * Handle item creation
    * @param {Event} event
    * @param {HTMLElement} target
@@ -505,72 +518,43 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
 
   /**
-   * Handle form input changes - only submit for specific fields
-   * @override
-   */
-  _onChangeForm(formConfig, event) {
-    super._onChangeForm(formConfig, event);
-    
-    // Get the input that changed
-    const target = event.target;
-    
-    // Only auto-submit for wound inputs and other specific fields
-    // Don't submit for tab changes or other UI interactions
-    if (target?.name?.startsWith('system.wounds.') || 
-        target?.name?.startsWith('system.traits.') ||
-        target?.name?.startsWith('system.details.')) {
-      
-      console.log('BNW | Auto-submitting form for:', target.name);
-      
-      // Debounce the submission slightly to avoid rapid consecutive updates
-      if (this._submitTimeout) {
-        clearTimeout(this._submitTimeout);
-      }
-      
-      this._submitTimeout = setTimeout(() => {
-        this.submit();
-        this._submitTimeout = null;
-      }, 300);
-    }
-  }
-
-  /**
-   * Prepare submit data - override to handle wounds in hidden tabs
+   * Prepare submit data - override to handle specific field updates
    * @override
    */
   _prepareSubmitData(event, form, formData) {
-    // Get the expanded object from FormData
-    const submitData = super._prepareSubmitData(event, form, formData);
+    // IMPORTANT: Only submit the specific field that changed
+    // This prevents corruption of data in hidden tabs
+    const target = event?.target;
     
-    // Manually collect wound values from ALL tabs (including hidden ones)
-    // because display:none prevents them from being in FormData
-    const woundLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
-    
-    // Ensure wounds object exists in submitData
-    if (!submitData.system) submitData.system = {};
-    if (!submitData.system.wounds) submitData.system.wounds = {};
-    
-    for (const location of woundLocations) {
-      const input = form.querySelector(`input[name="system.wounds.${location}"]`);
-      if (input) {
-        const value = Number(input.value);
-        submitData.system.wounds[location] = value;
+    if (target?.name) {
+      // If this is a specific field change, only update that field
+      const submitData = {};
+      const keys = target.name.split('.');
+      let current = submitData;
+      
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = current[keys[i]] || {};
+        current = current[keys[i]];
       }
+      
+      // Set the value
+      const finalKey = keys[keys.length - 1];
+      let value = target.value;
+      
+      // Convert to number if it's a number input
+      if (target.type === 'number') {
+        value = Number(value);
+      }
+      
+      current[finalKey] = value;
+      
+      console.log('BNW Actor | Prepared submit data for field:', target.name, 'value:', value);
+      
+      return submitData;
     }
     
-    // Validate and cap wounds at maximum (strength dice)
-    const strengthDice = Number(this.document.system.traits?.strength?.dice ?? 3);
-    for (const location of woundLocations) {
-      if (submitData.system.wounds[location] !== undefined) {
-        let wounds = Number(submitData.system.wounds[location]);
-        // Cap at max and ensure non-negative
-        submitData.system.wounds[location] = Math.min(Math.max(0, wounds), strengthDice);
-      }
-    }
-    
-    console.log('BNW Actor | Prepared submit data with wounds:', submitData.system?.wounds);
-    
-    return submitData;
+    // Fallback to default behavior for full form submissions
+    return super._prepareSubmitData(event, form, formData);
   }
 
   /**

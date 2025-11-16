@@ -95,7 +95,8 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/close-combat-weapon-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/skill-sheet-v2.hbs`,
-    `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
+    `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`,
+    `${CONFIG.BNW.templatePath}/chat/initiative-roll-card.hbs`
   ];
 
   await foundry.applications.handlebars.loadTemplates(templatesToLoad);
@@ -170,10 +171,14 @@ Hooks.on('preCreateActor', async (actor, data, options, userId) => {
   // Initialize traits if they don't exist
   if (!actor.system.traits || Object.keys(actor.system.traits).length === 0) {
     console.log('BNW | Initializing traits for new actor');
+    console.log('BNW | CONFIG.BNW.traits keys:', Object.keys(CONFIG.BNW.traits));
     const traits = {};
     for (const [key, config] of Object.entries(CONFIG.BNW.traits)) {
+      console.log('BNW | Setting trait:', key, config);
       traits[key] = { dice: config.dice, default: config.default };
     }
+    console.log('BNW | Created traits object:', traits);
+    console.log('BNW | Traits keys:', Object.keys(traits));
     updates['system.traits'] = traits;
   }
   

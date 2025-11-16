@@ -825,6 +825,13 @@
   text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
+.chat-message .bnw-roll-card .outcome.initiative {
+  background: var(--bnw-primary-yellow);
+  color: var(--bnw-text-bold);
+  font-size: 1.3rem;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+}
+
 .chat-message .bnw-roll-card footer {
   font-size: 0.8rem;
   color: var(--bnw-accent-dark);
@@ -919,6 +926,68 @@
   font-size: 0.9rem;
   color: var(--color-text-dark-secondary);
   padding: 0.5rem;
+}
+
+/* Initiative Section Styling */
+.bnw.sheet .initiative-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+}
+
+.bnw.sheet .initiative-section h3 {
+  margin: 0 0 1rem 0;
+  font-weight: 900;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--bnw-primary-red);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .initiative-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bnw.sheet .initiative-roll {
+  background: var(--bnw-primary-yellow);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: var(--bnw-shadow-comic);
+  transition: all 0.2s;
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .initiative-roll:hover {
+  background: var(--bnw-primary-red);
+  color: white;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .initiative-roll:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.bnw.sheet .initiative-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--bnw-accent-dark);
+  font-style: italic;
+  text-align: center;
 }
 
 /* Wounds Section Styling */

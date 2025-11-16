@@ -60,7 +60,6 @@ function coerceTargetValue(value) {
  * @returns {Promise<number|null>}
  */
 BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = '', skillLabel = '' } = {}) {
-  console.log('BNW | promptTargetNumber called with defaultTarget:', defaultTarget);
   const title = game?.i18n?.localize?.('BNW.RollPromptTitle') ?? 'Brave New World Test';
   const targetLabel = game?.i18n?.localize?.('BNW.RollPromptTarget') ?? 'Target Number';
   const buttonLabel = game?.i18n?.localize?.('BNW.RollPromptButton') ?? 'Roll Dice';
@@ -77,7 +76,6 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
   `;
 
   const dialogV2 = foundry?.applications?.api?.DialogV2;
-  console.log('BNW | DialogV2 available:', !!dialogV2?.prompt);
   if (dialogV2?.prompt) {
     try {
       const result = await dialogV2.prompt({
@@ -91,29 +89,23 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
             const input = form?.querySelector('input[name="target"]');
             if (input?.value != null) {
               const parsed = Number(input.value);
-              console.log('BNW | DialogV2 input value:', input.value, 'parsed:', parsed);
               if (Number.isFinite(parsed)) return parsed;
             }
-            console.log('BNW | DialogV2 returning default:', defaultTarget);
             return defaultTarget;
           }
         },
         rejectClose: false
       });
 
-      console.log('BNW | DialogV2 result:', result, 'type:', typeof result);
       if (typeof result === 'number' && Number.isFinite(result)) {
-        console.log('BNW | Returning DialogV2 result:', result);
         return result;
       }
-      console.log('BNW | DialogV2 result invalid, returning default:', defaultTarget);
       return defaultTarget;
     } catch (error) {
       console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
     }
   }
 
-  console.log('BNW | Using fallback Dialog.prompt');
   return Dialog.prompt({
     title,
     content,
@@ -134,9 +126,7 @@ BNW.dice.promptTargetNumber = async function ({ defaultTarget = 7, traitLabel = 
       }
 
       const rawValue = inputElement?.value;
-      console.log('BNW | Dialog.prompt input value:', rawValue);
       const value = Number(rawValue);
-      console.log('BNW | Dialog.prompt returning:', Number.isFinite(value) ? value : defaultTarget);
       return Number.isFinite(value) ? value : defaultTarget;
     },
     rejectClose: false
@@ -481,3 +471,131 @@ BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
     }
   });
 };
+
+/**
+ * Roll initiative for a character
+ * @param {object} params
+ * @param {Actor} params.actor
+ */
+BNW.dice.rollInitiative = async function ({ actor } = {}) {
+  if (!actor) {
+    console.warn('BNW | rollInitiative requires an actor.');
+    return null;
+  }
+
+  const systemData = actor.system ?? {};
+  console.log('BNW | rollInitiative - systemData:', systemData);
+  console.log('BNW | rollInitiative - traits:', systemData.traits);
+  
+  const speedTrait = foundry.utils.getProperty(systemData, 'traits.speed') ?? null;
+  console.log('BNW | rollInitiative - speedTrait:', speedTrait);
+  
+  if (!speedTrait) {
+    ui.notifications?.warn?.('Actor must have Speed trait configured.');
+    return null;
+  }
+
+  const speedDice = Number(speedTrait?.dice ?? 3);
+  const speedDefault = Number(speedTrait?.default ?? 0);
+  const targetNumber = 5;
+
+  // Roll speed dice
+  const formula = `${speedDice}d6x=6`;
+  let roll = new Roll(formula);
+
+  try {
+    roll = await roll.evaluate();
+  } catch (error) {
+    console.error('BNW | Failed to evaluate initiative roll', error);
+    ui.notifications?.error?.('Failed to evaluate initiative roll.');
+    return null;
+  }
+
+  const diceResults = [];
+
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+
+      console.log('BNW | Initiative dice result:', value, 'exploded:', result.exploded, 'runningTotal before:', runningTotal);
+      runningTotal += value;
+
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        console.log('BNW | Pushing dice result:', runningTotal);
+        runningTotal = 0;
+      }
+    }
+
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+      console.log('BNW | Pushing final running total:', runningTotal);
+    }
+  }
+
+  console.log('BNW | All dice results:', diceResults);
+
+  if (!diceResults.length) {
+    diceResults.push(0);
+  }
+
+  const highest = Math.max(...diceResults);
+  const finalResult = highest + speedDefault;
+  const success = finalResult >= targetNumber;
+  
+  // Calculate actions: 1 base + 1 per success, capped at speed dice
+  let actions = 1;
+  if (success) {
+    const margin = finalResult - targetNumber;
+    const successes = 1 + Math.floor(margin / 5);
+    actions = 1 + successes;
+  }
+  
+  // Cap actions at speed dice count
+  actions = Math.min(actions, speedDice);
+
+  const data = {
+    actorName: actor.name,
+    speedDice: speedDice,
+    speedDefault: speedDefault,
+    dice: diceResults,
+    highest,
+    finalResult,
+    target: targetNumber,
+    success,
+    actions,
+    title: game?.i18n?.localize?.('BNW.Label.Initiative') ?? 'Initiative'
+  };
+
+  const systemBasePath =
+    CONFIG.BNW?.systemBasePath ??
+    game.system?.path ??
+    (game.system?.id ? `systems/${game.system.id}` : '');
+  const templateBasePath =
+    CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
+  const content = await foundry.applications.handlebars.renderTemplate(`${templateBasePath}/chat/initiative-roll-card.hbs`, data);
+
+  return roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: data.title,
+    content,
+    flags: {
+      bravenewworld: {
+        rollType: 'initiative',
+        speedDice,
+        speedDefault,
+        target: targetNumber,
+        highest,
+        finalResult,
+        actions
+      }
+    }
+  });
+};
+
