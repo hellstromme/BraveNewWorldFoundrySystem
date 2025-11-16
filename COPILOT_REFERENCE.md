@@ -75,6 +75,10 @@ packs/
   - `default`: Default bonus when no skill applies (e.g., 0)
 - **Actor Storage**: Each actor stores personalized `system.traits.<traitKey>.dice` and `.default` values
 - **Default Traits**: Strength, Speed, Smarts, Spirit
+- **Customization**: GMs can add/edit/delete traits via Settings → "Configure Traits"
+  - Trait keys are immutable after creation (for data integrity)
+  - Changes apply world-wide but don't affect existing actor values
+  - New actors receive current default values
 
 #### Skills
 - **Stored as**: Item documents (type `skill`)
@@ -93,6 +97,16 @@ packs/
 - **Old System**: `pool = trait.value + skill.value` (variable dice pool)
 - **New System**: `[trait.dice]d6 + [skill.bonus || trait.default]` (fixed trait dice + bonus)
 - **Example**: Strength 3 dice + Athletics +2 bonus = `3d6+2` with exploding 6s
+
+#### Trait Configuration UI
+- **Location**: Settings → System Settings → "Configure Traits"
+- **Access**: GM-only
+- **Features**: 
+  - Add new traits with custom key, label, default dice, default bonus
+  - Edit existing trait properties (except key)
+  - Delete traits with confirmation
+  - Changes saved to world settings
+- **Implementation**: Application V2 FormApplication with custom template
 
 ### Application V2 Migration (Completed Nov 2025)
 - **V2 sheets are DEFAULT** for all actor/item types

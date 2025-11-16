@@ -6,7 +6,7 @@ Hooks.once('init', async function () {
     name: "BNW.Settings.Traits.Name",
     hint: "BNW.Settings.Traits.Hint",
     scope: "world",
-    config: false,  // Hidden from UI for now, can enable later
+    config: false,  // Use custom menu instead
     type: Object,
     default: {
       strength: { label: "Strength", dice: 3, default: 0 },
@@ -17,6 +17,16 @@ Hooks.once('init', async function () {
     onChange: (value) => {
       CONFIG.BNW.traits = value;
     }
+  });
+
+  // Register settings menu for trait configuration
+  game.settings.registerMenu('bravenewworld', 'traitConfig', {
+    name: "BNW.Settings.Traits.MenuName",
+    label: "BNW.Settings.Traits.MenuLabel",
+    hint: "BNW.Settings.Traits.MenuHint",
+    icon: "fas fa-cogs",
+    type: BraveNewWorldTraitConfig,
+    restricted: true  // Only GMs can access
   });
 
   CONFIG.BNW = CONFIG.BNW ?? {};

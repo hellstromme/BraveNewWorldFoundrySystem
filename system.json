@@ -22,6 +22,7 @@
     "scripts/bnw-item-sheet.js",
     "scripts/bnw-actor-sheet-v2.js",
     "scripts/bnw-item-sheet-v2.js",
+    "scripts/bnw-trait-config.js",
     "scripts/main.js"
   ],
   "styles": [
