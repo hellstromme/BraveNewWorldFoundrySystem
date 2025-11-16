@@ -23,6 +23,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     actions: {
       rollSkill: BraveNewWorldActorSheetV2.prototype._onRollSkill,
       rollPower: BraveNewWorldActorSheetV2.prototype._onRollPower,
+      rollWeaponAttack: BraveNewWorldActorSheetV2.prototype._onRollWeaponAttack,
+      rollWeaponDamage: BraveNewWorldActorSheetV2.prototype._onRollWeaponDamage,
       createItem: BraveNewWorldActorSheetV2.prototype._onCreateItem,
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
@@ -59,24 +61,38 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     super._attachFrameListeners();
     
     // Listen for embedded document changes to trigger re-render
-    Hooks.on('createItem', this._onEmbeddedDocumentChange.bind(this));
-    Hooks.on('updateItem', this._onEmbeddedDocumentChange.bind(this));
-    Hooks.on('deleteItem', this._onEmbeddedDocumentChange.bind(this));
+    // Only re-render on create and delete, not on update
+    Hooks.on('createItem', this._onEmbeddedDocumentCreate.bind(this));
+    Hooks.on('deleteItem', this._onEmbeddedDocumentDelete.bind(this));
   }
 
   /**
-   * Handle embedded document changes
-   * @param {Item} item - The item that changed
-   * @param {object} changes - The changes made
-   * @param {object} options - Update options
+   * Handle embedded document creation
+   * @param {Item} item - The item that was created
+   * @param {object} options - Create options
    * @param {string} userId - The user who made the change
    * @private
    */
-  _onEmbeddedDocumentChange(item, changes, options, userId) {
+  _onEmbeddedDocumentCreate(item, options, userId) {
     // Only re-render if this item belongs to our actor
     if (item.parent?.id === this.document.id) {
-      console.log('BNW | Item changed, re-rendering:', item.name);
-      this.render(true, { parts: ['form'] });
+      console.log('BNW | Item created, re-rendering actor sheet');
+      this.render(false);
+    }
+  }
+
+  /**
+   * Handle embedded document deletion
+   * @param {Item} item - The item that was deleted
+   * @param {object} options - Delete options
+   * @param {string} userId - The user who made the change
+   * @private
+   */
+  _onEmbeddedDocumentDelete(item, options, userId) {
+    // Only re-render if this item belongs to our actor
+    if (item.parent?.id === this.document.id) {
+      console.log('BNW | Item deleted, re-rendering actor sheet');
+      this.render(false);
     }
   }
 
@@ -320,6 +336,40 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       bonusDice: Number(item.system?.dice ?? 0),
       label: item.name,
       sourceItem: item
+    });
+  }
+
+  /**
+   * Handle weapon attack roll
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onRollWeaponAttack(event, target) {
+    const { itemId } = target.dataset;
+    const weapon = this.document.items.get(itemId);
+    if (!weapon) return;
+
+    await BNW.dice.rollWeaponAttack({
+      actor: this.document,
+      weapon: weapon
+    });
+  }
+
+  /**
+   * Handle weapon damage roll
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onRollWeaponDamage(event, target) {
+    const { itemId } = target.dataset;
+    const weapon = this.document.items.get(itemId);
+    if (!weapon) return;
+
+    await BNW.dice.rollWeaponDamage({
+      actor: this.document,
+      weapon: weapon
     });
   }
 

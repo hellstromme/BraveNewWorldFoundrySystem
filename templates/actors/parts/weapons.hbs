@@ -9,6 +9,7 @@
       <div class="item-name">
         <h4>{{item.name}}</h4>
         <div class="weapon-stats">
+          <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.system.attackTrait}} / {{item.system.attackSkill}}</span>
           <span class="stat"><strong>{{localize 'BNW.Label.DefensiveBonus'}}:</strong> {{item.system.defensiveBonus}}</span>
           <span class="stat"><strong>{{localize 'BNW.Label.Quickness'}}:</strong> {{item.system.quickness}}</span>
           <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
@@ -19,6 +20,12 @@
         </div>
       </div>
       <div class="item-controls">
+        <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
+          <i class="fas fa-crosshairs"></i>
+        </a>
+        <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
+          <i class="fas fa-burst"></i>
+        </a>
         <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
           <i class="fas fa-edit"></i>
         </a>

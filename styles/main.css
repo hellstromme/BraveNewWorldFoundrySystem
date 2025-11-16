@@ -418,6 +418,78 @@
   box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
 }
 
+/* Tricks list item controls */
+.bnw.sheet .tricks-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .tricks-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .tricks-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Quirks list item controls */
+.bnw.sheet .quirks-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .quirks-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .quirks-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Weapons list item controls */
+.bnw.sheet .weapons-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .weapons-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .weapons-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
 .bnw.sheet .form-group {
   display: flex;
   flex-direction: column;
@@ -667,6 +739,78 @@
   font-size: 0.9rem;
   color: var(--color-text-dark-secondary);
   padding: 0.5rem;
+}
+
+/* Weapons styling - matches quirks */
+.bnw.sheet .weapons-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .weapons-list .item {
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  padding: 0.75rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .weapons-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .weapons-list .item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bnw.sheet .weapons-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .weapons-list .item .item-name h4 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats .stat {
+  font-size: 0.85rem;
+  color: var(--bnw-text-bold);
+  font-weight: 600;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats .stat strong {
+  color: var(--bnw-accent-dark);
+  font-weight: 700;
 }
 
 .bnw.sheet .item-controls.header {

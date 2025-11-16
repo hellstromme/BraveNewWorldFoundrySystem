@@ -11,23 +11,27 @@ const ItemSheetV2Base = foundry.applications.api.HandlebarsApplicationMixin(
 class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   
   /** @override */
-  static DEFAULT_OPTIONS = {
-    classes: ['bravenewworld', 'sheet', 'item', 'bnw'],
-    position: {
-      width: 520,
-      height: 520
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(
+    foundry.applications.sheets.ItemSheetV2.DEFAULT_OPTIONS,
+    {
+      classes: ['bravenewworld', 'sheet', 'item', 'bnw'],
+      position: {
+        width: 520,
+        height: 520
+      },
+      window: {
+        resizable: true
+      },
+      actions: {
+        editImage: BraveNewWorldItemSheetV2.prototype._onEditImage
+      },
+      form: {
+        closeOnSubmit: false,
+        submitOnChange: true
+      }
     },
-    window: {
-      resizable: true
-    },
-    actions: {
-      editImage: BraveNewWorldItemSheetV2.prototype._onEditImage
-    },
-    form: {
-      handler: BraveNewWorldItemSheetV2.prototype._onSubmitForm,
-      submitOnChange: true
-    }
-  };
+    { inplace: false }
+  );
 
   /** @override */
   static PARTS = {
@@ -156,46 +160,14 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     });
     fp.render(true);
   }
-
-  /* -------------------------------------------- */
-  /*  Form Handling                               */
-  /* -------------------------------------------- */
-
-  /**
-   * Handle form submission
-   * In V2, the parameters are: formConfig, event
-   * @param {object} formConfig - Form configuration options
-   * @param {Event} event - The form change event
-   * @private
-   */
-  async _onSubmitForm(formConfig, event) {
-    // Get the form element from the event
-    const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
-    
-    if (!form) {
-      console.warn('BNW | No form element found in event');
-      return;
-    }
-    
-    // Extract form data
-    const formData = new FormData(form);
-    const submitData = {};
-    for (const [key, value] of formData.entries()) {
-      submitData[key] = value;
-    }
-    
-    // Expand dotted notation to nested object
-    const expanded = foundry.utils.expandObject(submitData);
-    
-    // Update without rendering to preserve form state
-    await this.document.update(expanded, { render: false });
-  }
 }
 
 /**
  * Power Item Sheet
  */
 class BraveNewWorldPowerSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
   static PARTS = {
     form: {
       template: "systems/bravenewworld/templates/items/power-sheet-v2.hbs"
@@ -207,6 +179,8 @@ class BraveNewWorldPowerSheetV2 extends BraveNewWorldItemSheetV2 {
  * Trick Item Sheet
  */
 class BraveNewWorldTrickSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
   static PARTS = {
     form: {
       template: "systems/bravenewworld/templates/items/trick-sheet-v2.hbs"
@@ -218,6 +192,8 @@ class BraveNewWorldTrickSheetV2 extends BraveNewWorldItemSheetV2 {
  * Quirk Item Sheet
  */
 class BraveNewWorldQuirkSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
   static PARTS = {
     form: {
       template: "systems/bravenewworld/templates/items/quirk-sheet-v2.hbs"
@@ -229,6 +205,8 @@ class BraveNewWorldQuirkSheetV2 extends BraveNewWorldItemSheetV2 {
  * Close Combat Weapon Item Sheet
  */
 class BraveNewWorldCloseCombatWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
   static PARTS = {
     form: {
       template: "systems/bravenewworld/templates/items/close-combat-weapon-sheet-v2.hbs"

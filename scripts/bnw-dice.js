@@ -272,3 +272,178 @@ BNW.dice.rollTraitSkill = async function ({
     }
   });
 };
+
+/**
+ * Roll a weapon attack
+ * @param {object} params
+ * @param {Actor} params.actor
+ * @param {Item} params.weapon
+ * @param {number} [params.defenseRating=5]
+ */
+BNW.dice.rollWeaponAttack = async function ({ actor, weapon, defenseRating = null } = {}) {
+  if (!actor) {
+    console.warn('BNW | rollWeaponAttack requires an actor.');
+    return null;
+  }
+  if (!weapon) {
+    console.warn('BNW | rollWeaponAttack requires a weapon.');
+    return null;
+  }
+
+  const attackTrait = weapon.system?.attackTrait ?? '';
+  const attackSkill = weapon.system?.attackSkill ?? '';
+
+  if (!attackTrait) {
+    ui.notifications?.warn?.('Weapon must have an attack trait selected.');
+    return null;
+  }
+  if (!attackSkill) {
+    ui.notifications?.warn?.('Weapon must have an attack skill selected.');
+    return null;
+  }
+
+  // Prompt for defense rating if not provided
+  const defaultDefense = Number(defenseRating ?? 0) || 5;
+  const resolvedDefense = defenseRating ?? await BNW.dice.promptTargetNumber({
+    defaultTarget: defaultDefense,
+    traitLabel: game?.i18n?.localize?.('BNW.Dialog.DefenseRating') ?? 'Defense Rating',
+    skillLabel: weapon.name
+  });
+  if (resolvedDefense == null) return null;
+
+  // Use the existing rollTraitSkill function with the weapon's attack trait/skill
+  return BNW.dice.rollTraitSkill({
+    actor,
+    traitKey: attackTrait,
+    skillKey: attackSkill,
+    target: resolvedDefense,
+    bonusDice: 0,
+    label: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Attack') ?? 'Attack'}`,
+    sourceItem: weapon
+  });
+};
+
+/**
+ * Roll weapon damage
+ * @param {object} params
+ * @param {Actor} params.actor
+ * @param {Item} params.weapon
+ */
+BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
+  if (!actor) {
+    console.warn('BNW | rollWeaponDamage requires an actor.');
+    return null;
+  }
+  if (!weapon) {
+    console.warn('BNW | rollWeaponDamage requires a weapon.');
+    return null;
+  }
+
+  const damageType = weapon.system?.damageType ?? 'strength';
+  const damageModifier = Number(weapon.system?.damageModifier ?? 0);
+
+  // Get the damage trait (typically strength)
+  const systemData = actor.system ?? {};
+  const trait = foundry.utils.getProperty(systemData, `traits.${damageType}`) ?? null;
+  
+  if (!trait) {
+    ui.notifications?.warn?.(`Unknown damage type: ${damageType}`);
+    return null;
+  }
+
+  const traitValue = Number(trait?.value ?? 0);
+  let pool = Math.max(traitValue, 1);
+
+  const formula = `${pool}d6x=6`;
+  let roll = new Roll(formula);
+
+  try {
+    roll = await roll.evaluate();
+  } catch (error) {
+    console.error('BNW | Failed to evaluate damage roll', error);
+    ui.notifications?.error?.('Failed to evaluate damage roll.');
+    return null;
+  }
+
+  const diceResults = [];
+
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+
+      runningTotal += value;
+
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        runningTotal = 0;
+      }
+    }
+
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+    }
+  }
+
+  if (!diceResults.length) {
+    diceResults.push(0);
+  }
+
+  const highest = Math.max(...diceResults);
+  const totalDamage = highest + damageModifier;
+
+  const data = {
+    actorName: actor.name,
+    weaponName: weapon.name,
+    traitLabel: trait?.label ?? damageType,
+    pool,
+    dice: diceResults,
+    highest,
+    damageModifier,
+    totalDamage,
+    title: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Damage') ?? 'Damage'}`
+  };
+
+  // Create a simple chat message for damage
+  const content = `
+    <div class="bnw dice-roll damage-roll">
+      <div class="roll-header">
+        <h3>${data.weaponName}</h3>
+        <span class="roll-type">${game?.i18n?.localize?.('BNW.Roll.Damage') ?? 'Damage'}</span>
+      </div>
+      <div class="roll-content">
+        <div class="dice-results">
+          <strong>${game?.i18n?.localize?.('BNW.Label.Highest') ?? 'Highest'}:</strong> ${highest}
+          ${damageModifier !== 0 ? ` + ${damageModifier}` : ''}
+        </div>
+        <div class="roll-total">
+          <strong>Total Damage:</strong> ${totalDamage}
+        </div>
+        <div class="roll-details">
+          <em>${data.traitLabel} (${pool}d6): [${diceResults.join(', ')}]</em>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: data.title,
+    content,
+    flags: {
+      bravenewworld: {
+        weaponId: weapon.id,
+        damageType,
+        damageModifier,
+        highest,
+        totalDamage,
+        pool
+      }
+    }
+  });
+};

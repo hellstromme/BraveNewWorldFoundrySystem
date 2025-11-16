@@ -138,6 +138,8 @@
       "system": {
         "defensiveBonus": 0,
         "quickness": 0,
+        "attackTrait": "strength",
+        "attackSkill": "brawl",
         "damageType": "strength",
         "damageModifier": 0,
         "cost": 0,
