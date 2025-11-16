@@ -1,35 +1,36 @@
-const BNW_DEFAULT_TRAIT_KEYS = Object.freeze(['strength', 'speed', 'smarts', 'spirit']);
-
-const BNW_DEFAULT_TRAIT_LABELS = Object.freeze({
-  strength: 'Strength',
-  speed: 'Speed',
-  smarts: 'Smarts',
-  spirit: 'Spirit'
-});
-
-const BNW_DEFAULT_SKILLS = Object.freeze({
-  athletics: { label: 'Athletics', trait: 'strength', value: 2 },
-  brawl: { label: 'Brawl', trait: 'strength', value: 2 },
-  might: { label: 'Might', trait: 'strength', value: 2 },
-  stealth: { label: 'Stealth', trait: 'speed', value: 2 },
-  investigation: { label: 'Investigation', trait: 'smarts', value: 2 },
-  knowledge: { label: 'Knowledge', trait: 'smarts', value: 2 },
-  science: { label: 'Science', trait: 'smarts', value: 2 },
-  technology: { label: 'Technology', trait: 'smarts', value: 2 },
-  leadership: { label: 'Leadership', trait: 'spirit', value: 2 },
-  persuasion: { label: 'Persuasion', trait: 'spirit', value: 2 },
-  streetwise: { label: 'Streetwise', trait: 'spirit', value: 2 },
-  willpower: { label: 'Willpower', trait: 'spirit', value: 2 }
-});
-
-
-
 Hooks.once('init', async function () {
   console.log('BNW | Initializing Brave New World system');
 
+  // Register trait configuration setting
+  game.settings.register('bravenewworld', 'traits', {
+    name: "BNW.Settings.Traits.Name",
+    hint: "BNW.Settings.Traits.Hint",
+    scope: "world",
+    config: false,  // Use custom menu instead
+    type: Object,
+    default: {
+      strength: { label: "Strength", dice: 3, default: 0 },
+      speed: { label: "Speed", dice: 3, default: 0 },
+      smarts: { label: "Smarts", dice: 3, default: 0 },
+      spirit: { label: "Spirit", dice: 3, default: 0 }
+    },
+    onChange: (value) => {
+      CONFIG.BNW.traits = value;
+    }
+  });
+
+  // Register settings menu for trait configuration
+  game.settings.registerMenu('bravenewworld', 'traitConfig', {
+    name: "BNW.Settings.Traits.MenuName",
+    label: "BNW.Settings.Traits.MenuLabel",
+    hint: "BNW.Settings.Traits.MenuHint",
+    icon: "fas fa-cogs",
+    type: BraveNewWorldTraitConfig,
+    restricted: true  // Only GMs can access
+  });
+
   CONFIG.BNW = CONFIG.BNW ?? {};
-  CONFIG.BNW.traits = CONFIG.BNW.traits ?? Array.from(BNW_DEFAULT_TRAIT_KEYS);
-  CONFIG.BNW.defaultSkills = CONFIG.BNW.defaultSkills ?? BNW_DEFAULT_SKILLS;
+  CONFIG.BNW.traits = game.settings.get('bravenewworld', 'traits');
 
   CONFIG.Actor.typeLabels = CONFIG.Actor.typeLabels ?? {};
   CONFIG.Actor.typeLabels.delta = game.i18n.localize('BNW.ActorType.Delta');
@@ -38,6 +39,8 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.power = game.i18n.localize('BNW.ItemType.Power');
   CONFIG.Item.typeLabels.trick = game.i18n.localize('BNW.ItemType.Trick');
   CONFIG.Item.typeLabels.quirk = game.i18n.localize('BNW.ItemType.Quirk');
+  CONFIG.Item.typeLabels.closeCombatWeapon = game.i18n.localize('BNW.ItemType.CloseCombatWeapon');
+  CONFIG.Item.typeLabels.skill = game.i18n.localize('BNW.ItemType.Skill');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -61,6 +64,14 @@ Hooks.once('init', async function () {
     });
   }
 
+  // Add helper to filter skills by trait
+  if (!Handlebars.helpers.filterSkillsByTrait) {
+    Handlebars.registerHelper('filterSkillsByTrait', (skills, traitKey) => {
+      if (!Array.isArray(skills)) return [];
+      return skills.filter(s => s.system?.trait === traitKey);
+    });
+  }
+
   const systemBasePath = game.system?.path ?? `systems/${game.system.id}`;
   CONFIG.BNW.systemBasePath = systemBasePath;
   CONFIG.BNW.templatePath = `${systemBasePath}/templates`;
@@ -74,6 +85,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/actors/parts/powers.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/tricks.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/quirks.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/weapons.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/notes.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet-v2.hbs`,
@@ -81,6 +93,8 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/trick-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/close-combat-weapon-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/skill-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`
   ];
 
@@ -125,12 +139,62 @@ Hooks.once('init', async function () {
     makeDefault: true,
     label: "BNW.Sheet.Item.Quirk.V2"
   });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldCloseCombatWeaponSheetV2, {
+    types: ['closeCombatWeapon'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.CloseCombatWeapon.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldSkillSheetV2, {
+    types: ['skill'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Skill.V2"
+  });
 });
 
 Hooks.once('ready', async function () {
   game.bnw = game.bnw ?? {};
   game.bnw.dice = BNW.dice;
   console.log('BNW | Ready');
+});
+
+/**
+ * Initialize default actor data when a new actor is created
+ */
+Hooks.on('preCreateActor', async (actor, data, options, userId) => {
+  console.log('BNW | preCreateActor hook - Initializing new actor data');
+  
+  const updates = {};
+  
+  // Initialize traits if they don't exist
+  if (!actor.system.traits || Object.keys(actor.system.traits).length === 0) {
+    console.log('BNW | Initializing traits for new actor');
+    const traits = {};
+    for (const [key, config] of Object.entries(CONFIG.BNW.traits)) {
+      traits[key] = { dice: config.dice, default: config.default };
+    }
+    updates['system.traits'] = traits;
+  }
+  
+  // Initialize wounds if they don't exist
+  if (!actor.system.wounds) {
+    console.log('BNW | Initializing wounds for new actor');
+    updates['system.wounds'] = {
+      head: 0,
+      leftArm: 0,
+      rightArm: 0,
+      torso: 0,
+      leftLeg: 0,
+      rightLeg: 0
+    };
+  }
+  
+  // Apply initialization data
+  if (Object.keys(updates).length > 0) {
+    actor.updateSource(updates);
+    console.log('BNW | Initialized new actor with default data:', updates);
+  }
 });
 
 /**

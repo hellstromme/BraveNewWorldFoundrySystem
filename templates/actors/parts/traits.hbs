@@ -2,47 +2,63 @@
   {{#each traits as |trait|}}
     <section class="trait-card" data-trait="{{trait.key}}">
       <header class="trait-header">
-        <input class="trait-label" type="text" name="system.traits.{{trait.key}}.label" value="{{trait.label}}" />
-        <div class="trait-value">
-          <span>{{localize 'BNW.Label.TraitDice'}}</span>
-          <input type="number" name="system.traits.{{trait.key}}.value" value="{{trait.value}}" min="0" />
+        <h3>{{trait.label}}</h3>
+        <div class="trait-values">
+          <label>
+            <span>{{localize 'BNW.Label.TraitDice'}}</span>
+            <input type="number" name="system.traits.{{trait.key}}.dice" value="{{trait.dice}}" min="1" />
+          </label>
+          <label>
+            <span>{{localize 'BNW.Label.DefaultBonus'}}</span>
+            <input type="number" name="system.traits.{{trait.key}}.default" value="{{trait.default}}" />
+          </label>
+          <button type="button" class="roll-default" data-action="rollSkill" data-trait="{{trait.key}}" title="{{localize 'BNW.Action.RollTrait'}}">
+            <i class="fas fa-dice-six"></i>
+          </button>
         </div>
       </header>
-      <table class="trait-skills">
-        <thead>
-          <tr>
-            <th>{{localize 'BNW.Label.Skill'}}</th>
-            <th>{{localize 'BNW.Label.Dice'}}</th>
-            <th>{{localize 'BNW.Label.Pool'}}</th>
-            <th class="roll-header">&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#if (hasEntries (lookup ../skillsByTrait trait.key))}}
-            {{#each (lookup ../skillsByTrait trait.key) as |skill|}}
-              <tr data-skill="{{skill.key}}">
-                <td class="skill-label">
-                  <input type="hidden" name="system.skills.{{skill.key}}.trait" value="{{skill.trait}}" />
-                  <input type="text" name="system.skills.{{skill.key}}.label" value="{{skill.label}}" />
-                </td>
-                <td class="skill-dice">
-                  <input type="number" name="system.skills.{{skill.key}}.value" value="{{skill.value}}" min="0" />
-                </td>
-                <td class="skill-pool">{{skill.pool}}</td>
-                <td class="skill-controls">
-                  <button type="button" data-action="rollSkill" data-trait="{{trait.key}}" data-skill="{{skill.key}}">
-                    <i class="fas fa-dice-six"></i>
-                  </button>
-                </td>
+      
+      <div class="trait-skills">
+        <div class="skill-header">
+          <h4>{{localize 'BNW.Label.Skills'}}</h4>
+          <button type="button" data-action="createItem" data-type="skill" data-trait="{{trait.key}}" title="{{localize 'BNW.Action.AddSkill'}}">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        
+        {{#if (hasEntries (filterSkillsByTrait ../skills trait.key))}}
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th>{{localize 'BNW.Label.Skill'}}</th>
+                <th>{{localize 'BNW.Label.Bonus'}}</th>
+                <th class="controls-header">&nbsp;</th>
               </tr>
-            {{/each}}
-          {{else}}
-            <tr>
-              <td colspan="4" class="empty">{{localize 'BNW.Label.NoSkills'}}</td>
-            </tr>
-          {{/if}}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {{#each (filterSkillsByTrait ../skills trait.key) as |skill|}}
+                <tr class="skill-row" data-item-id="{{skill.id}}">
+                  <td class="skill-name">{{skill.name}}</td>
+                  <td class="skill-bonus">+{{skill.system.bonus}}</td>
+                  <td class="skill-controls">
+                    <button type="button" data-action="rollSkill" data-trait="{{trait.key}}" data-skill-id="{{skill.id}}" title="{{localize 'BNW.Action.Roll'}}">
+                      <i class="fas fa-dice-six"></i>
+                    </button>
+                    <button type="button" data-action="editItem" data-item-id="{{skill.id}}" title="{{localize 'BNW.Action.Edit'}}">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" data-action="deleteItem" data-item-id="{{skill.id}}" title="{{localize 'BNW.Action.Delete'}}">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p class="empty">{{localize 'BNW.Label.NoSkills'}}</p>
+        {{/if}}
+      </div>
     </section>
   {{/each}}
 </div>

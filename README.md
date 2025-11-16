@@ -31,23 +31,29 @@ BraveNewWorldFoundrySystem brings the Brave New World tabletop roleplaying game 
 
 ### Delta character management
 
-- Dedicated Delta actor sheet with portrait, concept, demeanor, quote, and background fields organized in a responsive header layout.【F:templates/actors/delta-sheet.hbs†L1-L29】
-- Trait panels display customizable labels and dice ratings, with an auto-generated skills table per trait that summarizes current dice pools.【F:templates/actors/delta-sheet.hbs†L31-L71】
-- Tabs for **Traits & Skills**, **Powers**, and **Notes** keep long-form character information organized for play.【F:templates/actors/delta-sheet.hbs†L23-L89】
+- Dedicated Delta actor sheet with portrait, player name, hero name, code name, origin, affiliation, and background fields organized in a responsive header layout.
+- Trait panels display each trait's dice count and default bonus, with an auto-generated skills table per trait showing skill-specific bonuses.
+- Skills are managed as Item documents that can be created, edited, deleted, and reused across actors or stored in compendiums.
+- Tabs for **Traits & Skills**, **Powers**, **Tricks**, **Quirks**, and **Notes** keep long-form character information organized for play.
 
-### Powers and items
+### Powers, skills, and items
 
-- Power items capture summary text, activation type, cost, bonus dice, and associated trait/skill keys within a tailored item sheet.【F:templates/items/power-sheet.hbs†L1-L37】
-- Actor sheets list embedded powers with quick access to roll, edit, or delete controls plus at-a-glance dice bonuses.【F:templates/actors/delta-sheet.hbs†L73-L88】
-- A bundled item compendium (`bnw-items.db`) seeds campaigns with reusable Brave New World content.【F:system.json†L23-L32】
+- **Skill items** capture a skill name, associated trait, and bonus value. Skills are reusable Items that can be stored in compendiums.
+- **Power items** capture summary text, activation type, cost, bonus dice, and associated trait/skill selections within a tailored item sheet.
+- **Trick items** represent special techniques that may require a specific power to use.
+- **Quirk items** define character traits with positive or negative point costs, with a -10 negative quirk limit per character.
+- **Close-combat weapon items** define melee weapons with damage dice, associated skills, and special properties.
+- Actor sheets list embedded items with quick access to roll, edit, or delete controls plus at-a-glance dice bonuses.
+- A bundled item compendium (`bnw-items.db`) seeds campaigns with reusable Brave New World content.
 
 ### Dice and chat automation
 
-- `Roll Trait + Skill` buttons on the actor sheet launch automated dice pools for the selected trait/skill pair.【F:templates/actors/delta-sheet.hbs†L57-L71】【F:scripts/bnw-actor-sheet.js†L58-L79】
-- Players are prompted for a target number when one is not supplied, enabling on-the-fly tests that respect table difficulty decisions.【F:scripts/bnw-dice.js†L12-L39】
-- Dice pools total trait dice, skill dice, and any bonus dice (with a minimum pool of one die) before rolling and sending results to chat.【F:scripts/bnw-dice.js†L40-L86】
-- Chat cards highlight every die, the highest result, target number, success/failure state, and any bonus dice for clarity.【F:scripts/bnw-dice.js†L87-L121】【F:templates/chat/skill-roll-card.hbs†L1-L29】
-- `game.bnw.dice` exposes the rolling helpers for macro authors and module integrations.【F:scripts/main.js†L1-L31】
+- `Roll` buttons next to each skill on the actor sheet launch automated rolls combining trait dice and skill bonus.
+- Players are prompted for a target number when one is not supplied, enabling on-the-fly tests that respect table difficulty decisions.
+- Roll formula: `[Trait Dice]d6 + [Skill Bonus or Trait Default]` with exploding 6s, comparing highest die to target number.
+- Chat cards display the dice pool, individual die results (with exploding 6s), the highest result, target number, and success/failure state.
+- Power rolls automatically include configured bonus dice and associate the source item for automation hooks.
+- `game.bnw.dice` exposes the rolling helpers (`rollTraitSkill`, `promptTargetNumber`) for macro authors and module integrations.
 
 ### Localization support
 
@@ -55,19 +61,23 @@ BraveNewWorldFoundrySystem brings the Brave New World tabletop roleplaying game 
 
 ## Data entry workflow
 
-1. **Create a Delta actor.** The sheet automatically seeds trait definitions using the configured `body`, `mind`, and `spirit` categories so you can immediately set dice ratings.【F:scripts/main.js†L1-L14】【F:scripts/bnw-actor-sheet.js†L18-L40】
-2. **Set trait labels and dice.** Edit the trait headings and dice inputs in each trait card to match your character concept.【F:templates/actors/delta-sheet.hbs†L31-L49】
-3. **Define skills per trait.** Populate `system.skills` entries (via the sheet's fields or the actor's data sidebar) with labels, dice, and linked trait keys; each saved entry appears within the relevant trait table and shows its total pool.【F:scripts/bnw-actor-sheet.js†L41-L57】【F:templates/actors/delta-sheet.hbs†L50-L71】
-4. **Add and manage powers.** Use the **Add Power** control to create new power items, then fill out activation, cost, bonus dice, and trait/skill associations on the item sheet.【F:templates/actors/delta-sheet.hbs†L73-L82】【F:templates/items/power-sheet.hbs†L9-L37】
-5. **Roll during play.** Trigger trait/skill checks or power rolls directly from the sheet to prompt for target numbers, roll pools, and broadcast formatted results to chat.【F:scripts/bnw-actor-sheet.js†L58-L97】【F:scripts/bnw-dice.js†L12-L121】
-6. **Track notes and background.** Record freeform information on the Notes tab for quick reference at the table.【F:templates/actors/delta-sheet.hbs†L85-L89】
+1. **Create a Delta actor.** The sheet automatically initializes traits with default dice counts (3) and default bonuses (0) for Strength, Speed, Smarts, and Spirit.
+2. **Set trait dice and default bonus.** Edit the dice count and default bonus (used when no skill applies) in each trait panel to match your character concept.
+3. **Add skills.** Click **Add Skill** next to any trait to create a new skill Item. Fill in the skill name, select the associated trait, and set the skill bonus. Skills appear in the trait's table and can be rolled directly.
+4. **Add powers, tricks, and quirks.** Use the **Add Power**, **Add Trick**, and **Add Quirk** buttons on their respective tabs to create new items. Fill out activation types, costs, requirements, and trait/skill associations on the item sheets.
+5. **Add weapons.** Use the **Add Weapon** button to create close-combat weapons with damage, skills, and special properties.
+6. **Roll during play.** Click the roll button next to any skill to prompt for a target number, roll `[trait dice]d6 + [skill bonus]`, and broadcast formatted results to chat. Power rolls automatically include bonus dice.
+7. **Track notes and background.** Record freeform information on the Notes tab for quick reference at the table.
 
 ## Brave New World mechanics in Foundry
 
-- Dice pools combine trait, skill, and optional bonus dice and always roll at least one d6, mirroring Brave New World's resolution approach.【F:scripts/bnw-dice.js†L58-L77】
-- The system compares the highest die to the chosen target number to determine success or failure, echoing the tabletop rule of beating a difficulty.【F:scripts/bnw-dice.js†L78-L111】【F:templates/chat/skill-roll-card.hbs†L12-L24】
-- Power rolls automatically include their configured bonus dice and preserve the source item in chat message flags for downstream automation or logging.【F:scripts/bnw-actor-sheet.js†L80-L97】【F:scripts/bnw-dice.js†L99-L118】
-- Activation types (Standard, Quick, Free) and costs on power items provide reminders of Brave New World's action economy during sessions.【F:templates/items/power-sheet.hbs†L13-L27】
+- **Traits** are configured as system settings with dice counts and default bonuses. Each actor stores their personalized trait dice and defaults.
+- **Skills** are Item documents linked to a specific trait, with a bonus value. This allows skills to be shared via compendiums and reused across characters.
+- **Roll formula**: `[Trait Dice]d6 + [Skill Bonus or Trait Default]` with exploding 6s (`x=6`), always rolling at least one die.
+- The system compares the highest die result to the target number to determine success or failure, mirroring the tabletop resolution system.
+- Power rolls automatically include their configured bonus dice and preserve the source item in chat message flags for downstream automation or logging.
+- Activation types (Standard, Quick, Free) and costs on power items provide reminders of Brave New World's action economy during sessions.
+- Quirks enforce a -10 negative cost limit per character, preventing excessive negative quirk stacking.
 
 ## Contributor and development guide
 

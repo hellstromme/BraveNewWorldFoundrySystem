@@ -23,6 +23,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     actions: {
       rollSkill: BraveNewWorldActorSheetV2.prototype._onRollSkill,
       rollPower: BraveNewWorldActorSheetV2.prototype._onRollPower,
+      rollWeaponAttack: BraveNewWorldActorSheetV2.prototype._onRollWeaponAttack,
+      rollWeaponDamage: BraveNewWorldActorSheetV2.prototype._onRollWeaponDamage,
       createItem: BraveNewWorldActorSheetV2.prototype._onCreateItem,
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
@@ -30,8 +32,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab
     },
     form: {
-      handler: BraveNewWorldActorSheetV2.prototype._onSubmitForm,
-      submitOnChange: true
+      submitOnChange: false
     },
     dragDrop: [
       { dragSelector: '.item[data-item-id]', dropSelector: 'form' }
@@ -59,24 +60,38 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     super._attachFrameListeners();
     
     // Listen for embedded document changes to trigger re-render
-    Hooks.on('createItem', this._onEmbeddedDocumentChange.bind(this));
-    Hooks.on('updateItem', this._onEmbeddedDocumentChange.bind(this));
-    Hooks.on('deleteItem', this._onEmbeddedDocumentChange.bind(this));
+    // Only re-render on create and delete, not on update
+    Hooks.on('createItem', this._onEmbeddedDocumentCreate.bind(this));
+    Hooks.on('deleteItem', this._onEmbeddedDocumentDelete.bind(this));
   }
 
   /**
-   * Handle embedded document changes
-   * @param {Item} item - The item that changed
-   * @param {object} changes - The changes made
-   * @param {object} options - Update options
+   * Handle embedded document creation
+   * @param {Item} item - The item that was created
+   * @param {object} options - Create options
    * @param {string} userId - The user who made the change
    * @private
    */
-  _onEmbeddedDocumentChange(item, changes, options, userId) {
+  _onEmbeddedDocumentCreate(item, options, userId) {
     // Only re-render if this item belongs to our actor
     if (item.parent?.id === this.document.id) {
-      console.log('BNW | Item changed, re-rendering:', item.name);
-      this.render(true, { parts: ['form'] });
+      console.log('BNW | Item created, re-rendering actor sheet');
+      this.render(false);
+    }
+  }
+
+  /**
+   * Handle embedded document deletion
+   * @param {Item} item - The item that was deleted
+   * @param {object} options - Delete options
+   * @param {string} userId - The user who made the change
+   * @private
+   */
+  _onEmbeddedDocumentDelete(item, options, userId) {
+    // Only re-render if this item belongs to our actor
+    if (item.parent?.id === this.document.id) {
+      console.log('BNW | Item deleted, re-rendering actor sheet');
+      this.render(false);
     }
   }
 
@@ -126,28 +141,30 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     
     console.log('BNW Actor | Preparing context', {
       actorName: this.document.name,
-      systemData: context.system,
       hasTraits: !!context.system.traits,
       hasSkills: !!context.system.skills
     });
     
+    // Initialize defaults in the cloned context only (no saves)
     this._initializeDefaults(context.system);
     
+    // Prepare data for display
     context.traits = this._prepareTraits(context.system.traits);
-    context.skillsByTrait = this._prepareSkills(context.system.skills, context.traits);
-    
     context.powers = this.document.items.filter(i => i.type === 'power');
     context.tricks = this.document.items.filter(i => i.type === 'trick');
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
-    
+    context.weapons = this.document.items.filter(i => i.type === 'closeCombatWeapon');
+    context.skills = this.document.items.filter(i => i.type === 'skill');
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
+    context.woundsData = this._prepareWounds(context.system);
     
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
-      skillsCount: Object.keys(context.skillsByTrait).length,
+      skillsCount: context.skills.length,
       powersCount: context.powers.length,
       tricksCount: context.tricks.length,
       quirksCount: context.quirks.length,
+      weaponsCount: context.weapons.length,
       totalItems: this.document.items.size
     });
     
@@ -159,11 +176,13 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
 
   /**
-   * Initialize default values for system data
-   * @param {object} system
+   * Initialize default values for system data in the context clone
+   * This does NOT save to the database - only provides defaults for rendering
+   * @param {object} system - The cloned system data
    * @private
    */
   _initializeDefaults(system) {
+    // Initialize details with empty defaults
     system.details ??= {};
     const defaultDetails = {
       playerName: '',
@@ -175,21 +194,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     };
     foundry.utils.mergeObject(system.details, defaultDetails, { insertKeys: false });
     
+    // Initialize traits from config
     system.traits ??= {};
-    system.skills ??= {};
+    for (const [key, config] of Object.entries(CONFIG.BNW.traits)) {
+      if (!system.traits[key]) {
+        system.traits[key] = { dice: config.dice, default: config.default };
+      }
+    }
+    
+    // Initialize wounds - only add missing properties, don't overwrite existing values
+    system.wounds ??= {};
+    const woundLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
+    for (const location of woundLocations) {
+      // Only set to 0 if undefined - preserve existing values
+      if (system.wounds[location] === undefined) {
+        system.wounds[location] = 0;
+      }
+    }
+    
     system.notes ??= '';
-    
-    const defaultSkills = CONFIG.BNW?.defaultSkills ?? {};
-    if (foundry.utils.isEmpty(system.skills) && !foundry.utils.isEmpty(defaultSkills)) {
-      system.skills = foundry.utils.deepClone(defaultSkills);
-    }
-    
-    for (const traitKey of CONFIG.BNW?.traits ?? []) {
-      system.traits[traitKey] ??= { 
-        label: this._capitalize(traitKey), 
-        value: 0 
-      };
-    }
   }
 
   /**
@@ -199,54 +222,17 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   _prepareTraits(traits = {}) {
-    return Object.entries(traits).map(([key, data]) => ({
-      key,
-      label: data?.label ?? this._capitalize(key),
-      value: Number(data?.value ?? 0)
-    }));
-  }
-
-  /**
-   * Prepare skill data grouped by trait
-   * @param {object} skills
-   * @param {Array} traits
-   * @returns {object}
-   * @private
-   */
-  _prepareSkills(skills = {}, traits = []) {
-    const groups = {};
-    for (const trait of traits) {
-      groups[trait.key] = [];
-    }
-
-    const defaultTraitKey = traits[0]?.key ?? CONFIG.BNW?.traits?.[0] ?? 'strength';
-
-    for (const [key, data] of Object.entries(skills)) {
-      const traitKey = data?.trait ?? defaultTraitKey;
-      const trait = traits.find(t => t.key === traitKey) ?? { key: traitKey, value: 0 };
-      const traitValue = Number(trait?.value ?? 0);
-      const skillValue = Number(data?.value ?? 0);
-      const pool = Math.max(traitValue + skillValue, 1);
-      
-      const skillData = {
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    
+    return Object.entries(configTraits).map(([key, config]) => {
+      const actorTrait = traits[key] ?? {};
+      return {
         key,
-        label: data?.label ?? this._capitalize(key),
-        trait: traitKey,
-        value: skillValue,
-        pool
+        label: config.label ?? this._capitalize(key),
+        dice: Number(actorTrait?.dice ?? config.dice ?? 3),
+        default: Number(actorTrait?.default ?? config.default ?? 0)
       };
-
-      if (!groups[traitKey]) groups[traitKey] = [];
-      groups[traitKey].push(skillData);
-    }
-
-    for (const trait of traits) {
-      groups[trait.key] = (groups[trait.key] ?? []).sort((a, b) => 
-        a.label.localeCompare(b.label)
-      );
-    }
-
-    return groups;
+    });
   }
 
   /**
@@ -264,6 +250,44 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       }
     }
     return Math.abs(total);
+  }
+
+  /**
+   * Prepare wounds data for rendering
+   * @param {object} system
+   * @returns {Array}
+   * @private
+   */
+  _prepareWounds(system) {
+    // Get strength dice value for max wounds
+    const strengthDice = Number(system.traits?.strength?.dice ?? 3);
+    
+    // Initialize wounds if not present
+    system.wounds ??= {};
+    
+    // Define hit locations with their localization keys
+    const hitLocations = [
+      { key: 'head', labelKey: 'BNW.HitLocation.Head' },
+      { key: 'leftArm', labelKey: 'BNW.HitLocation.LeftArm' },
+      { key: 'rightArm', labelKey: 'BNW.HitLocation.RightArm' },
+      { key: 'torso', labelKey: 'BNW.HitLocation.Torso' },
+      { key: 'leftLeg', labelKey: 'BNW.HitLocation.LeftLeg' },
+      { key: 'rightLeg', labelKey: 'BNW.HitLocation.RightLeg' }
+    ];
+    
+    return hitLocations.map(location => {
+      // Get current wounds, ensure it's a number, and cap at max
+      let current = Number(system.wounds[location.key] ?? 0);
+      current = Math.min(Math.max(0, current), strengthDice);
+      
+      return {
+        key: location.key,
+        label: game.i18n.localize(location.labelKey),
+        current: current,
+        max: strengthDice,
+        isMaxed: current >= strengthDice
+      };
+    });
   }
 
   /**
@@ -288,12 +312,12 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   async _onRollSkill(event, target) {
-    const { trait, skill } = target.dataset;
+    const { trait, skillId } = target.dataset;
     
     await BNW.dice.rollTraitSkill({
       actor: this.document,
       traitKey: trait,
-      skillKey: skill
+      skillId: skillId
     });
   }
 
@@ -309,15 +333,47 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     if (!item) return;
 
     const traitKey = item.system?.trait ?? '';
-    const skillKey = item.system?.skill ?? '';
+    const skillId = item.system?.skill ?? '';
 
     await BNW.dice.rollTraitSkill({
       actor: this.document,
       traitKey,
-      skillKey,
+      skillId,
       bonusDice: Number(item.system?.dice ?? 0),
       label: item.name,
       sourceItem: item
+    });
+  }  /**
+   * Handle weapon attack roll
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onRollWeaponAttack(event, target) {
+    const { itemId } = target.dataset;
+    const weapon = this.document.items.get(itemId);
+    if (!weapon) return;
+
+    await BNW.dice.rollWeaponAttack({
+      actor: this.document,
+      weapon: weapon
+    });
+  }
+
+  /**
+   * Handle weapon damage roll
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onRollWeaponDamage(event, target) {
+    const { itemId } = target.dataset;
+    const weapon = this.document.items.get(itemId);
+    if (!weapon) return;
+
+    await BNW.dice.rollWeaponDamage({
+      actor: this.document,
+      weapon: weapon
     });
   }
 
@@ -328,12 +384,17 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @private
    */
   async _onCreateItem(event, target) {
-    const { type } = target.dataset;
+    const { type, trait } = target.dataset;
     
     const itemData = {
       name: `New ${type.capitalize()}`,
       type: type
     };
+    
+    // If creating a skill with a specific trait, set it
+    if (type === 'skill' && trait) {
+      itemData.system = { trait: trait };
+    }
     
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     
@@ -444,37 +505,87 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
 
   /**
-   * Handle form submission
-   * In V2, the parameters are: formConfig, event
-   * @param {object} formConfig - Form configuration options
-   * @param {Event} event - The form change event
-   * @private
+   * Handle form input changes - only submit for specific fields
+   * @override
    */
-  async _onSubmitForm(formConfig, event) {
-    // Get the form element from the event
-    const form = event.currentTarget?.tagName === 'FORM' ? event.currentTarget : event.currentTarget?.closest('form');
+  _onChangeForm(formConfig, event) {
+    super._onChangeForm(formConfig, event);
     
-    if (!form) {
-      console.warn('BNW | No form element found in event');
-      return;
+    // Get the input that changed
+    const target = event.target;
+    
+    // Only auto-submit for wound inputs and other specific fields
+    // Don't submit for tab changes or other UI interactions
+    if (target?.name?.startsWith('system.wounds.') || 
+        target?.name?.startsWith('system.traits.') ||
+        target?.name?.startsWith('system.details.')) {
+      
+      console.log('BNW | Auto-submitting form for:', target.name);
+      
+      // Debounce the submission slightly to avoid rapid consecutive updates
+      if (this._submitTimeout) {
+        clearTimeout(this._submitTimeout);
+      }
+      
+      this._submitTimeout = setTimeout(() => {
+        this.submit();
+        this._submitTimeout = null;
+      }, 300);
+    }
+  }
+
+  /**
+   * Prepare submit data - override to handle wounds in hidden tabs
+   * @override
+   */
+  _prepareSubmitData(event, form, formData) {
+    // Get the expanded object from FormData
+    const submitData = super._prepareSubmitData(event, form, formData);
+    
+    // Manually collect wound values from ALL tabs (including hidden ones)
+    // because display:none prevents them from being in FormData
+    const woundLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
+    
+    // Ensure wounds object exists in submitData
+    if (!submitData.system) submitData.system = {};
+    if (!submitData.system.wounds) submitData.system.wounds = {};
+    
+    for (const location of woundLocations) {
+      const input = form.querySelector(`input[name="system.wounds.${location}"]`);
+      if (input) {
+        const value = Number(input.value);
+        submitData.system.wounds[location] = value;
+      }
     }
     
-    // Extract form data
-    const formData = new FormData(form);
-    const submitData = {};
-    for (const [key, value] of formData.entries()) {
-      submitData[key] = value;
+    // Validate and cap wounds at maximum (strength dice)
+    const strengthDice = Number(this.document.system.traits?.strength?.dice ?? 3);
+    for (const location of woundLocations) {
+      if (submitData.system.wounds[location] !== undefined) {
+        let wounds = Number(submitData.system.wounds[location]);
+        // Cap at max and ensure non-negative
+        submitData.system.wounds[location] = Math.min(Math.max(0, wounds), strengthDice);
+      }
     }
     
-    console.log('BNW Actor | Submitting form data:', submitData);
+    console.log('BNW Actor | Prepared submit data with wounds:', submitData.system?.wounds);
     
-    // Expand dotted notation to nested object
-    const expanded = foundry.utils.expandObject(submitData);
-    
-    // Update without rendering
-    await this.document.update(expanded, { render: false });
-    
-    console.log('BNW Actor | Document updated (no render)');
+    return submitData;
+  }
+
+  /**
+   * Submit a document update based on the processed form data.
+   * This method is called automatically after _prepareSubmitData.
+   * @param {SubmitEvent} event - The originating form submission event
+   * @param {HTMLFormElement} form - The form element that was submitted
+   * @param {object} submitData - Processed and validated form data
+   * @protected
+   * @override
+   */
+  async _processSubmitData(event, form, submitData) {
+    console.log('BNW Actor | _processSubmitData called with:', submitData.system?.wounds);
+    await this.document.update(submitData);
+    console.log('BNW Actor | Document updated successfully');
   }
 
   /* -------------------------------------------- */

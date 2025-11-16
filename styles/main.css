@@ -222,6 +222,66 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.bnw.sheet .trait-header h3 {
+  flex: 1;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.2rem;
+  color: var(--bnw-primary-red);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+.bnw.sheet .trait-values {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bnw.sheet .trait-values label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bnw.sheet .trait-values label span {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--bnw-accent-dark);
+}
+
+.bnw.sheet .trait-values input {
+  width: 50px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: white;
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-primary-blue);
+  padding: 0.25rem;
+}
+
+.bnw.sheet .trait-values button.roll-default {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.bnw.sheet .trait-values button.roll-default:hover {
+  background: var(--bnw-accent-yellow);
+  color: var(--bnw-text-bold);
+  transform: scale(1.1);
 }
 
 .bnw.sheet .trait-label {
@@ -265,6 +325,125 @@
   background: white;
   border: 2px solid var(--bnw-text-bold);
   color: var(--bnw-primary-blue);
+}
+
+.bnw.sheet .trait-skills {
+  margin-top: 0.5rem;
+}
+
+.bnw.sheet .skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  background: var(--bnw-accent-dark);
+  border: 2px solid var(--bnw-text-bold);
+  border-bottom: none;
+}
+
+.bnw.sheet .skill-header h4 {
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.bnw.sheet .skill-header button {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.bnw.sheet .skill-header button:hover {
+  background: var(--bnw-accent-yellow);
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--bnw-text-bold);
+  font-size: 0.85rem;
+}
+
+.bnw.sheet .skills-table th,
+.bnw.sheet .skills-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--bnw-text-light);
+}
+
+.bnw.sheet .skills-table th {
+  background: var(--bnw-accent-light);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--bnw-text-bold);
+  padding: 0.35rem 0.5rem;
+}
+
+.bnw.sheet .skills-table tbody tr:hover {
+  background: rgba(52, 152, 219, 0.15);
+}
+
+.bnw.sheet .skills-table tbody tr {
+  border: 1px solid transparent;
+}
+
+.bnw.sheet .skills-table .skill-name {
+  font-weight: 600;
+  color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .skills-table .skill-bonus {
+  text-align: center;
+  font-weight: 700;
+  color: var(--bnw-primary-blue);
+  width: 50px;
+}
+
+.bnw.sheet .skills-table .skill-controls {
+  text-align: right;
+  white-space: nowrap;
+  width: 110px;
+}
+
+.bnw.sheet .skills-table .skill-controls button {
+  background: transparent;
+  border: 1px solid var(--bnw-text-light);
+  color: var(--bnw-text-bold);
+  padding: 0.2rem 0.4rem;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bnw.sheet .skills-table .skill-controls button:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border-color: var(--bnw-text-bold);
+}
+
+.bnw.sheet .trait-skills p.empty {
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--bnw-text-light);
+  font-style: italic;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  margin: 0;
 }
 
 .bnw.sheet .trait-skills {
@@ -412,6 +591,78 @@
 }
 
 .bnw.sheet .powers-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Tricks list item controls */
+.bnw.sheet .tricks-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .tricks-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .tricks-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Quirks list item controls */
+.bnw.sheet .quirks-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .quirks-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .quirks-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Weapons list item controls */
+.bnw.sheet .weapons-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .weapons-list .item .item-controls a {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.bnw.sheet .weapons-list .item .item-controls a:hover {
   background: var(--bnw-primary-blue);
   color: white;
   transform: translate(-1px, -1px);
@@ -669,6 +920,153 @@
   padding: 0.5rem;
 }
 
+/* Wounds Section Styling */
+.bnw.sheet .wounds-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+}
+
+.bnw.sheet .wounds-section h3 {
+  margin: 0 0 1rem 0;
+  font-weight: 900;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--bnw-primary-red);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .wounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.bnw.sheet .wound-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.bnw.sheet .wound-location label {
+  flex: 1;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  margin: 0;
+  color: var(--bnw-accent-dark);
+}
+
+.bnw.sheet .wound-location input[type="number"] {
+  width: 60px;
+  padding: 0.25rem;
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 3px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: white;
+  color: var(--bnw-primary-blue);
+}
+
+/* Maxed wounds styling - red color */
+.bnw.sheet .wound-location.maxed {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.2);
+}
+
+.bnw.sheet .wound-location.maxed label {
+  color: #c0392b;
+}
+
+.bnw.sheet .wound-location.maxed input[type="number"] {
+  border-color: #e74c3c;
+  color: #c0392b;
+  background: rgba(231, 76, 60, 0.1);
+  font-weight: 900;
+}
+
+/* Weapons styling - matches quirks */
+.bnw.sheet .weapons-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .weapons-list .item {
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  padding: 0.75rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .weapons-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .weapons-list .item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bnw.sheet .weapons-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .weapons-list .item .item-name h4 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats .stat {
+  font-size: 0.85rem;
+  color: var(--bnw-text-bold);
+  font-weight: 600;
+}
+
+.bnw.sheet .weapons-list .item .weapon-stats .stat strong {
+  color: var(--bnw-accent-dark);
+  font-weight: 700;
+}
+
 .bnw.sheet .item-controls.header {
   display: flex;
   justify-content: space-between;
@@ -924,4 +1322,167 @@
   color: white;
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Trait Configuration Dialog */
+.bnw.trait-config {
+  font-family: var(--bnw-font-body);
+}
+
+.bnw.trait-config .window-content {
+  background: var(--bnw-bg);
+  padding: 1rem;
+}
+
+.bnw-trait-config-form .notes {
+  background: var(--bnw-accent-light);
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--bnw-text-bold);
+  border-radius: 4px;
+}
+
+.bnw-trait-config-form .traits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--bnw-text-light);
+  border-radius: 4px;
+}
+
+.bnw-trait-config-form .trait-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 80px 80px 40px;
+  gap: 0.5rem;
+  align-items: end;
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.bnw-trait-config-form .trait-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bnw-trait-config-form .trait-field label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--bnw-text-bold);
+}
+
+.bnw-trait-config-form .trait-field input {
+  padding: 0.5rem;
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 3px;
+  font-family: var(--bnw-font-body);
+  font-size: 0.9rem;
+}
+
+.bnw-trait-config-form .trait-field input:disabled {
+  background: var(--bnw-accent-light);
+  color: var(--bnw-text-light);
+  cursor: not-allowed;
+}
+
+.bnw-trait-config-form .trait-field-small input {
+  text-align: center;
+  font-weight: 700;
+}
+
+.bnw-trait-config-form button[data-action="deleteTrait"] {
+  background: var(--bnw-primary-red);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  height: 38px;
+  align-self: end;
+}
+
+.bnw-trait-config-form button[data-action="deleteTrait"]:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.bnw-trait-config-form .form-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.bnw-trait-config-form button[data-action="addTrait"] {
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.bnw-trait-config-form button[data-action="addTrait"]:hover {
+  background: var(--bnw-accent-yellow);
+  color: var(--bnw-text-bold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.bnw-trait-config-form .sheet-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--bnw-text-light);
+}
+
+.bnw-trait-config-form .sheet-footer button {
+  flex: 1;
+  background: var(--bnw-primary-blue);
+  color: white;
+  border: 2px solid var(--bnw-text-bold);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bnw-trait-config-form button[data-action="save"] {
+  background: var(--bnw-primary-green);
+}
+
+.bnw-trait-config-form button[data-action="save"]:hover {
+  background: #27ae60;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.bnw-trait-config-form button[data-action="cancel"] {
+  background: var(--bnw-text-light);
+  color: var(--bnw-text-bold);
+}
+
+.bnw-trait-config-form button[data-action="cancel"]:hover {
+  background: var(--bnw-text-bold);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
 }

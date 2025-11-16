@@ -1,0 +1,59 @@
+{{!-- Wounds Section --}}
+<div class="wounds-section">
+  <h3>{{localize 'BNW.Label.Wounds'}}</h3>
+  <div class="wounds-grid">
+    {{#each woundsData as |wound|}}
+      <div class="wound-location {{#if wound.isMaxed}}maxed{{/if}}">
+        <label for="wound-{{wound.key}}">{{wound.label}} ({{wound.max}}):</label>
+        <input 
+          type="number" 
+          id="wound-{{wound.key}}"
+          name="system.wounds.{{wound.key}}" 
+          value="{{wound.current}}" 
+          min="0" 
+          max="{{wound.max}}" 
+          data-dtype="Number" />
+      </div>
+    {{/each}}
+  </div>
+</div>
+
+{{!-- Weapons Section --}}
+<div class="item-controls header">
+  <button type="button" data-action="createItem" data-type="closeCombatWeapon">
+    <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddWeapon'}}
+  </button>
+</div>
+<ol class="weapons-list">
+  {{#each weapons as |item|}}
+    <li class="item weapon flexrow" data-item-id="{{item.id}}">
+      <div class="item-name">
+        <h4>{{item.name}}</h4>
+        <div class="weapon-stats">
+          <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.system.attackTrait}} / {{item.system.attackSkill}}</span>
+          <span class="stat"><strong>{{localize 'BNW.Label.DefensiveBonus'}}:</strong> {{item.system.defensiveBonus}}</span>
+          <span class="stat"><strong>{{localize 'BNW.Label.Quickness'}}:</strong> {{item.system.quickness}}</span>
+          <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
+          <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
+          {{#if item.system.cost}}
+            <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+          {{/if}}
+        </div>
+      </div>
+      <div class="item-controls">
+        <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
+          <i class="fas fa-crosshairs"></i>
+        </a>
+        <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
+          <i class="fas fa-burst"></i>
+        </a>
+        <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+          <i class="fas fa-edit"></i>
+        </a>
+        <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+          <i class="fas fa-trash"></i>
+        </a>
+      </div>
+    </li>
+  {{/each}}
+</ol>

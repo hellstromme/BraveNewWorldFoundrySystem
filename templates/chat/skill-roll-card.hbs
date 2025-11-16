@@ -1,7 +1,16 @@
 <div class="bnw-roll-card">
   <header>
     <h2>{{title}}</h2>
-    <p class="subtitle">{{actorName}} &mdash; {{skillLabel}} ({{traitLabel}})</p>
+    <p class="subtitle">
+      {{actorName}} &mdash; 
+      {{traitLabel}} ({{traitDice}}d6)
+      {{#if skillLabel}}
+        + {{skillLabel}} (+{{skillBonus}})
+      {{/if}}
+      {{#if bonusDice}}
+        + {{bonusDice}} bonus dice
+      {{/if}}
+    </p>
   </header>
   <section class="dice-results">
     <div class="dice-list">
@@ -13,6 +22,16 @@
       <div>
         <span class="label">{{localize 'BNW.Label.Highest'}}</span>
         <span class="value">{{highest}}</span>
+      </div>
+      {{#if totalBonus}}
+        <div>
+          <span class="label">{{localize 'BNW.Label.Bonus'}}</span>
+          <span class="value">+{{totalBonus}}</span>
+        </div>
+      {{/if}}
+      <div>
+        <span class="label">{{localize 'BNW.Label.Final'}}</span>
+        <span class="value">{{finalResult}}</span>
       </div>
       <div>
         <span class="label">{{localize 'BNW.Label.Target'}}</span>
@@ -27,9 +46,5 @@
       </div>
     </div>
   </section>
-  {{#if bonusDice}}
-    <footer>
-      <span>{{localize 'BNW.Label.BonusDice'}}: {{bonusDice}}</span>
-    </footer>
-  {{/if}}
 </div>
+

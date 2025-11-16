@@ -1,0 +1,51 @@
+{{!-- Trait Configuration Dialog --}}
+<form class="bnw-trait-config-form">
+  <p class="notes">{{localize "BNW.Settings.Traits.Description"}}</p>
+  
+  <div class="traits-list">
+    {{#each traits as |trait index|}}
+      <div class="trait-row" data-key="{{trait.key}}">
+        <input type="hidden" name="traits.{{index}}.key" value="{{trait.key}}" />
+        
+        <div class="trait-field">
+          <label>{{localize "BNW.Settings.Traits.Key"}}</label>
+          <input type="text" name="traits.{{index}}.key" value="{{trait.key}}" disabled />
+        </div>
+        
+        <div class="trait-field">
+          <label>{{localize "BNW.Settings.Traits.Label"}}</label>
+          <input type="text" name="traits.{{index}}.label" value="{{trait.label}}" required />
+        </div>
+        
+        <div class="trait-field trait-field-small">
+          <label>{{localize "BNW.Settings.Traits.DefaultDice"}}</label>
+          <input type="number" name="traits.{{index}}.dice" value="{{trait.dice}}" min="1" max="10" />
+        </div>
+        
+        <div class="trait-field trait-field-small">
+          <label>{{localize "BNW.Settings.Traits.DefaultBonus"}}</label>
+          <input type="number" name="traits.{{index}}.default" value="{{trait.default}}" min="-5" max="10" />
+        </div>
+        
+        <button type="button" data-action="deleteTrait" data-key="{{trait.key}}" title="{{localize 'BNW.Settings.Traits.Delete'}}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    {{/each}}
+  </div>
+  
+  <div class="form-actions">
+    <button type="button" data-action="addTrait">
+      <i class="fas fa-plus"></i> {{localize "BNW.Settings.Traits.AddTrait"}}
+    </button>
+  </div>
+  
+  <footer class="sheet-footer flexrow">
+    <button type="button" data-action="save">
+      <i class="fas fa-save"></i> {{localize "BNW.Settings.Traits.Save"}}
+    </button>
+    <button type="button" data-action="cancel">
+      <i class="fas fa-times"></i> {{localize "BNW.Settings.Traits.Cancel"}}
+    </button>
+  </footer>
+</form>
