@@ -171,7 +171,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     context.powers = this.document.items.filter(i => i.type === 'power');
     context.tricks = this.document.items.filter(i => i.type === 'trick');
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
-    context.weapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'closeCombatWeapon'));
+    context.closeCombatWeapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'closeCombatWeapon'));
+    context.rangedWeapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'rangedWeapon'));
     context.skills = this.document.items.filter(i => i.type === 'skill');
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
     context.woundsData = this._prepareWounds(context.system);
@@ -182,7 +183,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       powersCount: context.powers.length,
       tricksCount: context.tricks.length,
       quirksCount: context.quirks.length,
-      weaponsCount: context.weapons.length,
+      closeCombatWeaponsCount: context.closeCombatWeapons.length,
+      rangedWeaponsCount: context.rangedWeapons.length,
       totalItems: this.document.items.size
     });
     

@@ -635,11 +635,12 @@ BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
     return null;
   }
 
-  // Check if this is a close combat weapon
-  if (weapon.type === 'closeCombatWeapon') {
+  // Check if this is a close combat weapon or ranged weapon - use new damage system
+  if (weapon.type === 'closeCombatWeapon' || weapon.type === 'rangedWeapon') {
     return BNW.dice.rollCloseCombatDamage({ actor, weapon });
   }
 
+  // Legacy weapon damage for other types
   const damageType = weapon.system?.damageType ?? 'strength';
   const damageModifier = Number(weapon.system?.damageModifier ?? 0);
 

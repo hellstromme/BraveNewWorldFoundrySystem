@@ -212,6 +212,19 @@ class BraveNewWorldCloseCombatWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
 }
 
 /**
+ * Ranged Weapon Item Sheet
+ */
+class BraveNewWorldRangedWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/ranged-weapon-sheet-v2.hbs"
+    }
+  };
+}
+
+/**
  * Skill Item Sheet
  */
 class BraveNewWorldSkillSheetV2 extends BraveNewWorldItemSheetV2 {
@@ -242,4 +255,5 @@ globalThis.BraveNewWorldPowerSheetV2 = BraveNewWorldPowerSheetV2;
 globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
 globalThis.BraveNewWorldQuirkSheetV2 = BraveNewWorldQuirkSheetV2;
 globalThis.BraveNewWorldCloseCombatWeaponSheetV2 = BraveNewWorldCloseCombatWeaponSheetV2;
+globalThis.BraveNewWorldRangedWeaponSheetV2 = BraveNewWorldRangedWeaponSheetV2;
 globalThis.BraveNewWorldSkillSheetV2 = BraveNewWorldSkillSheetV2;

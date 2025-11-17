@@ -1,0 +1,82 @@
+{{!-- Application V2 Item Sheet Template - Ranged Weapon --}}
+<div>
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.ItemType.RangedWeapon'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize "BNW.Label.WeaponType"}}</span>
+          <input type="text" name="system.weaponType" value="{{system.weaponType}}" placeholder="Pistol" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.Action"}}</span>
+          <select name="system.action">
+            <option value="drawn" {{#if (eq system.action "drawn")}}selected{{/if}}>{{localize "BNW.Action.Drawn"}}</option>
+            <option value="throw" {{#if (eq system.action "throw")}}selected{{/if}}>{{localize "BNW.Action.Throw"}}</option>
+            <option value="revolver" {{#if (eq system.action "revolver")}}selected{{/if}}>{{localize "BNW.Action.Revolver"}}</option>
+            <option value="auto" {{#if (eq system.action "auto")}}selected{{/if}}>{{localize "BNW.Action.Auto"}}</option>
+            <option value="single" {{#if (eq system.action "single")}}selected{{/if}}>{{localize "BNW.Action.Single"}}</option>
+            <option value="bolt" {{#if (eq system.action "bolt")}}selected{{/if}}>{{localize "BNW.Action.Bolt"}}</option>
+            <option value="standard" {{#if (eq system.action "standard")}}selected{{/if}}>{{localize "BNW.Action.Standard"}}</option>
+            <option value="pump" {{#if (eq system.action "pump")}}selected{{/if}}>{{localize "BNW.Action.Pump"}}</option>
+            <option value="double" {{#if (eq system.action "double")}}selected{{/if}}>{{localize "BNW.Action.Double"}}</option>
+          </select>
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.Ammo"}}</span>
+          <input type="text" name="system.ammo" value="{{system.ammo}}" placeholder="9mm" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.RateOfFire"}}</span>
+          <input type="number" name="system.rateOfFire" value="{{system.rateOfFire}}" placeholder="1" min="1" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.RangeIncrement"}}</span>
+          <input type="number" name="system.rangeIncrement" value="{{system.rangeIncrement}}" placeholder="10" min="1" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.AttackSkill"}}</span>
+          <select name="system.attackSkill">
+            <option value="">&mdash;</option>
+            {{#each skillOptions as |skill|}}
+              <option value="{{skill.name}}" {{#if (eq ../system.attackSkill skill.name)}}selected{{/if}}>{{skill.label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.DamageType"}}</span>
+          <select name="system.damageType">
+            <option value="strength" {{#if (eq system.damageType "strength")}}selected{{/if}}>{{localize "BNW.DamageType.Strength"}}</option>
+            <option value="stun" {{#if (eq system.damageType "stun")}}selected{{/if}}>{{localize "BNW.DamageType.Stun"}}</option>
+            <option value="fixed" {{#if (eq system.damageType "fixed")}}selected{{/if}}>{{localize "BNW.DamageType.Fixed"}}</option>
+            <option value="none" {{#if (eq system.damageType "none")}}selected{{/if}}>{{localize "BNW.DamageType.None"}}</option>
+          </select>
+        </label>
+        {{#if (eq system.damageType "fixed")}}
+          <label>
+            <span>{{localize "BNW.Label.FixedDamageDice"}}</span>
+            <input type="number" name="system.fixedDamageDice" value="{{system.fixedDamageDice}}" placeholder="3" min="1" />
+          </label>
+        {{/if}}
+        <label>
+          <span>{{localize "BNW.Label.DamageModifier"}}</span>
+          <input type="number" name="system.damageModifier" value="{{system.damageModifier}}" placeholder="0" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.CostDollars"}}</span>
+          <input type="number" name="system.cost" value="{{system.cost}}" placeholder="0" step="1" min="0" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group stacked">
+      <label>{{localize "BNW.Label.Description"}}</label>
+      <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.Description'}}">{{system.description}}</textarea>
+    </div>
+  </section>
+</div>

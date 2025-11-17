@@ -92,6 +92,23 @@
         "description": ""
       }
     },
+    "rangedWeapon": {
+      "type": "rangedWeapon",
+      "img": "icons/svg/target.svg",
+      "system": {
+        "weaponType": "",
+        "action": "standard",
+        "ammo": "",
+        "rateOfFire": 1,
+        "rangeIncrement": 10,
+        "attackSkill": "",
+        "damageType": "strength",
+        "damageModifier": 0,
+        "fixedDamageDice": 0,
+        "cost": 0,
+        "description": ""
+      }
+    },
     "skill": {
       "type": "skill",
       "img": "icons/svg/book.svg",
