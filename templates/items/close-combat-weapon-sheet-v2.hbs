@@ -29,9 +29,16 @@
           <select name="system.damageType">
             <option value="strength" {{#if (eq system.damageType "strength")}}selected{{/if}}>{{localize "BNW.DamageType.Strength"}}</option>
             <option value="stun" {{#if (eq system.damageType "stun")}}selected{{/if}}>{{localize "BNW.DamageType.Stun"}}</option>
+            <option value="fixed" {{#if (eq system.damageType "fixed")}}selected{{/if}}>{{localize "BNW.DamageType.Fixed"}}</option>
             <option value="none" {{#if (eq system.damageType "none")}}selected{{/if}}>{{localize "BNW.DamageType.None"}}</option>
           </select>
         </label>
+        {{#if (eq system.damageType "fixed")}}
+          <label>
+            <span>{{localize "BNW.Label.FixedDamageDice"}}</span>
+            <input type="number" name="system.fixedDamageDice" value="{{system.fixedDamageDice}}" placeholder="3" min="1" />
+          </label>
+        {{/if}}
         <label>
           <span>{{localize "BNW.Label.DamageModifier"}}</span>
           <input type="number" name="system.damageModifier" value="{{system.damageModifier}}" placeholder="0" />

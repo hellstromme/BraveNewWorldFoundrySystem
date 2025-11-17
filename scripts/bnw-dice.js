@@ -481,16 +481,7 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
   }
 
   const damageType = weapon.system?.damageType ?? 'strength';
-  const damageModifier = Number(weapon.system?.damageModifier ?? 0);
-
-  // Get the damage trait (typically strength)
-  const systemData = actor.system ?? {};
-  const trait = foundry.utils.getProperty(systemData, `traits.${damageType}`) ?? null;
-  
-  if (!trait) {
-    ui.notifications?.warn?.(`Unknown damage type: ${damageType}`);
-    return null;
-  }
+  const weaponModifier = Number(weapon.system?.damageModifier ?? 0);
 
   // Prompt for target size and headshot if not provided
   let resolvedSize = targetSize;
@@ -508,12 +499,38 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
     resolvedHeadshot = result.headshot;
   }
 
-  const traitDice = Number(trait?.dice ?? 0);
   const headshotBonus = resolvedHeadshot ? 2 : 0;
-  let pool = Math.max(traitDice + headshotBonus, 1);
-
-  // Get trait configuration for label
-  const traitConfig = CONFIG.BNW?.traits?.[damageType] ?? { label: damageType };
+  let pool;
+  let damageLabel;
+  let totalModifier = weaponModifier;
+  
+  // Determine dice pool based on damage type
+  if (damageType === 'fixed') {
+    // Fixed damage - use weapon's fixed dice
+    const fixedDice = Number(weapon.system?.fixedDamageDice ?? 0);
+    pool = Math.max(fixedDice + headshotBonus, 1);
+    damageLabel = `${fixedDice}d6${headshotBonus > 0 ? ` +${headshotBonus} Headshot` : ''}`;
+  } else {
+    // Trait-based damage (strength, stun, etc.)
+    const systemData = actor.system ?? {};
+    const trait = foundry.utils.getProperty(systemData, `traits.${damageType}`) ?? null;
+    
+    if (!trait) {
+      ui.notifications?.warn?.(`Unknown damage type: ${damageType}`);
+      return null;
+    }
+    
+    const traitDice = Number(trait?.dice ?? 0);
+    const traitBonus = Number(trait?.default ?? 0);
+    pool = Math.max(traitDice + headshotBonus, 1);
+    
+    // Add trait bonus to weapon modifier for total
+    totalModifier = weaponModifier + traitBonus;
+    
+    // Get trait configuration for label
+    const traitConfig = CONFIG.BNW?.traits?.[damageType] ?? { label: damageType };
+    damageLabel = traitConfig.label ?? damageType;
+  }
 
   const formula = `${pool}d6x=6`;
   let roll = new Roll(formula);
@@ -556,17 +573,17 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
   }
 
   const highest = Math.max(...diceResults);
-  const rawDamage = highest + damageModifier;
+  const rawDamage = highest + totalModifier;
   const finalDamage = Math.floor(rawDamage / resolvedSize);
 
   const data = {
     actorName: actor.name,
     weaponName: weapon.name,
-    traitLabel: traitConfig.label ?? damageType,
+    traitLabel: damageLabel,
     pool,
     dice: diceResults,
     highest,
-    damageModifier,
+    damageModifier: totalModifier,
     rawDamage,
     targetSize: resolvedSize,
     finalDamage,
@@ -590,7 +607,7 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
       bravenewworld: {
         weaponId: weapon.id,
         damageType,
-        damageModifier,
+        damageModifier: totalModifier,
         highest,
         rawDamage,
         targetSize: resolvedSize,

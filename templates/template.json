@@ -87,6 +87,7 @@
         "attackSkill": "",
         "damageType": "strength",
         "damageModifier": 0,
+        "fixedDamageDice": 0,
         "cost": 0,
         "description": ""
       }

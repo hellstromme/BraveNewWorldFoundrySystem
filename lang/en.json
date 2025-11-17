@@ -122,6 +122,7 @@
   "BNW.Roll.Damage": "Damage",
   "BNW.DamageType.Strength": "Strength",
   "BNW.DamageType.Stun": "Stun",
+  "BNW.DamageType.Fixed": "Fixed",
   "BNW.DamageType.None": "None",
   "BNW.Item.Skill": "Skill",
   "BNW.Placeholder.SkillDescription": "Describe what this skill covers",
@@ -143,6 +144,7 @@
   "BNW.RollPromptHeadshot": "Head Shot",
   "BNW.Label.TargetSize": "Target Size",
   "BNW.Label.FinalDamage": "Final Damage",
+  "BNW.Label.FixedDamageDice": "Fixed Damage Dice",
   "BNW.Label.UnknownSkill": "Unknown Skill",
   "BNW.Roll.NoDamage": "No Damage"
 }
