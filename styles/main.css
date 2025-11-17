@@ -135,7 +135,12 @@
 }
 
 /* V2 Tab Management - hide inactive tabs */
-.bnw.sheet .sheet-body .tab {
+.bnw.sheet .sheet-body.tab:not(.active) {
+  display: none;
+}
+
+.bnw.sheet .sheet-body.tab.active {
+  display: flex;
   flex: 1;
   min-height: 0; /* Important for flex scrolling */
   overflow-y: auto;

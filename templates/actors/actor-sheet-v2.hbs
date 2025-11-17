@@ -1,31 +1,38 @@
-{{!-- Application V2 Actor Sheet Template --}}
-<div>
+<div class="{{cssClass}}">
+  {{!-- Header --}}
   {{> "systems/bravenewworld/templates/actors/parts/header.hbs"}}
+  
+  {{!-- Navigation Tabs --}}
   {{> "systems/bravenewworld/templates/actors/parts/tabs.hbs"}}
   
-  <section class="sheet-body">
-    <div class="tab traits" data-group="primary" data-tab="traits">
-      {{> "systems/bravenewworld/templates/actors/parts/traits.hbs"}}
-    </div>
-
-    <div class="tab powers" data-group="primary" data-tab="powers">
-      {{> "systems/bravenewworld/templates/actors/parts/powers.hbs"}}
-    </div>
-
-    <div class="tab tricks" data-group="primary" data-tab="tricks">
-      {{> "systems/bravenewworld/templates/actors/parts/tricks.hbs"}}
-    </div>
-
-    <div class="tab quirks" data-group="primary" data-tab="quirks">
-      {{> "systems/bravenewworld/templates/actors/parts/quirks.hbs"}}
-    </div>
-
-    <div class="tab combat" data-group="primary" data-tab="combat">
-      {{> "systems/bravenewworld/templates/actors/parts/weapons.hbs"}}
-    </div>
-
-    <div class="tab notes" data-group="primary" data-tab="notes">
-      {{> "systems/bravenewworld/templates/actors/parts/notes.hbs"}}
-    </div>
+  {{!-- Sheet Body --}}
+  {{!-- Traits & Skills Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'traits')}}active{{/if}}" data-group="primary" data-tab="traits">
+    {{> "systems/bravenewworld/templates/actors/parts/traits.hbs"}}
+  </section>
+  
+  {{!-- Powers Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'powers')}}active{{/if}}" data-group="primary" data-tab="powers">
+    {{> "systems/bravenewworld/templates/actors/parts/powers.hbs"}}
+  </section>
+  
+  {{!-- Tricks Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'tricks')}}active{{/if}}" data-group="primary" data-tab="tricks">
+    {{> "systems/bravenewworld/templates/actors/parts/tricks.hbs"}}
+  </section>
+  
+  {{!-- Quirks Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'quirks')}}active{{/if}}" data-group="primary" data-tab="quirks">
+    {{> "systems/bravenewworld/templates/actors/parts/quirks.hbs"}}
+  </section>
+  
+  {{!-- Combat Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'combat')}}active{{/if}}" data-group="primary" data-tab="combat">
+    {{> "systems/bravenewworld/templates/actors/parts/weapons.hbs"}}
+  </section>
+  
+  {{!-- Notes Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'notes')}}active{{/if}}" data-group="primary" data-tab="notes">
+    {{> "systems/bravenewworld/templates/actors/parts/notes.hbs"}}
   </section>
 </div>

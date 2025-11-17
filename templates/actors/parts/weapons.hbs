@@ -1,146 +1,148 @@
-{{!-- Initiative Section --}}
-<div class="initiative-section">
-  <h3>{{localize 'BNW.Label.Initiative'}}</h3>
-  <div class="initiative-controls">
-    <button type="button" class="initiative-roll" data-action="rollInitiative">
-      <i class="fas fa-bolt"></i> {{localize 'BNW.Action.RollInitiative'}}
-    </button>
-    <p class="initiative-hint">{{localize 'BNW.Hint.Initiative'}}</p>
+<div class="combat-section">
+  {{!-- Initiative Section --}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Label.Initiative'}}</h3>
+    <div class="initiative-controls">
+      <button type="button" class="initiative-roll" data-action="rollInitiative">
+        <i class="fas fa-bolt"></i> {{localize 'BNW.Action.RollInitiative'}}
+      </button>
+      <p class="initiative-hint">{{localize 'BNW.Hint.Initiative'}}</p>
+    </div>
   </div>
-</div>
 
-{{!-- Hit Locations Section --}}
-<div class="wounds-section">
-  <h3>{{localize 'BNW.Label.HitLocations'}}</h3>
-  <div class="armor-display">
-    <span class="armor-worn">{{woundsData.equippedArmorNames}}</span>
-    <button type="button" data-action="selectArmor" title="{{localize 'BNW.Action.SelectArmor'}}">
-      <i class="fas fa-shield-alt"></i>
-    </button>
-  </div>
-  <div class="wounds-grid">
-    {{#each woundsData.locations as |wound|}}
-      <div class="wound-location {{#if wound.isMaxed}}maxed{{/if}}">
-        <label for="wound-{{wound.key}}">{{wound.label}} ({{wound.max}}):</label>
-        <div class="wound-controls">
-          <input 
-            type="number" 
-            id="wound-{{wound.key}}"
-            name="system.wounds.{{wound.key}}" 
-            value="{{wound.current}}" 
-            min="0" 
-            max="{{wound.max}}" 
-            data-dtype="Number" />
-          {{#if wound.hasArmor}}
-            <span class="armor-stats">
-              <span class="deflection" title="{{localize 'BNW.Label.Deflection'}}">
-                <i class="fas fa-shield-alt"></i> {{wound.deflection}}
+  {{!-- Hit Locations Section --}}
+  <div class="wounds-section">
+    <h3>{{localize 'BNW.Label.HitLocations'}}</h3>
+    <div class="armor-display">
+      <span class="armor-worn">{{woundsData.equippedArmorNames}}</span>
+      <button type="button" data-action="selectArmor" title="{{localize 'BNW.Action.SelectArmor'}}">
+        <i class="fas fa-shield-alt"></i>
+      </button>
+    </div>
+    <div class="wounds-grid">
+      {{#each woundsData.locations as |wound|}}
+        <div class="wound-location {{#if wound.isMaxed}}maxed{{/if}}">
+          <label for="wound-{{wound.key}}">{{wound.label}} ({{wound.max}}):</label>
+          <div class="wound-controls">
+            <input 
+              type="number" 
+              id="wound-{{wound.key}}"
+              name="system.wounds.{{wound.key}}" 
+              value="{{wound.current}}" 
+              min="0" 
+              max="{{wound.max}}" 
+              data-dtype="Number" />
+            {{#if wound.hasArmor}}
+              <span class="armor-stats">
+                <span class="deflection" title="{{localize 'BNW.Label.Deflection'}}">
+                  <i class="fas fa-shield-alt"></i> {{wound.deflection}}
+                </span>
+                <span class="durability-control">
+                  <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="-1" title="{{localize 'BNW.Action.DecreaseDurability'}}">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <span class="durability-value" title="{{localize 'BNW.Label.Durability'}}">{{wound.durability}}/{{wound.maxDurability}}</span>
+                  <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="1" title="{{localize 'BNW.Action.IncreaseDurability'}}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </span>
               </span>
-              <span class="durability-control">
-                <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="-1" title="{{localize 'BNW.Action.DecreaseDurability'}}">
-                  <i class="fas fa-minus"></i>
-                </button>
-                <span class="durability-value" title="{{localize 'BNW.Label.Durability'}}">{{wound.durability}}/{{wound.maxDurability}}</span>
-                <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="1" title="{{localize 'BNW.Action.IncreaseDurability'}}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </span>
-            </span>
-          {{/if}}
-        </div>
-      </div>
-    {{/each}}
-  </div>
-</div>
-
-{{!-- Weapons Section --}}
-<div class="item-controls header">
-  <button type="button" data-action="createItem" data-type="closeCombatWeapon">
-    <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddCloseCombatWeapon'}}
-  </button>
-  <button type="button" data-action="createItem" data-type="rangedWeapon">
-    <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddRangedWeapon'}}
-  </button>
-</div>
-
-{{!-- Close Combat Weapons --}}
-{{#if closeCombatWeapons.length}}
-<div class="initiative-section">
-  <h3>{{localize 'BNW.Label.CloseCombatWeapons'}}</h3>
-  <ol class="weapons-list">
-    {{#each closeCombatWeapons as |item|}}
-      <li class="item weapon flexrow" data-item-id="{{item.id}}">
-        <div class="item-name">
-          <h4>{{item.name}}</h4>
-          <div class="weapon-stats">
-            <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.DefensiveBonus'}}:</strong> {{item.system.defensiveBonus}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.Quickness'}}:</strong> {{item.system.quickness}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
-            {{#if item.system.cost}}
-              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
             {{/if}}
           </div>
         </div>
-        <div class="item-controls">
-          <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
-            <i class="fas fa-crosshairs"></i>
-          </a>
-          <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
-            <i class="fas fa-burst"></i>
-          </a>
-          <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
-            <i class="fas fa-edit"></i>
-          </a>
-          <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
-            <i class="fas fa-trash"></i>
-          </a>
-        </div>
-      </li>
-    {{/each}}
-  </ol>
-</div>
-{{/if}}
+      {{/each}}
+    </div>
+  </div>
 
-{{!-- Ranged Weapons --}}
-{{#if rangedWeapons.length}}
-<div class="initiative-section">
-  <h3>{{localize 'BNW.Label.RangedWeapons'}}</h3>
-  <ol class="weapons-list">
-    {{#each rangedWeapons as |item|}}
-      <li class="item weapon flexrow" data-item-id="{{item.id}}">
-        <div class="item-name">
-          <h4>{{item.name}}</h4>
-          <div class="weapon-stats">
-            <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.WeaponType'}}:</strong> {{item.system.weaponType}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.Action'}}:</strong> {{item.system.action}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.RateOfFire'}}:</strong> {{item.system.rateOfFire}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.RangeIncrement'}}:</strong> {{item.system.rangeIncrement}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
-            <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
-            {{#if item.system.cost}}
-              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
-            {{/if}}
+  {{!-- Weapons Section --}}
+  <div class="item-controls header">
+    <button type="button" data-action="createItem" data-type="closeCombatWeapon">
+      <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddCloseCombatWeapon'}}
+    </button>
+    <button type="button" data-action="createItem" data-type="rangedWeapon">
+      <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddRangedWeapon'}}
+    </button>
+  </div>
+
+  {{!-- Close Combat Weapons --}}
+  {{#if closeCombatWeapons.length}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Label.CloseCombatWeapons'}}</h3>
+    <ol class="weapons-list">
+      {{#each closeCombatWeapons as |item|}}
+        <li class="item weapon flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            <div class="weapon-stats">
+              <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.DefensiveBonus'}}:</strong> {{item.system.defensiveBonus}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.Quickness'}}:</strong> {{item.system.quickness}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
+              {{#if item.system.cost}}
+                <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+              {{/if}}
+            </div>
           </div>
-        </div>
-        <div class="item-controls">
-          <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
-            <i class="fas fa-crosshairs"></i>
-          </a>
-          <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
-            <i class="fas fa-burst"></i>
-          </a>
-          <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
-            <i class="fas fa-edit"></i>
-          </a>
-          <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
-            <i class="fas fa-trash"></i>
-          </a>
-        </div>
-      </li>
-    {{/each}}
-  </ol>
+          <div class="item-controls">
+            <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
+              <i class="fas fa-crosshairs"></i>
+            </a>
+            <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
+              <i class="fas fa-burst"></i>
+            </a>
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+  {{/if}}
+
+  {{!-- Ranged Weapons --}}
+  {{#if rangedWeapons.length}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Label.RangedWeapons'}}</h3>
+    <ol class="weapons-list">
+      {{#each rangedWeapons as |item|}}
+        <li class="item weapon flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            <div class="weapon-stats">
+              <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.WeaponType'}}:</strong> {{item.system.weaponType}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.Action'}}:</strong> {{item.system.action}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.RateOfFire'}}:</strong> {{item.system.rateOfFire}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.RangeIncrement'}}:</strong> {{item.system.rangeIncrement}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
+              <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
+              {{#if item.system.cost}}
+                <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+              {{/if}}
+            </div>
+          </div>
+          <div class="item-controls">
+            <a data-action="rollWeaponAttack" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollAttack'}}">
+              <i class="fas fa-crosshairs"></i>
+            </a>
+            <a data-action="rollWeaponDamage" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollDamage'}}">
+              <i class="fas fa-burst"></i>
+            </a>
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+  {{/if}}
 </div>
-{{/if}}

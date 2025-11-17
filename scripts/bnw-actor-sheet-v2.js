@@ -18,9 +18,11 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       height: 720
     },
     window: {
-      resizable: true
+      resizable: true,
+      contentClasses: ['standard-form']
     },
     actions: {
+      changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab,
       rollSkill: BraveNewWorldActorSheetV2.prototype._onRollSkill,
       rollPower: BraveNewWorldActorSheetV2.prototype._onRollPower,
       rollWeaponAttack: BraveNewWorldActorSheetV2.prototype._onRollWeaponAttack,
@@ -30,7 +32,6 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
       editImage: BraveNewWorldActorSheetV2.prototype._onEditImage,
-      changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab,
       selectArmor: BraveNewWorldActorSheetV2.prototype._onSelectArmor,
       adjustArmorDurability: BraveNewWorldActorSheetV2.prototype._onAdjustArmorDurability
     },
@@ -45,7 +46,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /** @override */
   static PARTS = {
     form: {
-      template: "systems/bravenewworld/templates/actors/actor-sheet-v2.hbs"
+      template: "systems/bravenewworld/templates/actors/actor-sheet-v2.hbs",
+      scrollable: [".tab.active"]
     }
   };
 
@@ -53,113 +55,6 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   tabGroups = {
     primary: "traits"
   };
-
-  /* -------------------------------------------- */
-  /*  Lifecycle Methods                           */
-  /* -------------------------------------------- */
-
-  /** @override */
-  _onRender(context, options) {
-    super._onRender(context, options);
-    
-    // Restore scroll position
-    if (this._scrollPosition != null) {
-      const scrollableElement = this.element.querySelector('.window-content');
-      if (scrollableElement) {
-        scrollableElement.scrollTop = this._scrollPosition;
-      }
-      this._scrollPosition = null;
-    }
-  }
-
-  /** @override */
-  _attachFrameListeners() {
-    super._attachFrameListeners();
-    
-    // Store hook IDs so we can remove them later
-    this._hookIds = this._hookIds || [];
-    
-    // Listen for embedded document changes to trigger re-render
-    const createHookId = Hooks.on('createItem', this._onEmbeddedDocumentCreate.bind(this));
-    const deleteHookId = Hooks.on('deleteItem', this._onEmbeddedDocumentDelete.bind(this));
-    
-    this._hookIds.push(createHookId, deleteHookId);
-  }
-
-  /** @override */
-  async close(options = {}) {
-    // Clean up hooks when closing
-    if (this._hookIds) {
-      for (const id of this._hookIds) {
-        Hooks.off('createItem', id);
-        Hooks.off('deleteItem', id);
-      }
-      this._hookIds = [];
-    }
-    return super.close(options);
-  }
-
-  /**
-   * Handle embedded document creation
-   * @param {Item} item - The item that was created
-   * @param {object} options - Create options
-   * @param {string} userId - The user who made the change
-   * @private
-   */
-  _onEmbeddedDocumentCreate(item, options, userId) {
-    // Only re-render if this item belongs to our actor
-    if (item.parent?.id === this.document.id) {
-      console.log('BNW | Item created, re-rendering actor sheet');
-      this.render(false);
-    }
-  }
-
-  /**
-   * Handle embedded document deletion
-   * @param {Item} item - The item that was deleted
-   * @param {object} options - Delete options
-   * @param {string} userId - The user who made the change
-   * @private
-   */
-  _onEmbeddedDocumentDelete(item, options, userId) {
-    // Only re-render if this item belongs to our actor
-    if (item.parent?.id === this.document.id) {
-      console.log('BNW | Item deleted, re-rendering actor sheet');
-      this.render(false);
-    }
-  }
-
-  /** @override */
-  _onRender(context, options) {
-    super._onRender(context, options);
-    
-    // Manually activate the first tab if none are active
-    const form = this.element.querySelector('[data-application-part="form"]');
-    if (form) {
-      const activeTab = form.querySelector('.tab.active');
-      
-      // Determine which tab to activate
-      const tabToActivate = this._activeTab || 'traits';
-      
-      if (!activeTab || activeTab.dataset.tab !== tabToActivate) {
-        // Remove active from all tabs
-        form.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-        form.querySelectorAll('.sheet-tabs .item').forEach(link => link.classList.remove('active'));
-        
-        // Activate the correct tab
-        const tab = form.querySelector(`.tab[data-tab="${tabToActivate}"]`);
-        const tabLink = form.querySelector(`.sheet-tabs [data-tab="${tabToActivate}"]`);
-        
-        if (tab) {
-          tab.classList.add('active');
-          console.log('BNW | Activated tab on render:', tabToActivate);
-        }
-        if (tabLink) {
-          tabLink.classList.add('active');
-        }
-      }
-    }
-  }
 
   /* -------------------------------------------- */
   /*  Context Preparation                         */
@@ -193,6 +88,25 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
     context.woundsData = this._prepareWounds(context.system);
     
+    // Manually prepare tabs data since ApplicationV2 doesn't auto-populate it
+    context.tabs = {};
+    for (const [groupId, activeTab] of Object.entries(this.tabGroups)) {
+      context.tabs[groupId] = {
+        active: activeTab,
+        tabs: {
+          traits: { id: "traits", group: groupId, label: "Traits & Skills", active: activeTab === "traits" },
+          powers: { id: "powers", group: groupId, label: "Powers", active: activeTab === "powers" },
+          tricks: { id: "tricks", group: groupId, label: "Tricks", active: activeTab === "tricks" },
+          quirks: { id: "quirks", group: groupId, label: "Quirks", active: activeTab === "quirks" },
+          combat: { id: "combat", group: groupId, label: "Combat", active: activeTab === "combat" },
+          notes: { id: "notes", group: groupId, label: "Notes", active: activeTab === "notes" }
+        }
+      };
+    }
+    
+    // Add tabsActive for template compatibility
+    context.tabsActive = this.tabGroups.primary || 'traits';
+    
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
       skillsCount: context.skills.length,
@@ -201,8 +115,22 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       quirksCount: context.quirks.length,
       closeCombatWeaponsCount: context.closeCombatWeapons.length,
       rangedWeaponsCount: context.rangedWeapons.length,
-      totalItems: this.document.items.size
+      totalItems: this.document.items.size,
+      tabsActive: context.tabs.primary?.active
     });
+    
+    return context;
+  }
+
+  /**
+   * Prepare context for a specific part
+   * @override
+   */
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    
+    // Each part receives the full context prepared by _prepareContext
+    // No need to filter - templates will use what they need
     
     return context;
   }
@@ -526,6 +454,27 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     });
   }
 
+  /* -------------------------------------------- */
+  /*  Tab Management                              */
+  /* -------------------------------------------- */
+
+  /**
+   * Handle tab change
+   * @param {Event} event
+   * @param {HTMLElement} target
+   * @private
+   */
+  async _onChangeTab(event, target) {
+    const { tab, group } = target.dataset;
+    if (!tab || !group) return;
+    
+    // Update the active tab in tabGroups
+    this.tabGroups[group] = tab;
+    
+    // Re-render to show the new tab
+    await this.render();
+  }
+
   /**
    * Handle item creation
    * @param {Event} event
@@ -555,8 +504,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       setTimeout(() => sheet.bringToFront(), 50);
     }
     
-    // Force full re-render with parts refresh
-    await this.render(true, { parts: ['form'] });
+    // Don't manually render - the createItem hook will handle it
   }
 
   /**
@@ -621,33 +569,6 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @param {HTMLElement} target
    * @private
    */
-  _onChangeTab(event, target) {
-    const tabName = target.dataset.tab;
-    const group = target.dataset.group || 'primary';
-    
-    // Store the active tab
-    this._activeTab = tabName;
-    
-    console.log('BNW | Changing tab to:', tabName);
-    
-    const form = this.element.querySelector('[data-application-part="form"]');
-    if (!form) return;
-    
-    // Remove active from all tabs in this group
-    form.querySelectorAll(`.tab[data-group="${group}"]`).forEach(tab => {
-      tab.classList.remove('active');
-    });
-    form.querySelectorAll(`.sheet-tabs[data-group="${group}"] .item`).forEach(link => {
-      link.classList.remove('active');
-    });
-    
-    // Add active to the selected tab
-    const selectedTab = form.querySelector(`.tab[data-group="${group}"][data-tab="${tabName}"]`);
-    if (selectedTab) {
-      selectedTab.classList.add('active');
-      target.classList.add('active');
-    }
-  }
 
   /* -------------------------------------------- */
   /*  Form Handling                               */
@@ -879,12 +800,6 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     const change = parseInt(target.dataset.change);
     
     if (!location || !change) return;
-    
-    // Save scroll position before update
-    const scrollableElement = this.element.querySelector('.window-content');
-    if (scrollableElement) {
-      this._scrollPosition = scrollableElement.scrollTop;
-    }
     
     // Find armor covering this location
     const armors = this.document.items.filter(i => 

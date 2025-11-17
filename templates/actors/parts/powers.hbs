@@ -1,30 +1,32 @@
-<div class="item-controls header">
-  <button type="button" data-action="createItem" data-type="power">
-    <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddPower'}}
-  </button>
+<div class="powers-section">
+    <div class="item-controls header">
+      <button type="button" data-action="createItem" data-type="power">
+        <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddPower'}}
+      </button>
+    </div>
+    <ol class="powers-list">
+      {{#each powers as |item|}}
+        <li class="item power flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            <p class="summary">{{item.system.summary}}</p>
+          </div>
+          <div class="item-info">
+            <span class="dice">{{localize 'BNW.Label.BonusDice'}}: {{item.system.dice}}</span>
+            <span class="pair">{{item.system.trait}} / {{item.system.skill}}</span>
+          </div>
+          <div class="item-controls">
+            <a data-action="rollPower" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollPower'}}">
+              <i class="fas fa-dice"></i>
+            </a>
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
 </div>
-<ol class="powers-list">
-  {{#each powers as |item|}}
-    <li class="item power flexrow" data-item-id="{{item.id}}">
-      <div class="item-name">
-        <h4>{{item.name}}</h4>
-        <p class="summary">{{item.system.summary}}</p>
-      </div>
-      <div class="item-info">
-        <span class="dice">{{localize 'BNW.Label.BonusDice'}}: {{item.system.dice}}</span>
-        <span class="pair">{{item.system.trait}} / {{item.system.skill}}</span>
-      </div>
-      <div class="item-controls">
-        <a data-action="rollPower" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.RollPower'}}">
-          <i class="fas fa-dice"></i>
-        </a>
-        <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
-          <i class="fas fa-edit"></i>
-        </a>
-        <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
-          <i class="fas fa-trash"></i>
-        </a>
-      </div>
-    </li>
-  {{/each}}
-</ol>
