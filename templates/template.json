@@ -84,7 +84,6 @@
       "system": {
         "defensiveBonus": 0,
         "quickness": 0,
-        "attackTrait": "strength",
         "attackSkill": "",
         "damageType": "strength",
         "damageModifier": 0,

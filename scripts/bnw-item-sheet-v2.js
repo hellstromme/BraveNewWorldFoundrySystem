@@ -16,8 +16,8 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
     {
       classes: ['bravenewworld', 'sheet', 'item', 'bnw'],
       position: {
-        width: 520,
-        height: 520
+        width: 560,
+        height: 'auto'
       },
       window: {
         resizable: true
@@ -90,28 +90,34 @@ class BraveNewWorldItemSheetV2 extends ItemSheetV2Base {
   /**
    * Prepare skill options for dropdown
    * @param {Actor} actor
-   * @param {string} currentSkillId
+   * @param {string} currentSkillName - Current skill name (not ID)
    * @returns {Array}
    * @private
    */
-  _prepareSkillOptions(actor, currentSkillId) {
+  _prepareSkillOptions(actor, currentSkillName) {
     const options = [];
     const configTraits = CONFIG.BNW?.traits ?? {};
     
+    let skills = [];
+    
     if (actor) {
-      const skills = actor.items.filter(i => i.type === 'skill');
+      // If owned by an actor, use skills from that actor
+      skills = actor.items.filter(i => i.type === 'skill');
+    } else {
+      // If standalone item, use skills from world Items collection
+      skills = game.items?.filter(i => i.type === 'skill') ?? [];
+    }
+    
+    for (const skill of skills) {
+      const traitKey = skill.system?.trait ?? '';
+      const traitLabel = configTraits[traitKey]?.label ?? traitKey;
+      const label = `${skill.name} (${traitLabel})`;
       
-      for (const skill of skills) {
-        const traitKey = skill.system?.trait ?? '';
-        const traitLabel = configTraits[traitKey]?.label ?? traitKey;
-        const label = `${skill.name} (${traitLabel})`;
-        
-        options.push({
-          id: skill.id,
-          label: label,
-          trait: traitKey
-        });
-      }
+      options.push({
+        name: skill.name,
+        label: label,
+        trait: traitKey
+      });
     }
     
     // Sort by label

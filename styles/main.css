@@ -41,6 +41,16 @@
   overflow: hidden;
 }
 
+/* Item sheets need scrolling instead of hidden overflow */
+.bnw.sheet.item .window-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.bnw.sheet.item [data-application-part="form"] {
+  overflow: visible;
+}
+
 .bnw.sheet .sheet-header {
   gap: 1rem;
   align-items: center;
@@ -820,6 +830,12 @@
 }
 
 .chat-message .bnw-roll-card .outcome.failure {
+  background: var(--bnw-danger-red);
+  color: white;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.chat-message .bnw-roll-card .outcome.damage {
   background: var(--bnw-danger-red);
   color: white;
   text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);

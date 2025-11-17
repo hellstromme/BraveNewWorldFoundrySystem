@@ -311,15 +311,33 @@ BNW.dice.rollWeaponAttack = async function ({ actor, weapon, defenseRating = nul
     return null;
   }
 
-  const attackTrait = weapon.system?.attackTrait ?? '';
-  const attackSkillId = weapon.system?.attackSkill ?? '';
+  const skillRef = weapon.system?.attackSkill ?? '';
 
-  if (!attackTrait) {
-    ui.notifications?.warn?.('Weapon must have an attack trait selected.');
+  if (!skillRef) {
+    ui.notifications?.warn?.('Weapon must have an attack skill selected.');
     return null;
   }
-  if (!attackSkillId) {
-    ui.notifications?.warn?.('Weapon must have an attack skill selected.');
+
+  // Look up skill - handle both legacy ID and new name-based storage
+  let skill = null;
+  
+  // Try to find by name first (new system)
+  skill = actor.items.find(i => i.type === 'skill' && i.name === skillRef);
+  
+  // Fallback: try by ID (legacy system)
+  if (!skill) {
+    skill = actor.items.get(skillRef);
+  }
+  
+  if (!skill) {
+    ui.notifications?.warn?.(`Skill "${skillRef}" not found on character. Try re-selecting the skill in the weapon configuration.`);
+    return null;
+  }
+
+  // Get the trait from the skill
+  const attackTrait = skill.system?.trait;
+  if (!attackTrait) {
+    ui.notifications?.warn?.(`Skill "${skill.name}" does not have a trait assigned.`);
     return null;
   }
 
@@ -336,11 +354,251 @@ BNW.dice.rollWeaponAttack = async function ({ actor, weapon, defenseRating = nul
   return BNW.dice.rollTraitSkill({
     actor,
     traitKey: attackTrait,
-    skillId: attackSkillId,
+    skillId: skill.id,
     target: resolvedDefense,
     bonusDice: 0,
     label: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Attack') ?? 'Attack'}`,
     sourceItem: weapon
+  });
+};
+
+/**
+ * Prompt the user for target size if one was not provided.
+ * @param {object} options
+ * @param {number} [options.defaultSize=5]
+ * @param {string} [options.weaponLabel]
+ * @returns {Promise<{size: number, headshot: boolean}|null>}
+ */
+BNW.dice.promptTargetSize = async function ({ defaultSize = 5, weaponLabel = '' } = {}) {
+  const title = game?.i18n?.localize?.('BNW.RollPromptSizeTitle') ?? 'Target Size';
+  const sizeLabel = game?.i18n?.localize?.('BNW.RollPromptSize') ?? 'Target Size';
+  const headshotLabel = game?.i18n?.localize?.('BNW.RollPromptHeadshot') ?? 'Head Shot';
+  const buttonLabel = game?.i18n?.localize?.('BNW.RollPromptButton') ?? 'Roll Dice';
+
+  const content = `
+    <form class="bnw-dialog">
+      ${weaponLabel ? `<p class="context">${weaponLabel}</p>` : ''}
+      <div class="form-group">
+        <label>${sizeLabel}</label>
+        <input type="number" name="size" value="${defaultSize}" min="1" step="1" />
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="headshot" />
+          ${headshotLabel}
+        </label>
+      </div>
+    </form>
+  `;
+
+  const dialogV2 = foundry?.applications?.api?.DialogV2;
+  if (dialogV2?.prompt) {
+    try {
+      const result = await dialogV2.prompt({
+        window: { title },
+        content,
+        ok: {
+          label: buttonLabel,
+          callback: (event, button, dialog) => {
+            const dialogElement = dialog.element ?? dialog;
+            const form = dialogElement.querySelector('form');
+            const sizeInput = form?.querySelector('input[name="size"]');
+            const headshotInput = form?.querySelector('input[name="headshot"]');
+            
+            const size = sizeInput?.value != null ? Number(sizeInput.value) : defaultSize;
+            const headshot = headshotInput?.checked ?? false;
+            
+            return {
+              size: Number.isFinite(size) && size > 0 ? size : defaultSize,
+              headshot
+            };
+          }
+        },
+        rejectClose: false
+      });
+
+      if (result && typeof result.size === 'number' && Number.isFinite(result.size) && result.size > 0) {
+        return result;
+      }
+      return { size: defaultSize, headshot: false };
+    } catch (error) {
+      console.warn('BNW | DialogV2 prompt failed, falling back to Dialog.prompt', error);
+    }
+  }
+
+  return Dialog.prompt({
+    title,
+    content,
+    label: buttonLabel,
+    callback: (html) => {
+      const sizeSelector = 'input[name="size"]';
+      const headshotSelector = 'input[name="headshot"]';
+
+      let sizeInput = null;
+      let headshotInput = null;
+      
+      if (typeof html?.find === 'function') {
+        sizeInput = html.find(sizeSelector)?.[0] ?? null;
+        headshotInput = html.find(headshotSelector)?.[0] ?? null;
+      }
+
+      if (!sizeInput) {
+        const root = html?.[0] ?? html;
+        if (root?.querySelector) {
+          sizeInput = root.querySelector(sizeSelector);
+          headshotInput = root.querySelector(headshotSelector);
+        }
+      }
+
+      const size = Number(sizeInput?.value);
+      const headshot = headshotInput?.checked ?? false;
+      
+      return {
+        size: Number.isFinite(size) && size > 0 ? size : defaultSize,
+        headshot
+      };
+    },
+    rejectClose: false
+  });
+};
+
+/**
+ * Roll close combat weapon damage (divided by target size)
+ * @param {object} params
+ * @param {Actor} params.actor
+ * @param {Item} params.weapon
+ * @param {number} [params.targetSize] - Optional target size
+ * @param {boolean} [params.headshot] - Optional headshot flag
+ */
+BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = null, headshot = false } = {}) {
+  if (!actor) {
+    console.warn('BNW | rollCloseCombatDamage requires an actor.');
+    return null;
+  }
+  if (!weapon) {
+    console.warn('BNW | rollCloseCombatDamage requires a weapon.');
+    return null;
+  }
+
+  const damageType = weapon.system?.damageType ?? 'strength';
+  const damageModifier = Number(weapon.system?.damageModifier ?? 0);
+
+  // Get the damage trait (typically strength)
+  const systemData = actor.system ?? {};
+  const trait = foundry.utils.getProperty(systemData, `traits.${damageType}`) ?? null;
+  
+  if (!trait) {
+    ui.notifications?.warn?.(`Unknown damage type: ${damageType}`);
+    return null;
+  }
+
+  // Prompt for target size and headshot if not provided
+  let resolvedSize = targetSize;
+  let resolvedHeadshot = headshot;
+  
+  if (targetSize == null) {
+    const defaultSize = 5;
+    const result = await BNW.dice.promptTargetSize({
+      defaultSize,
+      weaponLabel: weapon.name
+    });
+    if (result == null) return null;
+    
+    resolvedSize = result.size;
+    resolvedHeadshot = result.headshot;
+  }
+
+  const traitDice = Number(trait?.dice ?? 0);
+  const headshotBonus = resolvedHeadshot ? 2 : 0;
+  let pool = Math.max(traitDice + headshotBonus, 1);
+
+  // Get trait configuration for label
+  const traitConfig = CONFIG.BNW?.traits?.[damageType] ?? { label: damageType };
+
+  const formula = `${pool}d6x=6`;
+  let roll = new Roll(formula);
+
+  try {
+    roll = await roll.evaluate();
+  } catch (error) {
+    console.error('BNW | Failed to evaluate damage roll', error);
+    ui.notifications?.error?.('Failed to evaluate damage roll.');
+    return null;
+  }
+
+  const diceResults = [];
+
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+
+      runningTotal += value;
+
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        runningTotal = 0;
+      }
+    }
+
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+    }
+  }
+
+  if (!diceResults.length) {
+    diceResults.push(0);
+  }
+
+  const highest = Math.max(...diceResults);
+  const rawDamage = highest + damageModifier;
+  const finalDamage = Math.floor(rawDamage / resolvedSize);
+
+  const data = {
+    actorName: actor.name,
+    weaponName: weapon.name,
+    traitLabel: traitConfig.label ?? damageType,
+    pool,
+    dice: diceResults,
+    highest,
+    damageModifier,
+    rawDamage,
+    targetSize: resolvedSize,
+    finalDamage,
+    headshot: resolvedHeadshot,
+    title: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Damage') ?? 'Damage'}${resolvedHeadshot ? ' (Headshot)' : ''}`
+  };
+
+  const systemBasePath =
+    CONFIG.BNW?.systemBasePath ??
+    game.system?.path ??
+    (game.system?.id ? `systems/${game.system.id}` : '');
+  const templateBasePath =
+    CONFIG.BNW?.templatePath ?? (systemBasePath ? `${systemBasePath}/templates` : 'templates');
+  const content = await foundry.applications.handlebars.renderTemplate(`${templateBasePath}/chat/close-combat-damage-roll-card.hbs`, data);
+
+  return roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: data.title,
+    content,
+    flags: {
+      bravenewworld: {
+        weaponId: weapon.id,
+        damageType,
+        damageModifier,
+        highest,
+        rawDamage,
+        targetSize: resolvedSize,
+        finalDamage,
+        pool,
+        headshot: resolvedHeadshot
+      }
+    }
   });
 };
 
@@ -358,6 +616,11 @@ BNW.dice.rollWeaponDamage = async function ({ actor, weapon } = {}) {
   if (!weapon) {
     console.warn('BNW | rollWeaponDamage requires a weapon.');
     return null;
+  }
+
+  // Check if this is a close combat weapon
+  if (weapon.type === 'closeCombatWeapon') {
+    return BNW.dice.rollCloseCombatDamage({ actor, weapon });
   }
 
   const damageType = weapon.system?.damageType ?? 'strength';

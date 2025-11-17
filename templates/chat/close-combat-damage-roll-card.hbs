@@ -1,0 +1,53 @@
+{{!-- Close Combat Damage Roll Card --}}
+<div class="bnw-roll-card">
+  <header>
+    <h2>{{title}}</h2>
+    <p class="subtitle">
+      {{actorName}} &mdash; 
+      {{traitLabel}} ({{pool}}d6{{#if headshot}} +2 Headshot{{/if}})
+      {{#if damageModifier}}
+        {{#if (gt damageModifier 0)}}
+          + {{damageModifier}} modifier
+        {{else if (lt damageModifier 0)}}
+          {{damageModifier}} modifier
+        {{/if}}
+      {{/if}}
+    </p>
+  </header>
+  <section class="dice-results">
+    <div class="dice-list">
+      {{#each dice as |die|}}
+        <span class="die">{{die}}</span>
+      {{/each}}
+    </div>
+    <div class="result-summary">
+      <div>
+        <span class="label">{{localize 'BNW.Label.Highest'}}</span>
+        <span class="value">{{highest}}</span>
+      </div>
+      {{#if damageModifier}}
+        <div>
+          <span class="label">{{localize 'BNW.Label.DamageModifier'}}</span>
+          <span class="value">{{#if (gt damageModifier 0)}}+{{/if}}{{damageModifier}}</span>
+        </div>
+      {{/if}}
+      <div>
+        <span class="label">Raw {{localize 'BNW.Roll.Damage'}}</span>
+        <span class="value">{{rawDamage}}</span>
+      </div>
+      <div>
+        <span class="label">{{localize 'BNW.Label.TargetSize'}}</span>
+        <span class="value">{{targetSize}}</span>
+      </div>
+      <div class="outcome damage">
+        {{#if (gt finalDamage 1)}}
+          {{finalDamage}} {{localize 'BNW.Roll.Damage'}}
+        {{else if (eq finalDamage 1)}}
+          1 {{localize 'BNW.Roll.Damage'}}
+        {{else}}
+          {{localize 'BNW.Roll.NoDamage'}}
+        {{/if}}
+      </div>
+    </div>
+  </section>
+</div>

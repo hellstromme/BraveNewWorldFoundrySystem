@@ -137,5 +137,12 @@
   "BNW.HitLocation.RightArm": "Right Arm",
   "BNW.HitLocation.Torso": "Torso",
   "BNW.HitLocation.LeftLeg": "Left Leg",
-  "BNW.HitLocation.RightLeg": "Right Leg"
+  "BNW.HitLocation.RightLeg": "Right Leg",
+  "BNW.RollPromptSizeTitle": "Target Size",
+  "BNW.RollPromptSize": "Target Size",
+  "BNW.RollPromptHeadshot": "Head Shot",
+  "BNW.Label.TargetSize": "Target Size",
+  "BNW.Label.FinalDamage": "Final Damage",
+  "BNW.Label.UnknownSkill": "Unknown Skill",
+  "BNW.Roll.NoDamage": "No Damage"
 }

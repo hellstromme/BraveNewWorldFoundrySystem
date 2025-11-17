@@ -60,10 +60,27 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   _attachFrameListeners() {
     super._attachFrameListeners();
     
+    // Store hook IDs so we can remove them later
+    this._hookIds = this._hookIds || [];
+    
     // Listen for embedded document changes to trigger re-render
-    // Only re-render on create and delete, not on update
-    Hooks.on('createItem', this._onEmbeddedDocumentCreate.bind(this));
-    Hooks.on('deleteItem', this._onEmbeddedDocumentDelete.bind(this));
+    const createHookId = Hooks.on('createItem', this._onEmbeddedDocumentCreate.bind(this));
+    const deleteHookId = Hooks.on('deleteItem', this._onEmbeddedDocumentDelete.bind(this));
+    
+    this._hookIds.push(createHookId, deleteHookId);
+  }
+
+  /** @override */
+  async close(options = {}) {
+    // Clean up hooks when closing
+    if (this._hookIds) {
+      for (const id of this._hookIds) {
+        Hooks.off('createItem', id);
+        Hooks.off('deleteItem', id);
+      }
+      this._hookIds = [];
+    }
+    return super.close(options);
   }
 
   /**
@@ -154,7 +171,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     context.powers = this.document.items.filter(i => i.type === 'power');
     context.tricks = this.document.items.filter(i => i.type === 'trick');
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
-    context.weapons = this.document.items.filter(i => i.type === 'closeCombatWeapon');
+    context.weapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'closeCombatWeapon'));
     context.skills = this.document.items.filter(i => i.type === 'skill');
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
     context.woundsData = this._prepareWounds(context.system);
@@ -288,6 +305,50 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
         max: strengthDice,
         isMaxed: current >= strengthDice
       };
+    });
+  }
+
+  /**
+   * Prepare weapons data for rendering
+   * @param {Array} weapons - Array of weapon items
+   * @returns {Array}
+   * @private
+   */
+  _prepareWeapons(weapons = []) {
+    const configTraits = CONFIG.BNW?.traits ?? {};
+    
+    return weapons.map(weapon => {
+      const enrichedWeapon = foundry.utils.deepClone(weapon);
+      
+      // Look up skill - handle both legacy ID and new name-based storage
+      const skillRef = weapon.system?.attackSkill;
+      let skill = null;
+      
+      if (skillRef) {
+        // Try to find by name first (new system)
+        skill = this.document.items.find(i => i.type === 'skill' && i.name === skillRef);
+        
+        // Fallback: try by ID (legacy system)
+        if (!skill) {
+          skill = this.document.items.get(skillRef);
+        }
+        
+        if (skill) {
+          enrichedWeapon.attackSkillName = skill.name;
+          // Get trait from the skill
+          const traitKey = skill.system?.trait;
+          enrichedWeapon.attackTraitLabel = configTraits[traitKey]?.label ?? traitKey ?? '—';
+        } else {
+          // Show what we have, even if not found
+          enrichedWeapon.attackSkillName = skillRef;
+          enrichedWeapon.attackTraitLabel = '—';
+        }
+      } else {
+        enrichedWeapon.attackSkillName = '—';
+        enrichedWeapon.attackTraitLabel = '—';
+      }
+      
+      return enrichedWeapon;
     });
   }
 
@@ -653,10 +714,15 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
 
     // Create the item on this actor
     const itemData = item.toObject();
+    
+    // Ensure skills have a default bonus if not set
+    if (itemData.type === 'skill' && (itemData.system.bonus == null || itemData.system.bonus === '')) {
+      itemData.system.bonus = 2; // Default from template.json
+    }
+    
     const created = await this.document.createEmbeddedDocuments('Item', [itemData]);
     
-    // Force full re-render with parts refresh
-    await this.render(true, { parts: ['form'] });
+    // The createItem hook will trigger a re-render automatically
     
     return created;
   }

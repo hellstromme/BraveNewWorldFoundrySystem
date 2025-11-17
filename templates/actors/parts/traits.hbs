@@ -39,7 +39,7 @@
               {{#each (filterSkillsByTrait ../skills trait.key) as |skill|}}
                 <tr class="skill-row" data-item-id="{{skill.id}}">
                   <td class="skill-name">{{skill.name}}</td>
-                  <td class="skill-bonus">+{{skill.system.bonus}}</td>
+                  <td class="skill-bonus">{{#if skill.system.bonus}}+{{skill.system.bonus}}{{else}}+0{{/if}}</td>
                   <td class="skill-controls">
                     <button type="button" data-action="rollSkill" data-trait="{{trait.key}}" data-skill-id="{{skill.id}}" title="{{localize 'BNW.Action.Roll'}}">
                       <i class="fas fa-dice-six"></i>

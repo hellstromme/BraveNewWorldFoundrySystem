@@ -8,20 +8,11 @@
       </h1>
       <div class="details-grid">
         <label>
-          <span>{{localize "BNW.Label.AttackTrait"}}</span>
-          <select name="system.attackTrait">
-            <option value="">&mdash;</option>
-            {{#each traitOptions as |trait|}}
-              <option value="{{trait.key}}" {{#if (eq ../system.attackTrait trait.key)}}selected{{/if}}>{{trait.label}}</option>
-            {{/each}}
-          </select>
-        </label>
-        <label>
           <span>{{localize "BNW.Label.AttackSkill"}}</span>
           <select name="system.attackSkill">
             <option value="">&mdash;</option>
             {{#each skillOptions as |skill|}}
-              <option value="{{skill.id}}" {{#if (eq ../system.attackSkill skill.id)}}selected{{/if}}>{{skill.label}}</option>
+              <option value="{{skill.name}}" {{#if (eq ../system.attackSkill skill.name)}}selected{{/if}}>{{skill.label}}</option>
             {{/each}}
           </select>
         </label>
