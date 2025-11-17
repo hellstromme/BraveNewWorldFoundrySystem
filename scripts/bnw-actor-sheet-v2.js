@@ -30,7 +30,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       editItem: BraveNewWorldActorSheetV2.prototype._onEditItem,
       deleteItem: BraveNewWorldActorSheetV2.prototype._onDeleteItem,
       editImage: BraveNewWorldActorSheetV2.prototype._onEditImage,
-      changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab
+      changeTab: BraveNewWorldActorSheetV2.prototype._onChangeTab,
+      selectArmor: BraveNewWorldActorSheetV2.prototype._onSelectArmor,
+      adjustArmorDurability: BraveNewWorldActorSheetV2.prototype._onAdjustArmorDurability
     },
     form: {
       submitOnChange: true
@@ -55,6 +57,20 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
   /*  Lifecycle Methods                           */
   /* -------------------------------------------- */
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    
+    // Restore scroll position
+    if (this._scrollPosition != null) {
+      const scrollableElement = this.element.querySelector('.window-content');
+      if (scrollableElement) {
+        scrollableElement.scrollTop = this._scrollPosition;
+      }
+      this._scrollPosition = null;
+    }
+  }
 
   /** @override */
   _attachFrameListeners() {
@@ -273,9 +289,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   }
 
   /**
-   * Prepare wounds data for rendering
+   * Prepare wounds data for rendering with armor information
    * @param {object} system
-   * @returns {Array}
+   * @returns {object}
    * @private
    */
   _prepareWounds(system) {
@@ -295,19 +311,76 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       { key: 'rightLeg', labelKey: 'BNW.HitLocation.RightLeg' }
     ];
     
-    return hitLocations.map(location => {
+    // Get equipped armor items
+    const equippedArmor = this.document.items.filter(i => i.type === 'armor' && i.system?.equipped);
+    
+    // Build armor coverage map
+    const armorByLocation = {};
+    hitLocations.forEach(loc => {
+      armorByLocation[loc.key] = {
+        deflection: 0,
+        durability: 0,
+        maxDurability: 0,
+        armorItems: []
+      };
+    });
+    
+    // Process each equipped armor
+    equippedArmor.forEach(armor => {
+      hitLocations.forEach(loc => {
+        const covered = armor.system?.coverage?.[loc.key] ?? false;
+        if (covered) {
+          const deflection = Number(armor.system?.deflection ?? 0);
+          const durability = Number(armor.system?.durability?.[loc.key] ?? 0);
+          const woundsAbsorbed = Number(armor.system?.woundsAbsorbed ?? 0);
+          
+          // Add deflection values (they stack)
+          armorByLocation[loc.key].deflection += deflection;
+          
+          // Track the armor with highest durability for this location
+          if (durability > armorByLocation[loc.key].durability) {
+            armorByLocation[loc.key].durability = durability;
+            armorByLocation[loc.key].maxDurability = woundsAbsorbed;
+          }
+          
+          armorByLocation[loc.key].armorItems.push({
+            id: armor.id,
+            name: armor.name,
+            woundsAbsorbed: woundsAbsorbed
+          });
+        }
+      });
+    });
+    
+    const woundsData = hitLocations.map(location => {
       // Get current wounds, ensure it's a number, and cap at max
       let current = Number(system.wounds[location.key] ?? 0);
       current = Math.min(Math.max(0, current), strengthDice);
+      
+      const armorData = armorByLocation[location.key];
       
       return {
         key: location.key,
         label: game.i18n.localize(location.labelKey),
         current: current,
         max: strengthDice,
-        isMaxed: current >= strengthDice
+        isMaxed: current >= strengthDice,
+        deflection: armorData.deflection,
+        durability: armorData.durability,
+        maxDurability: armorData.maxDurability,
+        hasArmor: armorData.armorItems.length > 0,
+        armorItems: armorData.armorItems
       };
     });
+    
+    // Get armor names for display
+    const armorNames = equippedArmor.map(a => a.name).join(', ');
+    
+    return {
+      locations: woundsData,
+      equippedArmorNames: armorNames || game.i18n.localize('BNW.Label.Unarmored'),
+      hasArmor: equippedArmor.length > 0
+    };
   }
 
   /**
@@ -727,6 +800,119 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     // The createItem hook will trigger a re-render automatically
     
     return created;
+  }
+
+  /* -------------------------------------------- */
+  /*  Armor Management Actions                    */
+  /* -------------------------------------------- */
+
+  /**
+   * Show armor selection dialog
+   * @param {Event} event
+   * @param {HTMLElement} target
+   */
+  async _onSelectArmor(event, target) {
+    const armors = this.document.items.filter(i => i.type === 'armor');
+    
+    if (!armors.length) {
+      ui.notifications?.warn?.(game.i18n.localize('BNW.Warning.NoArmor'));
+      return;
+    }
+    
+    // Build checkbox list of armor
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${game.i18n.localize('BNW.Dialog.SelectArmorToWear')}</label>
+          ${armors.map(armor => `
+            <div>
+              <label>
+                <input type="checkbox" name="armor-${armor.id}" ${armor.system?.equipped ? 'checked' : ''}/>
+                ${armor.name}
+              </label>
+            </div>
+          `).join('')}
+        </div>
+      </form>
+    `;
+    
+    const dialogV2 = foundry?.applications?.api?.DialogV2;
+    if (dialogV2?.prompt) {
+      try {
+        await dialogV2.prompt({
+          window: { title: game.i18n.localize('BNW.Dialog.SelectArmor') },
+          content,
+          ok: {
+            label: game.i18n.localize('BNW.Action.Apply'),
+            callback: async (event, button, dialog) => {
+              const form = dialog.element.querySelector('form');
+              const updates = [];
+              armors.forEach(armor => {
+                const checkbox = form.querySelector(`input[name="armor-${armor.id}"]`);
+                if (checkbox) {
+                  updates.push({
+                    _id: armor.id,
+                    'system.equipped': checkbox.checked
+                  });
+                }
+              });
+              if (updates.length) {
+                await this.document.updateEmbeddedDocuments('Item', updates);
+              }
+            }
+          },
+          rejectClose: false
+        });
+      } catch (err) {
+        // User cancelled or closed dialog
+      }
+    }
+  }
+
+  /**
+   * Adjust armor durability for a hit location
+   * @param {Event} event
+   * @param {HTMLElement} target
+   */
+  async _onAdjustArmorDurability(event, target) {
+    const location = target.dataset.location;
+    const change = parseInt(target.dataset.change);
+    
+    if (!location || !change) return;
+    
+    // Save scroll position before update
+    const scrollableElement = this.element.querySelector('.window-content');
+    if (scrollableElement) {
+      this._scrollPosition = scrollableElement.scrollTop;
+    }
+    
+    // Find armor covering this location
+    const armors = this.document.items.filter(i => 
+      i.type === 'armor' && 
+      i.system?.equipped && 
+      i.system?.coverage?.[location]
+    );
+    
+    if (!armors.length) return;
+    
+    // Update durability for all armor pieces covering this location
+    const updates = [];
+    for (const armor of armors) {
+      const currentDurability = Number(armor.system?.durability?.[location] ?? 0);
+      const maxDurability = Number(armor.system?.woundsAbsorbed ?? 0);
+      const newDurability = Math.max(0, Math.min(maxDurability, currentDurability + change));
+      
+      if (newDurability !== currentDurability) {
+        updates.push({
+          _id: armor.id,
+          [`system.durability.${location}`]: newDurability
+        });
+      }
+    }
+    
+    if (updates.length) {
+      await this.document.updateEmbeddedDocuments('Item', updates);
+    }
   }
 }
 

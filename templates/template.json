@@ -109,6 +109,33 @@
         "description": ""
       }
     },
+    "armor": {
+      "type": "armor",
+      "img": "icons/svg/shield.svg",
+      "system": {
+        "deflection": 0,
+        "woundsAbsorbed": 0,
+        "cost": 0,
+        "description": "",
+        "equipped": false,
+        "coverage": {
+          "head": true,
+          "leftArm": true,
+          "rightArm": true,
+          "torso": true,
+          "leftLeg": true,
+          "rightLeg": true
+        },
+        "durability": {
+          "head": 0,
+          "leftArm": 0,
+          "rightArm": 0,
+          "torso": 0,
+          "leftLeg": 0,
+          "rightLeg": 0
+        }
+      }
+    },
     "skill": {
       "type": "skill",
       "img": "icons/svg/book.svg",

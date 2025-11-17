@@ -66,6 +66,9 @@
       "rangedWeapon": {
         "label": "BNW.ItemType.RangedWeapon"
       },
+      "armor": {
+        "label": "BNW.ItemType.Armor"
+      },
       "skill": {
         "label": "BNW.ItemType.Skill"
       }

@@ -225,6 +225,69 @@ class BraveNewWorldRangedWeaponSheetV2 extends BraveNewWorldItemSheetV2 {
 }
 
 /**
+ * Armor Item Sheet
+ */
+class BraveNewWorldArmorSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {
+    actions: {
+      toggleAllCoverage: BraveNewWorldArmorSheetV2.prototype._onToggleAllCoverage
+    }
+  }, {inplace: false});
+  
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/armor-sheet-v2.hbs"
+    }
+  };
+
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    
+    // Initialize coverage and durability if not set
+    const woundsAbsorbed = Number(context.system?.woundsAbsorbed ?? 0);
+    
+    context.system.coverage = context.system.coverage ?? {};
+    context.system.durability = context.system.durability ?? {};
+    
+    const hitLocations = ['head', 'leftArm', 'rightArm', 'torso', 'leftLeg', 'rightLeg'];
+    
+    // Prepare hit location data for the table
+    context.hitLocations = hitLocations.map(key => {
+      // Default coverage to true if not set
+      if (context.system.coverage[key] === undefined) {
+        context.system.coverage[key] = true;
+      }
+      
+      // Default durability to woundsAbsorbed if not set or if woundsAbsorbed changed
+      if (context.system.durability[key] === undefined || context.system.durability[key] === 0) {
+        context.system.durability[key] = woundsAbsorbed;
+      }
+      
+      return {
+        key,
+        label: game.i18n.localize(`BNW.HitLocation.${key.charAt(0).toUpperCase() + key.slice(1)}`),
+        covered: context.system.coverage[key],
+        durability: context.system.durability[key]
+      };
+    });
+    
+    return context;
+  }
+
+  /**
+   * Toggle all coverage checkboxes
+   * @param {Event} event
+   * @param {HTMLElement} target
+   */
+  _onToggleAllCoverage(event, target) {
+    const isChecked = target.checked;
+    const checkboxes = this.element.querySelectorAll('input[name^="system.coverage."]');
+    checkboxes.forEach(cb => cb.checked = isChecked);
+  }
+}
+
+/**
  * Skill Item Sheet
  */
 class BraveNewWorldSkillSheetV2 extends BraveNewWorldItemSheetV2 {
@@ -256,4 +319,5 @@ globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
 globalThis.BraveNewWorldQuirkSheetV2 = BraveNewWorldQuirkSheetV2;
 globalThis.BraveNewWorldCloseCombatWeaponSheetV2 = BraveNewWorldCloseCombatWeaponSheetV2;
 globalThis.BraveNewWorldRangedWeaponSheetV2 = BraveNewWorldRangedWeaponSheetV2;
+globalThis.BraveNewWorldArmorSheetV2 = BraveNewWorldArmorSheetV2;
 globalThis.BraveNewWorldSkillSheetV2 = BraveNewWorldSkillSheetV2;

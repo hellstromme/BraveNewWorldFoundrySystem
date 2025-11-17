@@ -9,21 +9,45 @@
   </div>
 </div>
 
-{{!-- Wounds Section --}}
+{{!-- Hit Locations Section --}}
 <div class="wounds-section">
-  <h3>{{localize 'BNW.Label.Wounds'}}</h3>
+  <h3>{{localize 'BNW.Label.HitLocations'}}</h3>
+  <div class="armor-display">
+    <span class="armor-worn">{{woundsData.equippedArmorNames}}</span>
+    <button type="button" data-action="selectArmor" title="{{localize 'BNW.Action.SelectArmor'}}">
+      <i class="fas fa-shield-alt"></i>
+    </button>
+  </div>
   <div class="wounds-grid">
-    {{#each woundsData as |wound|}}
+    {{#each woundsData.locations as |wound|}}
       <div class="wound-location {{#if wound.isMaxed}}maxed{{/if}}">
         <label for="wound-{{wound.key}}">{{wound.label}} ({{wound.max}}):</label>
-        <input 
-          type="number" 
-          id="wound-{{wound.key}}"
-          name="system.wounds.{{wound.key}}" 
-          value="{{wound.current}}" 
-          min="0" 
-          max="{{wound.max}}" 
-          data-dtype="Number" />
+        <div class="wound-controls">
+          <input 
+            type="number" 
+            id="wound-{{wound.key}}"
+            name="system.wounds.{{wound.key}}" 
+            value="{{wound.current}}" 
+            min="0" 
+            max="{{wound.max}}" 
+            data-dtype="Number" />
+          {{#if wound.hasArmor}}
+            <span class="armor-stats">
+              <span class="deflection" title="{{localize 'BNW.Label.Deflection'}}">
+                <i class="fas fa-shield-alt"></i> {{wound.deflection}}
+              </span>
+              <span class="durability-control">
+                <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="-1" title="{{localize 'BNW.Action.DecreaseDurability'}}">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <span class="durability-value" title="{{localize 'BNW.Label.Durability'}}">{{wound.durability}}/{{wound.maxDurability}}</span>
+                <button type="button" data-action="adjustArmorDurability" data-location="{{wound.key}}" data-change="1" title="{{localize 'BNW.Action.IncreaseDurability'}}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </span>
+            </span>
+          {{/if}}
+        </div>
       </div>
     {{/each}}
   </div>

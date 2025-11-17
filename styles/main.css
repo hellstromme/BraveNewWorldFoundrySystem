@@ -1572,3 +1572,110 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
 }
+
+/* Armor coverage table */
+.armor-coverage-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+}
+
+.armor-coverage-table th,
+.armor-coverage-table td {
+  padding: 0.25rem 0.5rem;
+  border: var(--bnw-border-thin) solid var(--bnw-text-bold);
+  text-align: left;
+}
+
+.armor-coverage-table th {
+  background: #f5f5f5;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: var(--bnw-text-bold);
+}
+
+.armor-coverage-table td.centered {
+  text-align: center;
+}
+
+.armor-coverage-table input[type="number"] {
+  width: 80px;
+}
+
+.armor-coverage-table input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Armor display in hit locations */
+.wounds-section .armor-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bnw-bg-light);
+  border: var(--bnw-border-thin) solid var(--bnw-text-bold);
+  border-radius: 4px;
+}
+
+.wounds-section .armor-worn {
+  flex: 1;
+  font-weight: bold;
+}
+
+.wounds-section .armor-display button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.wound-location .wound-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wound-location .armor-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.wound-location .deflection {
+  color: var(--bnw-primary-blue);
+  font-weight: bold;
+}
+
+.wound-location .durability-control {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.wound-location .durability-control button {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.7rem;
+  min-width: auto;
+}
+
+.wound-location .durability-value {
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+
+.wound-location .durability-control button {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.7rem;
+  min-width: auto;
+}
+
+.wound-location .durability-value {
+  color: var(--bnw-primary-blue);
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}

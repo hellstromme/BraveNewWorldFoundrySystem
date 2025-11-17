@@ -41,6 +41,7 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.quirk = game.i18n.localize('BNW.ItemType.Quirk');
   CONFIG.Item.typeLabels.closeCombatWeapon = game.i18n.localize('BNW.ItemType.CloseCombatWeapon');
   CONFIG.Item.typeLabels.rangedWeapon = game.i18n.localize('BNW.ItemType.RangedWeapon');
+  CONFIG.Item.typeLabels.armor = game.i18n.localize('BNW.ItemType.Armor');
   CONFIG.Item.typeLabels.skill = game.i18n.localize('BNW.ItemType.Skill');
 
   if (!Handlebars.helpers.eq) {
@@ -96,6 +97,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/quirk-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/close-combat-weapon-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/ranged-weapon-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/armor-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/skill-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`,
     `${CONFIG.BNW.templatePath}/chat/initiative-roll-card.hbs`
@@ -153,6 +155,12 @@ Hooks.once('init', async function () {
     types: ['rangedWeapon'],
     makeDefault: true,
     label: "BNW.Sheet.Item.RangedWeapon.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldArmorSheetV2, {
+    types: ['armor'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Armor.V2"
   });
   
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldSkillSheetV2, {

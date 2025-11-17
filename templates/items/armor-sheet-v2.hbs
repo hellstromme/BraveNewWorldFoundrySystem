@@ -1,0 +1,61 @@
+{{!-- Application V2 Item Sheet Template - Armor --}}
+<div>
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.ItemType.Armor'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize "BNW.Label.Deflection"}}</span>
+          <input type="number" name="system.deflection" value="{{system.deflection}}" placeholder="0" min="0" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.WoundsAbsorbed"}}</span>
+          <input type="number" name="system.woundsAbsorbed" value="{{system.woundsAbsorbed}}" placeholder="0" min="0" />
+        </label>
+        <label>
+          <span>{{localize "BNW.Label.CostDollars"}}</span>
+          <input type="number" name="system.cost" value="{{system.cost}}" placeholder="0" step="1" min="0" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group">
+      <label>{{localize "BNW.Label.ArmorCoverage"}}</label>
+      <table class="armor-coverage-table">
+        <thead>
+          <tr>
+            <th>{{localize "BNW.Label.HitLocation"}}</th>
+            <th>
+              {{localize "BNW.Label.Covered"}}
+              <input type="checkbox" data-action="toggleAllCoverage" title="{{localize 'BNW.Action.ToggleAll'}}" checked />
+            </th>
+            <th>{{localize "BNW.Label.Durability"}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each hitLocations as |location|}}
+            <tr>
+              <td>{{location.label}}</td>
+              <td class="centered">
+                <input type="checkbox" name="system.coverage.{{location.key}}" {{#if location.covered}}checked{{/if}} />
+              </td>
+              <td>
+                <input type="number" name="system.durability.{{location.key}}" value="{{location.durability}}" min="0" />
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-group stacked">
+      <label>{{localize "BNW.Label.Description"}}</label>
+      <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.Description'}}">{{system.description}}</textarea>
+    </div>
+  </section>
+</div>
