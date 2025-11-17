@@ -1684,3 +1684,108 @@
   min-width: 40px;
   text-align: center;
 }
+
+/* Gear list styling */
+.bnw.sheet .gear-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .gear-list .item {
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  padding: 0.75rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+  box-shadow: var(--bnw-shadow-comic);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Comic book halftone dot pattern */
+.bnw.sheet .gear-list .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bnw.sheet .gear-list .item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bnw.sheet .gear-list .item .item-name {
+  flex: 1;
+}
+
+.bnw.sheet .gear-list .item .item-name h4 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--bnw-primary-red);
+  letter-spacing: 0.5px;
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.bnw.sheet .gear-list .item .item-name .stat {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--bnw-text-bold);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.bnw.sheet .gear-list .item .item-name .stat strong {
+  color: var(--bnw-accent-dark);
+  font-weight: 900;
+}
+
+.bnw.sheet .gear-list .item .item-name .description {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--bnw-text-bold);
+  font-weight: 600;
+}
+
+.bnw.sheet .gear-list .item .item-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.bnw.sheet .gear-list .item .item-controls a {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: var(--bnw-primary-yellow);
+  border: 2px solid var(--bnw-text-bold);
+  color: var(--bnw-text-bold);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bnw.sheet .gear-list .item .item-controls a:hover {
+  background: var(--bnw-primary-blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+.bnw.sheet .gear-list .item .item-controls a i {
+  font-size: 1rem;
+}
+

@@ -1,0 +1,24 @@
+{{!-- Application V2 Item Sheet Template - Gear --}}
+<div>
+  <header class="sheet-header flexrow">
+    <img class="profile-img" src="{{item.img}}" data-action="editImage" title="{{item.name}}" />
+    <div class="header-fields">
+      <h1 class="item-name">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'BNW.Item.Gear'}}" />
+      </h1>
+      <div class="details-grid">
+        <label>
+          <span>{{localize 'BNW.Label.CostDollars'}}</span>
+          <input type="number" name="system.cost" value="{{system.cost}}" placeholder="0" step="0.01" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group stacked">
+      <label>{{localize 'BNW.Label.Description'}}</label>
+      <textarea name="system.description" placeholder="{{localize 'BNW.Placeholder.GearDescription'}}">{{system.description}}</textarea>
+    </div>
+  </section>
+</div>

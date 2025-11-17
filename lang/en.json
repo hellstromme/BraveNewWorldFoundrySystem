@@ -81,6 +81,7 @@
   "BNW.ItemType.RangedWeapon": "Ranged Weapon",
   "BNW.ItemType.Armor": "Armor",
   "BNW.ItemType.Skill": "Skill",
+  "BNW.ItemType.Gear": "Gear",
   "BNW.Item.Trick": "Trick",
   "BNW.Label.RequiresPower": "Requires Power",
   "BNW.Label.RequiredPowerName": "Required Power Name",
@@ -100,6 +101,8 @@
   "BNW.Placeholder.QuirkDescription": "Describe the quirk's effects and mechanics",
   "BNW.Action.AddCost": "Add Cost Option",
   "BNW.Action.AddQuirk": "Add Quirk",
+  "BNW.Action.AddGear": "Add Gear",
+  "BNW.Action.AddArmor": "Add Armor",
   "BNW.Action.AddWeapon": "Add Weapon",
   "BNW.Action.AddCloseCombatWeapon": "Add Close Combat Weapon",
   "BNW.Action.AddRangedWeapon": "Add Ranged Weapon",
@@ -109,6 +112,7 @@
   "BNW.Tab.Quirks": "Quirks",
   "BNW.Tab.Combat": "Combat",
   "BNW.Tab.Weapons": "Weapons",
+  "BNW.Tab.Gear": "Gear",
   "BNW.Label.TotalNegativeQuirks": "Total Negative Quirks",
   "BNW.Warning.TooManyNegativeQuirks": "Cannot add quirk - would exceed the limit of 10 negative quirk points (current: {current}, attempting to add: {adding})",
   "BNW.Sheet.Actor.V2": "BNW Actor Sheet (V2)",
@@ -140,6 +144,8 @@
   "BNW.DamageType.None": "None",
   "BNW.Item.Skill": "Skill",
   "BNW.Placeholder.SkillDescription": "Describe what this skill covers",
+  "BNW.Item.Gear": "Gear",
+  "BNW.Placeholder.GearDescription": "Describe what this gear is and what it does",
   "BNW.Label.Wounds": "Wounds",
   "BNW.Label.HitLocations": "Hit Locations",
   "BNW.Label.Unarmored": "Unarmored",
@@ -191,5 +197,6 @@
   "BNW.HitLocation.RightArm": "Right Arm",
   "BNW.HitLocation.Torso": "Torso",
   "BNW.HitLocation.LeftLeg": "Left Leg",
-  "BNW.HitLocation.RightLeg": "Right Leg"
+  "BNW.HitLocation.RightLeg": "Right Leg",
+  "BNW.Sheet.Item.Gear.V2": "BNW Gear Sheet (V2)"
 }

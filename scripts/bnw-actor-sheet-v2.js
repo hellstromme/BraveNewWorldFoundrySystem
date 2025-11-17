@@ -84,7 +84,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     context.quirks = this.document.items.filter(i => i.type === 'quirk');
     context.closeCombatWeapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'closeCombatWeapon'));
     context.rangedWeapons = this._prepareWeapons(this.document.items.filter(i => i.type === 'rangedWeapon'));
+    context.armor = this.document.items.filter(i => i.type === 'armor');
     context.skills = this.document.items.filter(i => i.type === 'skill');
+    context.gear = this.document.items.filter(i => i.type === 'gear');
     context.negativeQuirksTotal = this._calculateNegativeQuirksTotal(context.quirks);
     context.woundsData = this._prepareWounds(context.system);
     
@@ -99,6 +101,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
           tricks: { id: "tricks", group: groupId, label: "Tricks", active: activeTab === "tricks" },
           quirks: { id: "quirks", group: groupId, label: "Quirks", active: activeTab === "quirks" },
           combat: { id: "combat", group: groupId, label: "Combat", active: activeTab === "combat" },
+          gear: { id: "gear", group: groupId, label: "Gear", active: activeTab === "gear" },
           notes: { id: "notes", group: groupId, label: "Notes", active: activeTab === "notes" }
         }
       };
@@ -115,6 +118,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       quirksCount: context.quirks.length,
       closeCombatWeaponsCount: context.closeCombatWeapons.length,
       rangedWeaponsCount: context.rangedWeapons.length,
+      gearCount: context.gear.length,
       totalItems: this.document.items.size,
       tabsActive: context.tabs.primary?.active
     });

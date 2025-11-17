@@ -1,0 +1,154 @@
+<div class="gear-section">
+  {{!-- Gear Section --}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Tab.Gear'}}</h3>
+    <div class="item-controls header">
+      <button type="button" data-action="createItem" data-type="gear">
+        <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddGear'}}
+      </button>
+    </div>
+    <ol class="gear-list">
+      {{#each gear as |item|}}
+        <li class="item gear flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            {{#if item.system.cost}}
+              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+            {{/if}}
+            {{#if item.system.description}}
+              <p class="description">{{item.system.description}}</p>
+            {{/if}}
+          </div>
+          <div class="item-controls">
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+
+  {{!-- Armor Section --}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.ItemType.Armor'}}</h3>
+    <div class="item-controls header">
+      <button type="button" data-action="createItem" data-type="armor">
+        <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddArmor'}}
+      </button>
+    </div>
+    <ol class="gear-list">
+      {{#each armor as |item|}}
+        <li class="item gear flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            {{#if item.system.woundsAbsorbed}}
+              <span class="stat"><strong>{{localize 'BNW.Label.WoundsAbsorbed'}}:</strong> {{item.system.woundsAbsorbed}}</span>
+            {{/if}}
+            {{#if item.system.deflection}}
+              <span class="stat"><strong>{{localize 'BNW.Label.Deflection'}}:</strong> {{item.system.deflection}}</span>
+            {{/if}}
+            {{#if item.system.cost}}
+              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+            {{/if}}
+          </div>
+          <div class="item-controls">
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+
+  {{!-- Close Combat Weapons Section --}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Label.CloseCombatWeapons'}}</h3>
+    <div class="item-controls header">
+      <button type="button" data-action="createItem" data-type="closeCombatWeapon">
+        <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddCloseCombatWeapon'}}
+      </button>
+    </div>
+    <ol class="gear-list">
+      {{#each closeCombatWeapons as |item|}}
+        <li class="item gear flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
+            {{#if item.system.defensiveBonus}}
+              <span class="stat"><strong>{{localize 'BNW.Label.DefensiveBonus'}}:</strong> {{item.system.defensiveBonus}}</span>
+            {{/if}}
+            {{#if item.system.quickness}}
+              <span class="stat"><strong>{{localize 'BNW.Label.Quickness'}}:</strong> {{item.system.quickness}}</span>
+            {{/if}}
+            <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
+            <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
+            {{#if item.system.cost}}
+              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+            {{/if}}
+          </div>
+          <div class="item-controls">
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+
+  {{!-- Ranged Weapons Section --}}
+  <div class="initiative-section">
+    <h3>{{localize 'BNW.Label.RangedWeapons'}}</h3>
+    <div class="item-controls header">
+      <button type="button" data-action="createItem" data-type="rangedWeapon">
+        <i class="fas fa-plus"></i> {{localize 'BNW.Action.AddRangedWeapon'}}
+      </button>
+    </div>
+    <ol class="gear-list">
+      {{#each rangedWeapons as |item|}}
+        <li class="item gear flexrow" data-item-id="{{item.id}}">
+          <div class="item-name">
+            <h4>{{item.name}}</h4>
+            <span class="stat"><strong>{{localize 'BNW.Label.Attack'}}:</strong> {{item.attackTraitLabel}} / {{item.attackSkillName}}</span>
+            {{#if item.system.weaponType}}
+              <span class="stat"><strong>{{localize 'BNW.Label.WeaponType'}}:</strong> {{item.system.weaponType}}</span>
+            {{/if}}
+            {{#if item.system.action}}
+              <span class="stat"><strong>{{localize 'BNW.Label.Action'}}:</strong> {{item.system.action}}</span>
+            {{/if}}
+            {{#if item.system.rateOfFire}}
+              <span class="stat"><strong>{{localize 'BNW.Label.RateOfFire'}}:</strong> {{item.system.rateOfFire}}</span>
+            {{/if}}
+            {{#if item.system.rangeIncrement}}
+              <span class="stat"><strong>{{localize 'BNW.Label.RangeIncrement'}}:</strong> {{item.system.rangeIncrement}}</span>
+            {{/if}}
+            <span class="stat"><strong>{{localize 'BNW.Label.DamageType'}}:</strong> {{item.system.damageType}}</span>
+            <span class="stat"><strong>{{localize 'BNW.Label.DamageModifier'}}:</strong> {{#if (gt item.system.damageModifier 0)}}+{{/if}}{{item.system.damageModifier}}</span>
+            {{#if item.system.cost}}
+              <span class="stat"><strong>{{localize 'BNW.Label.CostDollars'}}:</strong> ${{item.system.cost}}</span>
+            {{/if}}
+          </div>
+          <div class="item-controls">
+            <a data-action="editItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Edit'}}">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}" title="{{localize 'BNW.Action.Delete'}}">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+</div>

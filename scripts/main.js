@@ -43,6 +43,7 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.rangedWeapon = game.i18n.localize('BNW.ItemType.RangedWeapon');
   CONFIG.Item.typeLabels.armor = game.i18n.localize('BNW.ItemType.Armor');
   CONFIG.Item.typeLabels.skill = game.i18n.localize('BNW.ItemType.Skill');
+  CONFIG.Item.typeLabels.gear = game.i18n.localize('BNW.ItemType.Gear');
 
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -88,6 +89,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/actors/parts/tricks.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/quirks.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/weapons.hbs`,
+    `${CONFIG.BNW.templatePath}/actors/parts/gear.hbs`,
     `${CONFIG.BNW.templatePath}/actors/parts/notes.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet.hbs`,
     `${CONFIG.BNW.templatePath}/items/power-sheet-v2.hbs`,
@@ -99,6 +101,7 @@ Hooks.once('init', async function () {
     `${CONFIG.BNW.templatePath}/items/ranged-weapon-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/armor-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/items/skill-sheet-v2.hbs`,
+    `${CONFIG.BNW.templatePath}/items/gear-sheet-v2.hbs`,
     `${CONFIG.BNW.templatePath}/chat/skill-roll-card.hbs`,
     `${CONFIG.BNW.templatePath}/chat/initiative-roll-card.hbs`
   ];
@@ -167,6 +170,12 @@ Hooks.once('init', async function () {
     types: ['skill'],
     makeDefault: true,
     label: "BNW.Sheet.Item.Skill.V2"
+  });
+  
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, 'bravenewworld', BraveNewWorldGearSheetV2, {
+    types: ['gear'],
+    makeDefault: true,
+    label: "BNW.Sheet.Item.Gear.V2"
   });
 });
 

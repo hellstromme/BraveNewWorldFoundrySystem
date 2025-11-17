@@ -313,6 +313,19 @@ class BraveNewWorldSkillSheetV2 extends BraveNewWorldItemSheetV2 {
   }
 }
 
+/**
+ * Gear Item Sheet
+ */
+class BraveNewWorldGearSheetV2 extends BraveNewWorldItemSheetV2 {
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(super.DEFAULT_OPTIONS, {}, {inplace: false});
+  
+  static PARTS = {
+    form: {
+      template: "systems/bravenewworld/templates/items/gear-sheet-v2.hbs"
+    }
+  };
+}
+
 globalThis.BraveNewWorldItemSheetV2 = BraveNewWorldItemSheetV2;
 globalThis.BraveNewWorldPowerSheetV2 = BraveNewWorldPowerSheetV2;
 globalThis.BraveNewWorldTrickSheetV2 = BraveNewWorldTrickSheetV2;
@@ -321,3 +334,4 @@ globalThis.BraveNewWorldCloseCombatWeaponSheetV2 = BraveNewWorldCloseCombatWeapo
 globalThis.BraveNewWorldRangedWeaponSheetV2 = BraveNewWorldRangedWeaponSheetV2;
 globalThis.BraveNewWorldArmorSheetV2 = BraveNewWorldArmorSheetV2;
 globalThis.BraveNewWorldSkillSheetV2 = BraveNewWorldSkillSheetV2;
+globalThis.BraveNewWorldGearSheetV2 = BraveNewWorldGearSheetV2;

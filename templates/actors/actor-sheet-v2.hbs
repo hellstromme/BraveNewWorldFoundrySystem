@@ -31,6 +31,11 @@
     {{> "systems/bravenewworld/templates/actors/parts/weapons.hbs"}}
   </section>
   
+  {{!-- Gear Tab --}}
+  <section class="sheet-body tab {{#if (eq tabsActive 'gear')}}active{{/if}}" data-group="primary" data-tab="gear">
+    {{> "systems/bravenewworld/templates/actors/parts/gear.hbs"}}
+  </section>
+  
   {{!-- Notes Tab --}}
   <section class="sheet-body tab {{#if (eq tabsActive 'notes')}}active{{/if}}" data-group="primary" data-tab="notes">
     {{> "systems/bravenewworld/templates/actors/parts/notes.hbs"}}

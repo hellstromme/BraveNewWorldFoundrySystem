@@ -71,6 +71,9 @@
       },
       "skill": {
         "label": "BNW.ItemType.Skill"
+      },
+      "gear": {
+        "label": "BNW.ItemType.Gear"
       }
     }
   },
