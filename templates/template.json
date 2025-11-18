@@ -12,6 +12,7 @@
           "affiliation": "",
           "background": ""
         },
+        "money": 0,
         "traits": {
           "strength": {
             "dice": 3,

@@ -170,6 +170,7 @@
 /* Comic book style tabs */
 .bnw.sheet .sheet-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.5rem;
   background: var(--bnw-accent-dark);
@@ -178,7 +179,7 @@
 }
 
 .bnw.sheet .sheet-tabs .item {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   background: var(--bnw-accent-light);
   border: 2px solid var(--bnw-text-bold);
   font-weight: 700;
@@ -188,6 +189,10 @@
   transition: all 0.2s;
   color: var(--bnw-text-bold);
   clip-path: polygon(5% 0%, 95% 0%, 100% 10%, 100% 90%, 95% 100%, 5% 100%, 0% 90%, 0% 10%);
+  white-space: nowrap;
+  font-size: 0.85rem;
+  flex: 1 1 auto;
+  text-align: center;
 }
 
 .bnw.sheet .sheet-tabs .item:hover {
@@ -1699,6 +1704,62 @@
   font-weight: bold;
   min-width: 40px;
   text-align: center;
+}
+
+/* Money section styling */
+.bnw.sheet .money-section {
+  background: linear-gradient(135deg, rgba(241, 196, 15, 0.15) 0%, rgba(230, 126, 34, 0.15) 100%);
+  border: var(--bnw-border-thick) solid var(--bnw-text-bold);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--bnw-shadow-comic);
+}
+
+.bnw.sheet .money-section .money-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bnw.sheet .money-section .money-label > span {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--bnw-text-bold);
+  font-size: 1.1rem;
+}
+
+.bnw.sheet .money-section .money-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  padding: 0.5rem;
+  max-width: 300px;
+}
+
+.bnw.sheet .money-section .currency-symbol {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--bnw-success-green);
+}
+
+.bnw.sheet .money-section input[type="number"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--bnw-text-bold);
+  padding: 0;
+  min-width: 0;
+}
+
+.bnw.sheet .money-section input[type="number"]:focus {
+  outline: none;
 }
 
 /* Gear list styling */

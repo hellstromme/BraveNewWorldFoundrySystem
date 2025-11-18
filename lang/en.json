@@ -114,6 +114,7 @@
   "BNW.Tab.Combat": "Combat",
   "BNW.Tab.Weapons": "Weapons",
   "BNW.Tab.Gear": "Gear",
+  "BNW.Label.Money": "Money ($)",
   "BNW.Label.TotalNegativeQuirks": "Total Negative Quirks",
   "BNW.Warning.TooManyNegativeQuirks": "Cannot add quirk - would exceed the limit of 10 negative quirk points (current: {current}, attempting to add: {adding})",
   "BNW.Sheet.Actor.V2": "BNW Actor Sheet (V2)",

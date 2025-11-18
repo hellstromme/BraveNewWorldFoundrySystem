@@ -1,4 +1,15 @@
 <div class="gear-section">
+  {{!-- Money Section --}}
+  <div class="money-section">
+    <label class="money-label">
+      <span>{{localize 'BNW.Label.Money'}}</span>
+      <div class="money-input-wrapper">
+        <span class="currency-symbol">$</span>
+        <input type="number" name="system.money" value="{{system.money}}" min="0" step="1" />
+      </div>
+    </label>
+  </div>
+
   {{!-- Gear Section --}}
   <div class="initiative-section">
     <h3>{{localize 'BNW.Tab.Gear'}}</h3>
