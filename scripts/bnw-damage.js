@@ -40,7 +40,6 @@ BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
   let armorDeflection = 0;
   let armorMaxAbsorb = 0;
   let armorDurability = 0;
-  let armorRemainingCapacity = 0;
 
   if (armor) {
     armorName = armor.name;
@@ -48,17 +47,11 @@ BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
     armorMaxAbsorb = Number(armor.woundsAbsorbed ?? 0) || 0;
     armorDurability = Number(armor.durability ?? 0) || 0;
 
-    // If armor has finite absorption and no remaining durability at this location,
-    // it no longer provides deflection or absorption.
-    if (armorMaxAbsorb > 0 && armorDurability <= 0) {
+    // If this location has no remaining durability, the armor no longer
+    // provides deflection or absorption.
+    const canStillAbsorb = armorMaxAbsorb > 0 && armorDurability > 0;
+    if (!canStillAbsorb) {
       armorDeflection = 0;
-      armorRemainingCapacity = 0;
-    } else if (armorMaxAbsorb > 0) {
-      // Durability represents remaining capacity at this location
-      armorRemainingCapacity = Math.max(0, Math.min(armorDurability, armorMaxAbsorb));
-    } else {
-      // 10/— style armor: no absorption limit, but deflection is always on.
-      armorRemainingCapacity = 0;
     }
   }
 
@@ -68,25 +61,26 @@ BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
   // Convert damage points to wounds
   const totalWounds = Math.floor(damageAfterDeflection / targetSize);
 
-  // Split wounds between armor and wearer based on remaining capacity
+  // Split wounds between armor and wearer.
+  // Armor can absorb at most 1 wound per hit, and only if durability > 0.
   let woundsToArmor = 0;
   let woundsToActor = totalWounds;
 
-  if (armor && armorMaxAbsorb > 0 && armorRemainingCapacity > 0 && totalWounds > 0) {
-    const idealArmor = Math.floor(totalWounds / 2);
-    woundsToArmor = Math.min(idealArmor, armorRemainingCapacity);
+  const canAbsorbThisHit = armor && armorMaxAbsorb > 0 && armorDurability > 0 && totalWounds > 0;
+  if (canAbsorbThisHit) {
+    woundsToArmor = 1;
     woundsToActor = totalWounds - woundsToArmor;
   }
 
   // Update armor durability if applicable
   if (armor && armorMaxAbsorb > 0 && woundsToArmor > 0 && armor.item) {
-    // Durability is remaining capacity - reduce it by the wounds absorbed
-    const newDurability = Math.max(0, armorDurability - woundsToArmor);
+    // Durability represents remaining capacity at this location;
+    // each absorbed wound reduces it by 1.
+    const newDurability = Math.max(0, armorDurability - 1);
     await armor.item.update({
       [`system.durability.${hitLocation}`]: newDurability
     });
     armorDurability = newDurability;
-    armorRemainingCapacity = Math.max(0, Math.min(armorDurability, armorMaxAbsorb));
   }
 
   // Calculate final damage
@@ -103,7 +97,6 @@ BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
     armorDeflection,
     armorMaxAbsorb,
     armorDurability,
-    armorRemainingCapacity,
     totalWounds,
     woundsToArmor,
     finalDamage: damageAfterArmor,
@@ -359,6 +352,7 @@ Hooks.on('renderChatMessageHTML', (message, htmlElement) => {
   // apply armor deflection before size division as per rules.
   const rawDamage = message.getFlag('bravenewworld', 'rawDamage') ?? finalDamage;
   const targetSize = message.getFlag('bravenewworld', 'targetSize') ?? 5;
+  const hitLocationKey = message.getFlag('bravenewworld', 'hitLocationKey') ?? null;
 
   // Find the message content element (HTMLElement API)
   const contentElement = htmlElement.querySelector?.('.message-content');
@@ -379,6 +373,7 @@ Hooks.on('renderChatMessageHTML', (message, htmlElement) => {
   button.addEventListener('click', async (event) => {
     const damage = Number(rawDamage);
     const size = Number(targetSize) || 5;
+    const hitLocation = hitLocationKey || null;
 
     // Get selected tokens
     const targets = Array.from(game.user.targets);
@@ -408,7 +403,8 @@ Hooks.on('renderChatMessageHTML', (message, htmlElement) => {
       damage,
       options: {
         attacker,
-        targetSize: size
+        targetSize: size,
+        hitLocation
       }
     });
   });

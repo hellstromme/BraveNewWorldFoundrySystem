@@ -2,6 +2,61 @@ const BNW = globalThis.BNW ?? (globalThis.BNW = {});
 BNW.dice = BNW.dice ?? {};
 
 /**
+ * Roll a Brave New World hit location using the core table.
+ * 1 = Leg, 2-4 = Torso, 5 = Arm, 6 = Head.
+ * If Arm/Leg, roll again: odd = Left, even = Right.
+ * Returns an object with { key, label, base, side, roll, sideRoll }.
+ */
+BNW.dice.rollHitLocation = async function () {
+  let roll = new Roll('1d6');
+  roll = await roll.evaluate();
+  const baseRoll = roll.total;
+
+  let base;
+  if (baseRoll === 1) base = 'leg';
+  else if (baseRoll >= 2 && baseRoll <= 4) base = 'torso';
+  else if (baseRoll === 5) base = 'arm';
+  else base = 'head';
+
+  let sideRoll = null;
+  let side = null;
+
+  if (base === 'arm' || base === 'leg') {
+    let second = new Roll('1d6');
+    second = await second.evaluate();
+    sideRoll = second.total;
+    side = sideRoll % 2 === 1 ? 'left' : 'right';
+  }
+
+  let key;
+  if (base === 'head') key = 'head';
+  else if (base === 'torso') key = 'torso';
+  else if (base === 'arm') key = side === 'left' ? 'leftArm' : 'rightArm';
+  else if (base === 'leg') key = side === 'left' ? 'leftLeg' : 'rightLeg';
+
+  // Prefer BNW.damage label helper if available, otherwise localize directly.
+  let label = key;
+  if (BNW.damage?.getHitLocationLabel) {
+    label = BNW.damage.getHitLocationLabel(key);
+  } else {
+    const labels = {
+      head: 'BNW.HitLocation.Head',
+      leftArm: 'BNW.HitLocation.LeftArm',
+      rightArm: 'BNW.HitLocation.RightArm',
+      torso: 'BNW.HitLocation.Torso',
+      leftLeg: 'BNW.HitLocation.LeftLeg',
+      rightLeg: 'BNW.HitLocation.RightLeg'
+    };
+    label = game.i18n?.localize?.(labels[key] ?? key) ?? key;
+  }
+
+  const baseLabel = base ? base.charAt(0).toUpperCase() + base.slice(1) : null;
+  const sideLabel = side ? side.charAt(0).toUpperCase() + side.slice(1) : null;
+
+  return { key, label, base, side, baseLabel, sideLabel, roll: baseRoll, sideRoll };
+};
+
+/**
  * Attempt to coerce a target number value from a DialogV2 response.
  * @param {*} value
  * @returns {number|null}
@@ -248,6 +303,19 @@ BNW.dice.rollTraitSkill = async function ({
     successes = 1 + Math.floor(margin / 5);
   }
 
+  // Optional: if this is a weapon attack and it hit, roll and record hit location
+  let hitLocation = null;
+  if (success && sourceItem && (sourceItem.type === 'closeCombatWeapon' || sourceItem.type === 'rangedWeapon')) {
+    try {
+      hitLocation = await BNW.dice.rollHitLocation();
+      if (game?.user?.setFlag) {
+        await game.user.setFlag('bravenewworld', 'lastHitLocation', hitLocation);
+      }
+    } catch (err) {
+      console.warn('BNW | Failed to roll hit location on attack', err);
+    }
+  }
+
   const data = {
     actorName: actor.name,
     traitLabel: traitLabel,
@@ -262,6 +330,9 @@ BNW.dice.rollTraitSkill = async function ({
     target: resolvedTarget,
     success,
     successes,
+    hitLocationLabel: hitLocation?.label ?? null,
+    hitLocationBase: hitLocation?.baseLabel ?? null,
+    hitLocationSide: hitLocation?.sideLabel ?? null,
     title: label || (skillLabel ? `${skillLabel} (${traitLabel})` : traitLabel)
   };
 
@@ -288,6 +359,9 @@ BNW.dice.rollTraitSkill = async function ({
         skillBonus,
         bonusDice: bonusValue,
         successes,
+        hitLocationKey: hitLocation?.key ?? null,
+        hitLocationBase: hitLocation?.base ?? null,
+        hitLocationSide: hitLocation?.side ?? null,
         itemId: sourceItem?.id ?? null
       }
     }
@@ -499,7 +573,25 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
     resolvedHeadshot = result.headshot;
   }
 
+  // Determine hit location up front so we can apply any
+  // location-based damage modifiers (e.g., extra dice for head shots).
+  let hitLocation = null;
+  try {
+    if (game?.user?.getFlag) {
+      const stored = await game.user.getFlag('bravenewworld', 'lastHitLocation');
+      if (stored && stored.key) {
+        hitLocation = stored;
+      }
+    }
+    if (!hitLocation) {
+      hitLocation = await BNW.dice.rollHitLocation();
+    }
+  } catch (err) {
+    console.warn('BNW | Failed to obtain hit location for damage roll', err);
+  }
+
   const headshotBonus = resolvedHeadshot ? 2 : 0;
+  const headLocationBonus = hitLocation?.key === 'head' ? 2 : 0;
   let pool;
   let damageLabel;
   let totalModifier = weaponModifier;
@@ -508,8 +600,10 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
   if (damageType === 'fixed') {
     // Fixed damage - use weapon's fixed dice
     const fixedDice = Number(weapon.system?.fixedDamageDice ?? 0);
-    pool = Math.max(fixedDice + headshotBonus, 1);
-    damageLabel = `${fixedDice}d6${headshotBonus > 0 ? ` +${headshotBonus} Headshot` : ''}`;
+    pool = Math.max(fixedDice + headshotBonus + headLocationBonus, 1);
+    const headshotText = headshotBonus > 0 ? ` +${headshotBonus} Headshot` : '';
+    const headLocText = headLocationBonus > 0 ? ` +${headLocationBonus} Head` : '';
+    damageLabel = `${fixedDice}d6${headshotText}${headLocText}`;
   } else {
     // Trait-based damage (strength, stun, etc.)
     const systemData = actor.system ?? {};
@@ -522,7 +616,7 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
     
     const traitDice = Number(trait?.dice ?? 0);
     const traitBonus = Number(trait?.default ?? 0);
-    pool = Math.max(traitDice + headshotBonus, 1);
+    pool = Math.max(traitDice + headshotBonus + headLocationBonus, 1);
     
     // Add trait bonus to weapon modifier for total
     totalModifier = weaponModifier + traitBonus;
@@ -587,6 +681,9 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
     rawDamage,
     targetSize: resolvedSize,
     finalDamage,
+    hitLocationLabel: hitLocation?.label ?? null,
+    hitLocationBase: hitLocation?.baseLabel ?? null,
+    hitLocationSide: hitLocation?.sideLabel ?? null,
     headshot: resolvedHeadshot,
     title: `${weapon.name} - ${game?.i18n?.localize?.('BNW.Roll.Damage') ?? 'Damage'}${resolvedHeadshot ? ' (Headshot)' : ''}`
   };
@@ -613,6 +710,9 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
         rawDamage,
         targetSize: resolvedSize,
         finalDamage,
+        hitLocationKey: hitLocation?.key ?? null,
+        hitLocationBase: hitLocation?.base ?? null,
+        hitLocationSide: hitLocation?.side ?? null,
         pool,
         headshot: resolvedHeadshot
       }
@@ -880,4 +980,3 @@ BNW.dice.rollInitiative = async function ({ actor } = {}) {
     }
   });
 };
-

@@ -37,6 +37,17 @@
         <span class="label">{{localize 'BNW.Label.Target'}}</span>
         <span class="value">{{target}}</span>
       </div>
+      {{#if hitLocationLabel}}
+        <div>
+          <span class="label">{{localize 'BNW.Label.HitLocation'}}</span>
+          <span class="value">
+            {{hitLocationLabel}}
+            {{#if hitLocationBase}}
+              ({{hitLocationBase}}{{#if hitLocationSide}}, {{hitLocationSide}}{{/if}})
+            {{/if}}
+          </span>
+        </div>
+      {{/if}}
       <div class="outcome {{#if success}}success{{else}}failure{{/if}}">
         {{#if success}}
           {{#if (gt successes 1)}}
@@ -51,4 +62,3 @@
     </div>
   </section>
 </div>
-

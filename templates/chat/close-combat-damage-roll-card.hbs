@@ -39,6 +39,17 @@
         <span class="label">{{localize 'BNW.Label.TargetSize'}}</span>
         <span class="value">{{targetSize}}</span>
       </div>
+      {{#if hitLocationLabel}}
+        <div>
+          <span class="label">{{localize 'BNW.Label.HitLocation'}}</span>
+          <span class="value">
+            {{hitLocationLabel}}
+            {{#if hitLocationBase}}
+              ({{hitLocationBase}}{{#if hitLocationSide}}, {{hitLocationSide}}{{/if}})
+            {{/if}}
+          </span>
+        </div>
+      {{/if}}
       <div class="outcome damage">
         {{#if (gt finalDamage 1)}}
           {{finalDamage}} {{localize 'BNW.Roll.Damage'}}
