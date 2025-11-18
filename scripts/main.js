@@ -41,6 +41,21 @@ Hooks.once('init', async function () {
     }
   });
 
+  // Register complication/critical failure mode setting
+  game.settings.register('bravenewworld', 'complicationMode', {
+    name: "BNW.Settings.ComplicationMode.Name",
+    hint: "BNW.Settings.ComplicationMode.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      off: "BNW.Settings.ComplicationMode.Off",
+      complication: "BNW.Settings.ComplicationMode.Complication",
+      critFail: "BNW.Settings.ComplicationMode.CritFail"
+    },
+    default: "complication"
+  });
+
   // Register settings menu for trait configuration
   game.settings.registerMenu('bravenewworld', 'traitConfig', {
     name: "BNW.Settings.Traits.MenuName",

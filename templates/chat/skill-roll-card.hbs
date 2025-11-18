@@ -56,9 +56,18 @@
             {{localize 'BNW.Roll.Success'}}
           {{/if}}
         {{else}}
-          {{localize 'BNW.Roll.Failure'}}
+          {{#if isCriticalFailure}}
+            {{localize 'BNW.Roll.CriticalFailure'}}
+          {{else}}
+            {{localize 'BNW.Roll.Failure'}}
+          {{/if}}
         {{/if}}
       </div>
+      {{#if isComplication}}
+        <div class="outcome complication">
+          {{localize 'BNW.Roll.Complication'}}
+        </div>
+      {{/if}}
     </div>
   </section>
 </div>

@@ -242,7 +242,7 @@ BNW.dice.rollTraitSkill = async function ({
   const traitDice = Number(trait?.dice ?? 3);
   const bonusValue = Number(bonusDice ?? 0);
 
-  const defaultTarget = Number(target ?? 0) || 7;
+  const defaultTarget = Number(target ?? 0) || 5;
   const resolvedTarget = target ?? await BNW.dice.promptTargetNumber({
     defaultTarget,
     traitLabel: traitLabel,
@@ -292,9 +292,44 @@ BNW.dice.rollTraitSkill = async function ({
   }
 
   const highest = Math.max(...diceResults);
+
+  // Determine complication / critical failure based on majority 1s rule.
+  let isComplication = false;
+  let isCriticalFailure = false;
+  try {
+    const allRolls = [];
+    for (const term of roll.dice ?? []) {
+      for (const result of term.results ?? []) {
+        if (result?.result != null) {
+          const v = Number(result.result);
+          if (Number.isFinite(v)) allRolls.push(v);
+        }
+      }
+    }
+    const totalDice = allRolls.length;
+    const onesCount = allRolls.filter(v => v === 1).length;
+    const majorityOnes = totalDice > 0 && onesCount > totalDice / 2;
+
+    if (majorityOnes) {
+      const mode = game.settings?.get?.('bravenewworld', 'complicationMode') ?? 'complication';
+      if (mode === 'critFail') {
+        isCriticalFailure = true;
+      } else if (mode === 'complication') {
+        isComplication = true;
+      }
+    }
+  } catch (err) {
+    console.warn('BNW | Failed to evaluate complication state', err);
+  }
+
   const totalBonus = skillBonus + bonusValue;
-  const finalResult = highest + totalBonus;
-  const success = finalResult >= resolvedTarget;
+  let finalResult = highest + totalBonus;
+  let success = finalResult >= resolvedTarget;
+
+  // Critical failure mode: mostly 1s always fail regardless of total.
+  if (isCriticalFailure) {
+    success = false;
+  }
   
   // Calculate number of successes: 1 for meeting TN, +1 for every 5 points over
   let successes = 0;
@@ -329,6 +364,8 @@ BNW.dice.rollTraitSkill = async function ({
     finalResult,
     target: resolvedTarget,
     success,
+    isComplication,
+    isCriticalFailure,
     successes,
     hitLocationLabel: hitLocation?.label ?? null,
     hitLocationBase: hitLocation?.baseLabel ?? null,
@@ -359,6 +396,8 @@ BNW.dice.rollTraitSkill = async function ({
         skillBonus,
         bonusDice: bonusValue,
         successes,
+        isComplication,
+        isCriticalFailure,
         hitLocationKey: hitLocation?.key ?? null,
         hitLocationBase: hitLocation?.base ?? null,
         hitLocationSide: hitLocation?.side ?? null,
