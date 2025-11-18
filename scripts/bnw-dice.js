@@ -605,6 +605,7 @@ BNW.dice.rollCloseCombatDamage = async function ({ actor, weapon, targetSize = n
     content,
     flags: {
       bravenewworld: {
+        rollType: 'damage',
         weaponId: weapon.id,
         damageType,
         damageModifier: totalModifier,

@@ -24,6 +24,7 @@
     "scripts/bnw-item-sheet-v2.js",
     "scripts/bnw-trait-config.js",
     "scripts/bnw-combat.js",
+    "scripts/bnw-damage.js",
     "scripts/main.js"
   ],
   "styles": [

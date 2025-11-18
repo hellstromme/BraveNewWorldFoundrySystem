@@ -1924,3 +1924,75 @@
 }
 
 
+
+/* Damage Application Styles */
+.bnw-apply-damage {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--bnw-primary-red) 0%, #c0392b 100%);
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  color: white;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.bnw-apply-damage:hover {
+  background: linear-gradient(135deg, #c0392b 0%, var(--bnw-primary-red) 100%);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.bnw-apply-damage i {
+  margin-right: 0.5rem;
+}
+
+.bnw-damage-card {
+  padding: 1rem;
+  background: var(--bnw-panel-bg);
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.bnw-damage-card h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--bnw-primary-red);
+  font-family: 'Bangers', cursive;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bnw-damage-card .damage-details {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 2px solid var(--bnw-text-bold);
+}
+
+.bnw-damage-card .damage-details p.final {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--bnw-text-muted);
+  color: var(--bnw-primary-red);
+  font-size: 1.1rem;
+}
+
+.bnw-damage-confirm .damage-summary {
+  padding: 1rem;
+  background: var(--bnw-panel-bg);
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+}
+
+.bnw-damage-confirm .final-damage {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 2px solid var(--bnw-primary-red);
+  color: var(--bnw-primary-red);
+  font-size: 1.1rem;
+}
