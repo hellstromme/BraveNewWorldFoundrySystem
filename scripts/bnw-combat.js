@@ -26,34 +26,42 @@ Hooks.on('init', () => {
 
   console.log('BNW Combat | Combat initiative formula set:', CONFIG.Combat.initiative);
 
-  // Store original method
-  const originalGetInitiativeRoll = CONFIG.Actor.documentClass.prototype.getInitiativeRoll;
-
-  /**
-   * Get initiative roll for BNW system
-   * Rolls Speed trait with TN 5, calculates actions
-   */
-  CONFIG.Actor.documentClass.prototype.getInitiativeRoll = async function(formula) {
-    console.log('BNW Combat | getInitiativeRoll called for actor:', this.name);
+  // Override Combatant._getInitiativeFormula to use actor's Speed trait
+  const originalGetInitiativeFormula = CONFIG.Combatant.documentClass.prototype._getInitiativeFormula;
+  
+  console.log('BNW Combat | Combatant._getInitiativeFormula exists?', !!originalGetInitiativeFormula);
+  
+  CONFIG.Combatant.documentClass.prototype._getInitiativeFormula = function() {
+    console.log('BNW Combat | _getInitiativeFormula called for combatant:', this.name);
     
-    // Get Speed trait
-    const speedTrait = this.system?.traits?.speed;
-    if (!speedTrait) {
-      ui.notifications.warn(`${this.name} has no Speed trait configured.`);
-      return originalGetInitiativeRoll.call(this, formula);
+    const actor = this.actor;
+    if (!actor) {
+      console.log('BNW Combat | No actor, using default formula');
+      return originalGetInitiativeFormula?.call(this) || CONFIG.Combat.initiative.formula;
     }
-
+    
+    const speedTrait = actor.system?.traits?.speed;
+    console.log('BNW Combat | Speed trait:', speedTrait);
+    
+    if (!speedTrait) {
+      console.log('BNW Combat | No speed trait, using default formula');
+      return originalGetInitiativeFormula?.call(this) || CONFIG.Combat.initiative.formula;
+    }
+    
     const speedDice = Number(speedTrait.dice ?? 3);
     const speedDefault = Number(speedTrait.default ?? 0);
-
-    // BNW initiative formula: Xd6x=6 (exploding 6s)
-    const rollFormula = `${speedDice}d6x=6`;
-    const roll = await new Roll(rollFormula).evaluate();
-
-    console.log('BNW Combat | Initiative roll result:', roll.total);
     
-    return roll;
+    // BNW initiative formula: Xd6x=6 + default bonus
+    const formula = speedDefault > 0 
+      ? `${speedDice}d6x=6 + ${speedDefault}`
+      : `${speedDice}d6x=6`;
+    
+    console.log('BNW Combat | Generated formula for', actor.name, ':', formula);
+    
+    return formula;
   };
+
+  console.log('BNW Combat | Combatant._getInitiativeFormula override complete');
 
   console.log('BNW Combat | About to override Combat.prototype.rollInitiative');
   
@@ -286,8 +294,107 @@ Hooks.on('preDeleteCombatant', async (combatant, options, userId) => {
 });
 
 /**
- * Render hook to display action numbers in combat tracker
+ * Hook to customize initiative chat messages with BNW template
  */
+Hooks.on('preCreateChatMessage', async (message, data, options, userId) => {
+  // Only process initiative rolls
+  if (!message.rolls?.length) return;
+  if (!message.flavor?.includes('Initiative')) return;
+  
+  const roll = message.rolls[0];
+  const combatant = message.speaker?.token ? game.combat?.combatants.find(c => c.tokenId === message.speaker.token) : null;
+  
+  if (!combatant?.actor) return;
+  
+  const actor = combatant.actor;
+  const speedTrait = actor.system?.traits?.speed;
+  
+  if (!speedTrait) return;
+  
+  const speedDice = Number(speedTrait.dice ?? 3);
+  const speedDefault = Number(speedTrait.default ?? 0);
+  const targetNumber = 5;
+  
+  // Parse the roll to get dice results
+  const diceResults = [];
+  for (const term of roll.dice ?? []) {
+    if (!term?.results) continue;
+    
+    let runningTotal = 0;
+    for (const result of term.results) {
+      if (result?.result == null) continue;
+      
+      const value = Number(result.result);
+      if (!Number.isFinite(value)) continue;
+      
+      runningTotal += value;
+      
+      if (!result.exploded) {
+        diceResults.push(runningTotal);
+        runningTotal = 0;
+      }
+    }
+    
+    if (runningTotal > 0) {
+      diceResults.push(runningTotal);
+    }
+  }
+  
+  if (!diceResults.length) diceResults.push(0);
+  
+  const highest = Math.max(...diceResults);
+  const finalResult = highest + speedDefault;
+  const success = finalResult >= targetNumber;
+  
+  // Calculate actions
+  let actions = 1;
+  if (success) {
+    const margin = finalResult - targetNumber;
+    const successes = 1 + Math.floor(margin / 5);
+    actions = 1 + successes;
+  }
+  actions = Math.min(actions, speedDice);
+  
+  // Prepare data for custom template
+  const templateData = {
+    actorName: actor.name,
+    speedDice: speedDice,
+    speedDefault: speedDefault,
+    dice: diceResults,
+    highest,
+    finalResult,
+    target: targetNumber,
+    success,
+    actions,
+    title: game.i18n.localize('BNW.Label.Initiative') || 'Initiative'
+  };
+  
+  // Render custom template
+  const systemBasePath = CONFIG.BNW?.systemBasePath ?? game.system?.path ?? `systems/${game.system.id}`;
+  const templateBasePath = CONFIG.BNW?.templatePath ?? `${systemBasePath}/templates`;
+  const content = await foundry.applications.handlebars.renderTemplate(
+    `${templateBasePath}/chat/initiative-roll-card.hbs`, 
+    templateData
+  );
+  
+  // Update message with custom content
+  message.updateSource({ content });
+  
+  // Add BNW flags
+  message.updateSource({
+    'flags.bravenewworld': {
+      rollType: 'initiative',
+      speedDice,
+      speedDefault,
+      target: targetNumber,
+      highest,
+      finalResult,
+      actions
+    }
+  });
+  
+  console.log('BNW Combat | Customized initiative chat message for', actor.name);
+});
 Hooks.on('renderCombatTracker', (app, html, data) => {
   // html is an HTMLElement in v13, not jQuery
   const element = html instanceof HTMLElement ? html : html[0];
