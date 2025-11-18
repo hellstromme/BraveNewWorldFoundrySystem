@@ -10,11 +10,12 @@ BNW.damage = BNW.damage || {};
 /**
  * Apply damage to an actor with armor reduction and hit location tracking
  * @param {Actor} actor - The actor receiving damage
- * @param {number} damage - Amount of damage before armor
+ * @param {number} damage - Raw damage points before armor and size division
  * @param {object} options - Additional options
  * @param {string} options.hitLocation - Specific hit location (head, leftArm, etc.)
  * @param {boolean} options.bypassArmor - Whether to ignore armor
  * @param {Actor} options.attacker - The attacking actor (for chat message)
+ * @param {number} options.targetSize - Target size used to convert damage points to wounds
  */
 BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
   if (!actor) {
@@ -26,25 +27,88 @@ BNW.damage.applyDamage = async function({ actor, damage, options = {} } = {}) {
   if (!hitLocation) return; // User cancelled
 
   const bypassArmor = options.bypassArmor || false;
+  const targetSize = Number(options.targetSize ?? 5) || 5;
+
+  // Clamp raw damage to non-negative
+  const rawDamage = Math.max(0, Number(damage ?? 0) || 0);
 
   // Get equipped armor
   const armor = bypassArmor ? null : this.getEquippedArmor(actor, hitLocation);
-  const armorValue = armor?.woundsAbsorbed || 0;
+
+  // Determine effective deflection and absorption for this hit
+  let armorName = game.i18n.localize('BNW.Label.Unarmored');
+  let armorDeflection = 0;
+  let armorMaxAbsorb = 0;
+  let armorDurability = 0;
+  let armorRemainingCapacity = 0;
+
+  if (armor) {
+    armorName = armor.name;
+    armorDeflection = Number(armor.deflection ?? 0) || 0;
+    armorMaxAbsorb = Number(armor.woundsAbsorbed ?? 0) || 0;
+    armorDurability = Number(armor.durability ?? 0) || 0;
+
+    // If armor has finite absorption and no remaining durability at this location,
+    // it no longer provides deflection or absorption.
+    if (armorMaxAbsorb > 0 && armorDurability <= 0) {
+      armorDeflection = 0;
+      armorRemainingCapacity = 0;
+    } else if (armorMaxAbsorb > 0) {
+      // Durability represents remaining capacity at this location
+      armorRemainingCapacity = Math.max(0, Math.min(armorDurability, armorMaxAbsorb));
+    } else {
+      // 10/— style armor: no absorption limit, but deflection is always on.
+      armorRemainingCapacity = 0;
+    }
+  }
+
+  // Apply deflection before dividing by size
+  const damageAfterDeflection = Math.max(0, rawDamage - armorDeflection);
+
+  // Convert damage points to wounds
+  const totalWounds = Math.floor(damageAfterDeflection / targetSize);
+
+  // Split wounds between armor and wearer based on remaining capacity
+  let woundsToArmor = 0;
+  let woundsToActor = totalWounds;
+
+  if (armor && armorMaxAbsorb > 0 && armorRemainingCapacity > 0 && totalWounds > 0) {
+    const idealArmor = Math.floor(totalWounds / 2);
+    woundsToArmor = Math.min(idealArmor, armorRemainingCapacity);
+    woundsToActor = totalWounds - woundsToArmor;
+  }
+
+  // Update armor durability if applicable
+  if (armor && armorMaxAbsorb > 0 && woundsToArmor > 0 && armor.item) {
+    // Durability is remaining capacity - reduce it by the wounds absorbed
+    const newDurability = Math.max(0, armorDurability - woundsToArmor);
+    await armor.item.update({
+      [`system.durability.${hitLocation}`]: newDurability
+    });
+    armorDurability = newDurability;
+    armorRemainingCapacity = Math.max(0, Math.min(armorDurability, armorMaxAbsorb));
+  }
 
   // Calculate final damage
-  const damageAfterArmor = Math.max(0, damage - armorValue);
+  const damageAfterArmor = Math.max(0, woundsToActor);
 
   // Prepare damage application data
   const damageData = {
     actor: actor.name,
     attacker: options.attacker?.name || 'Unknown',
-    rawDamage: damage,
+    rawDamage,
     hitLocation: this.getHitLocationLabel(hitLocation),
     hitLocationKey: hitLocation,
-    armorName: armor?.name || game.i18n.localize('BNW.Label.Unarmored'),
-    armorValue,
+    armorName,
+    armorDeflection,
+    armorMaxAbsorb,
+    armorDurability,
+    armorRemainingCapacity,
+    totalWounds,
+    woundsToArmor,
     finalDamage: damageAfterArmor,
-    bypassedArmor: bypassArmor
+    bypassedArmor: bypassArmor,
+    targetSize
   };
 
   // Show confirmation dialog
@@ -79,6 +143,7 @@ BNW.damage.promptHitLocation = async function() {
     { key: 'rightLeg', label: game.i18n.localize('BNW.HitLocation.RightLeg') }
   ];
 
+  const title = game.i18n.localize('BNW.Dialog.SelectHitLocation');
   const content = `
     <form>
       <div class="form-group">
@@ -91,28 +156,52 @@ BNW.damage.promptHitLocation = async function() {
     </form>
   `;
 
-  return new Promise((resolve) => {
-    new Dialog({
-      title: game.i18n.localize('BNW.Dialog.SelectHitLocation'),
-      content,
-      buttons: {
+  const dialogV2 = foundry?.applications?.api?.DialogV2;
+  if (dialogV2?.prompt) {
+    try {
+      const result = await dialogV2.prompt({
+        window: { title },
+        content,
         ok: {
-          icon: '<i class="fas fa-check"></i>',
           label: game.i18n.localize('BNW.Button.Confirm'),
-          callback: (html) => {
-            const form = html[0].querySelector('form');
-            const location = form.hitLocation.value;
-            resolve(location);
+          callback: (event, button, dialog) => {
+            const dialogElement = dialog.element ?? dialog;
+            const form = dialogElement.querySelector('form');
+            const select = form?.querySelector('select[name="hitLocation"]');
+            return select?.value ?? locations[0]?.key ?? null;
           }
         },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: game.i18n.localize('BNW.Button.Cancel'),
-          callback: () => resolve(null)
+        rejectClose: false
+      });
+
+      return result ?? null;
+    } catch (error) {
+      console.warn('BNW | DialogV2 hit location prompt failed, falling back to Dialog.prompt', error);
+    }
+  }
+
+  return Dialog.prompt({
+    title,
+    content,
+    label: game.i18n.localize('BNW.Button.Confirm'),
+    callback: (html) => {
+      const selector = 'select[name="hitLocation"]';
+
+      let select = null;
+      if (typeof html?.find === 'function') {
+        select = html.find(selector)?.[0] ?? null;
+      }
+
+      if (!select) {
+        const root = html?.[0] ?? html;
+        if (root?.querySelector) {
+          select = root.querySelector(selector);
         }
-      },
-      default: 'ok'
-    }).render(true);
+      }
+
+      return select?.value ?? locations[0]?.key ?? null;
+    },
+    rejectClose: false
   });
 };
 
@@ -124,19 +213,28 @@ BNW.damage.promptHitLocation = async function() {
  */
 BNW.damage.getEquippedArmor = function(actor, hitLocation) {
   const armorItems = actor.items.filter(i => i.type === 'armor' && i.system.equipped);
-  
+  let bestArmor = null;
+
   for (const armor of armorItems) {
     if (armor.system.coverage && armor.system.coverage[hitLocation]) {
-      return {
-        name: armor.name,
-        woundsAbsorbed: armor.system.woundsAbsorbed || 0,
-        deflection: armor.system.deflection || 0,
-        item: armor
-      };
+      const deflection = Number(armor.system.deflection ?? 0) || 0;
+      const woundsAbsorbed = Number(armor.system.woundsAbsorbed ?? 0) || 0;
+      const durability = Number(armor.system.durability?.[hitLocation] ?? 0) || 0;
+
+      // Prefer the armor with the highest deflection value
+      if (!bestArmor || deflection > bestArmor.deflection) {
+        bestArmor = {
+          name: armor.name,
+          woundsAbsorbed,
+          deflection,
+          durability,
+          item: armor
+        };
+      }
     }
   }
-  
-  return null;
+
+  return bestArmor;
 };
 
 /**
@@ -145,6 +243,7 @@ BNW.damage.getEquippedArmor = function(actor, hitLocation) {
  * @returns {Promise<boolean>} Whether user confirmed
  */
 BNW.damage.confirmDamageApplication = async function(damageData) {
+  const title = game.i18n.localize('BNW.Dialog.ConfirmDamage');
   const content = `
     <form class="bnw-damage-confirm">
       <div class="damage-summary">
@@ -153,31 +252,38 @@ BNW.damage.confirmDamageApplication = async function(damageData) {
         <p><strong>${game.i18n.localize('BNW.Label.HitLocation')}:</strong> ${damageData.hitLocation}</p>
         <p><strong>${game.i18n.localize('BNW.Label.RawDamage')}:</strong> ${damageData.rawDamage}</p>
         ${!damageData.bypassedArmor ? `
-          <p><strong>${game.i18n.localize('BNW.Label.Armor')}:</strong> ${damageData.armorName} (${damageData.armorValue})</p>
+          <p><strong>${game.i18n.localize('BNW.Label.Armor')}:</strong> ${damageData.armorName}${BNW.damage.formatArmorRating(damageData)}</p>
         ` : ''}
         <p class="final-damage"><strong>${game.i18n.localize('BNW.Label.FinalDamage')}:</strong> ${damageData.finalDamage} ${game.i18n.localize('BNW.Label.Wounds')}</p>
       </div>
     </form>
   `;
 
-  return new Promise((resolve) => {
-    new Dialog({
-      title: game.i18n.localize('BNW.Dialog.ConfirmDamage'),
-      content,
-      buttons: {
-        apply: {
-          icon: '<i class="fas fa-heart-broken"></i>',
+  const dialogV2 = foundry?.applications?.api?.DialogV2;
+  if (dialogV2?.prompt) {
+    try {
+      const result = await dialogV2.prompt({
+        window: { title },
+        content,
+        ok: {
           label: game.i18n.localize('BNW.Button.ApplyDamage'),
-          callback: () => resolve(true)
+          callback: () => true
         },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: game.i18n.localize('BNW.Button.Cancel'),
-          callback: () => resolve(false)
-        }
-      },
-      default: 'apply'
-    }).render(true);
+        rejectClose: false
+      });
+
+      return result === true;
+    } catch (error) {
+      console.warn('BNW | DialogV2 damage confirm failed, falling back to Dialog.confirm', error);
+    }
+  }
+
+  return Dialog.confirm({
+    title,
+    content,
+    yes: () => true,
+    no: () => false,
+    defaultYes: true
   });
 };
 
@@ -192,7 +298,7 @@ BNW.damage.createDamageMessage = async function(damageData) {
       <p><strong>${damageData.actor}</strong> ${game.i18n.localize('BNW.Label.WasHitIn')} <strong>${damageData.hitLocation}</strong></p>
       <div class="damage-details">
         <p>${game.i18n.localize('BNW.Label.RawDamage')}: ${damageData.rawDamage}</p>
-        ${!damageData.bypassedArmor ? `<p>${game.i18n.localize('BNW.Label.Armor')}: ${damageData.armorName} (-${damageData.armorValue})</p>` : ''}
+        ${!damageData.bypassedArmor ? `<p>${game.i18n.localize('BNW.Label.Armor')}: ${damageData.armorName}${BNW.damage.formatArmorRating(damageData)}</p>` : ''}
         <p class="final"><strong>${game.i18n.localize('BNW.Label.WoundsTaken')}: ${damageData.finalDamage}</strong></p>
       </div>
     </div>
@@ -223,9 +329,25 @@ BNW.damage.getHitLocationLabel = function(key) {
 };
 
 /**
- * Hook into damage roll chat cards to add "Apply Damage" button
+ * Format an armor rating string like \"10/3\" or \"10/—\".
+ * Returns an empty string if there is effectively no armor.
+ * @param {object} damageData
+ * @returns {string}
  */
-Hooks.on('renderChatMessage', (message, html) => {
+BNW.damage.formatArmorRating = function(damageData) {
+  if (!damageData) return '';
+  const deflection = Number(damageData.armorDeflection ?? 0) || 0;
+  const maxAbsorb = Number(damageData.armorMaxAbsorb ?? 0) || 0;
+  if (deflection <= 0 && maxAbsorb <= 0) return '';
+  const absorbDisplay = maxAbsorb > 0 ? maxAbsorb : '—';
+  return ` (${deflection}/${absorbDisplay})`;
+};
+
+/**
+ * Hook into damage roll chat cards to add "Apply Damage" button
+ * Uses renderChatMessageHTML (v13+) instead of deprecated renderChatMessage.
+ */
+Hooks.on('renderChatMessageHTML', (message, htmlElement) => {
   // Check if this is a damage roll
   const rollType = message.getFlag('bravenewworld', 'rollType');
   if (rollType !== 'damage') return;
@@ -233,19 +355,31 @@ Hooks.on('renderChatMessage', (message, html) => {
   const finalDamage = message.getFlag('bravenewworld', 'finalDamage');
   if (finalDamage == null) return;
 
+  // Prefer rawDamage and targetSize from the roll flags so we can
+  // apply armor deflection before size division as per rules.
+  const rawDamage = message.getFlag('bravenewworld', 'rawDamage') ?? finalDamage;
+  const targetSize = message.getFlag('bravenewworld', 'targetSize') ?? 5;
+
+  // Find the message content element (HTMLElement API)
+  const contentElement = htmlElement.querySelector?.('.message-content');
+  if (!contentElement) return;
+
   // Add apply damage button
-  const buttonHtml = `
-    <button type="button" class="bnw-apply-damage" data-damage="${finalDamage}">
-      <i class="fas fa-heart-broken"></i> ${game.i18n.localize('BNW.Button.ApplyDamage')}
-    </button>
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'bnw-apply-damage';
+  button.dataset.damage = String(finalDamage);
+  button.innerHTML = `
+    <i class="fas fa-heart-broken"></i> ${game.i18n.localize('BNW.Button.ApplyDamage')}
   `;
 
-  html.find('.message-content').append(buttonHtml);
+  contentElement.appendChild(button);
 
   // Attach click handler
-  html.find('.bnw-apply-damage').click(async (event) => {
-    const damage = Number(event.currentTarget.dataset.damage);
-    
+  button.addEventListener('click', async (event) => {
+    const damage = Number(rawDamage);
+    const size = Number(targetSize) || 5;
+
     // Get selected tokens
     const targets = Array.from(game.user.targets);
     if (targets.length === 0) {
@@ -273,7 +407,8 @@ Hooks.on('renderChatMessage', (message, html) => {
       actor: target.actor,
       damage,
       options: {
-        attacker
+        attacker,
+        targetSize: size
       }
     });
   });
