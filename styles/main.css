@@ -207,6 +207,12 @@
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
+/* Icon mode styling */
+.bnw.sheet .sheet-tabs .item i {
+  font-size: 1.2rem;
+  display: inline-block;
+}
+
 .bnw.sheet .sheet-body .tab:not(.active) {
   display: none;
 }

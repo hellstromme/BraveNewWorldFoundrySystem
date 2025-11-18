@@ -1,9 +1,23 @@
 <nav class="sheet-tabs tabs" data-group="primary">
-  <a class="item {{#if (eq tabs.primary.active 'traits')}}active{{/if}}" data-action="changeTab" data-tab="traits" data-group="primary">{{localize 'BNW.Tab.TraitsSkills'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'powers')}}active{{/if}}" data-action="changeTab" data-tab="powers" data-group="primary">{{localize 'BNW.Tab.Powers'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'tricks')}}active{{/if}}" data-action="changeTab" data-tab="tricks" data-group="primary">{{localize 'BNW.Tab.Tricks'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'quirks')}}active{{/if}}" data-action="changeTab" data-tab="quirks" data-group="primary">{{localize 'BNW.Tab.Quirks'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'combat')}}active{{/if}}" data-action="changeTab" data-tab="combat" data-group="primary">{{localize 'BNW.Tab.Combat'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'gear')}}active{{/if}}" data-action="changeTab" data-tab="gear" data-group="primary">{{localize 'BNW.Tab.Gear'}}</a>
-  <a class="item {{#if (eq tabs.primary.active 'notes')}}active{{/if}}" data-action="changeTab" data-tab="notes" data-group="primary">{{localize 'BNW.Tab.Notes'}}</a>
+  <a class="item {{#if (eq tabs.primary.active 'traits')}}active{{/if}}" data-action="changeTab" data-tab="traits" data-group="primary" title="{{localize 'BNW.Tab.TraitsSkills'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-dumbbell"></i>{{else}}{{localize 'BNW.Tab.TraitsSkills'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'powers')}}active{{/if}}" data-action="changeTab" data-tab="powers" data-group="primary" title="{{localize 'BNW.Tab.Powers'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-bolt"></i>{{else}}{{localize 'BNW.Tab.Powers'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'tricks')}}active{{/if}}" data-action="changeTab" data-tab="tricks" data-group="primary" title="{{localize 'BNW.Tab.Tricks'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-magic"></i>{{else}}{{localize 'BNW.Tab.Tricks'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'quirks')}}active{{/if}}" data-action="changeTab" data-tab="quirks" data-group="primary" title="{{localize 'BNW.Tab.Quirks'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-star"></i>{{else}}{{localize 'BNW.Tab.Quirks'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'combat')}}active{{/if}}" data-action="changeTab" data-tab="combat" data-group="primary" title="{{localize 'BNW.Tab.Combat'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-fist-raised"></i>{{else}}{{localize 'BNW.Tab.Combat'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'gear')}}active{{/if}}" data-action="changeTab" data-tab="gear" data-group="primary" title="{{localize 'BNW.Tab.Gear'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-shield-alt"></i>{{else}}{{localize 'BNW.Tab.Gear'}}{{/if}}
+  </a>
+  <a class="item {{#if (eq tabs.primary.active 'notes')}}active{{/if}}" data-action="changeTab" data-tab="notes" data-group="primary" title="{{localize 'BNW.Tab.Notes'}}">
+    {{#if (eq tabDisplayMode 'icons')}}<i class="fas fa-book"></i>{{else}}{{localize 'BNW.Tab.Notes'}}{{/if}}
+  </a>
 </nav>

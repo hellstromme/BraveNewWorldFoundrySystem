@@ -19,6 +19,28 @@ Hooks.once('init', async function () {
     }
   });
 
+  // Register tab display mode setting
+  game.settings.register('bravenewworld', 'tabDisplayMode', {
+    name: "BNW.Settings.TabDisplayMode.Name",
+    hint: "BNW.Settings.TabDisplayMode.Hint",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: {
+      text: "BNW.Settings.TabDisplayMode.Text",
+      icons: "BNW.Settings.TabDisplayMode.Icons"
+    },
+    default: "text",
+    onChange: () => {
+      // Re-render all open actor sheets
+      Object.values(ui.windows).forEach(app => {
+        if (app instanceof BraveNewWorldActorSheetV2) {
+          app.render();
+        }
+      });
+    }
+  });
+
   // Register settings menu for trait configuration
   game.settings.registerMenu('bravenewworld', 'traitConfig', {
     name: "BNW.Settings.Traits.MenuName",

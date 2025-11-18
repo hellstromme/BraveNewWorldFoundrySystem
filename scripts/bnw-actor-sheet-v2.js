@@ -110,6 +110,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     // Add tabsActive for template compatibility
     context.tabsActive = this.tabGroups.primary || 'traits';
     
+    // Add tab display mode setting
+    context.tabDisplayMode = game.settings.get('bravenewworld', 'tabDisplayMode') || 'text';
+    
     console.log('BNW Actor | Context prepared', {
       traitsCount: context.traits.length,
       skillsCount: context.skills.length,
