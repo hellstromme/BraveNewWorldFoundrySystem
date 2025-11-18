@@ -7,17 +7,24 @@
  * - Actions = 1 base + 1 per success (capped at Speed dice)
  * - Turn order: All combatants take action 1 (sorted by initiative), 
  *   then all take action 2 (same order), etc.
+ * 
+ * Implementation: Creates duplicate combatant entries for each action.
+ * Each actor appears N times in the tracker based on their action count.
  */
 
 /**
  * Set BNW initiative formula for Combat
  */
 Hooks.on('init', () => {
+  console.log('BNW Combat | init hook fired - setting up combat integration');
+  
   // Set default initiative formula for BNW system
   CONFIG.Combat.initiative = {
     formula: "3d6x=6",
     decimals: 2
   };
+
+  console.log('BNW Combat | Combat initiative formula set:', CONFIG.Combat.initiative);
 
   // Store original method
   const originalGetInitiativeRoll = CONFIG.Actor.documentClass.prototype.getInitiativeRoll;
@@ -27,6 +34,8 @@ Hooks.on('init', () => {
    * Rolls Speed trait with TN 5, calculates actions
    */
   CONFIG.Actor.documentClass.prototype.getInitiativeRoll = async function(formula) {
+    console.log('BNW Combat | getInitiativeRoll called for actor:', this.name);
+    
     // Get Speed trait
     const speedTrait = this.system?.traits?.speed;
     if (!speedTrait) {
@@ -41,111 +50,109 @@ Hooks.on('init', () => {
     const rollFormula = `${speedDice}d6x=6`;
     const roll = await new Roll(rollFormula).evaluate();
 
+    console.log('BNW Combat | Initiative roll result:', roll.total);
+    
     return roll;
   };
 
-  // Override Combat setupTurns to create BNW-style turn order
-  const originalSetupTurns = Combat.prototype.setupTurns;
+  console.log('BNW Combat | About to override Combat.prototype.rollInitiative');
   
-  Combat.prototype.setupTurns = function() {
-    // Call original to get base combatants
-    const turns = originalSetupTurns.call(this);
+  // Override Combat.rollInitiative to handle BNW action creation
+  const originalRollInitiative = Combat.prototype.rollInitiative;
+  
+  console.log('BNW Combat | Original rollInitiative:', typeof originalRollInitiative);
+  
+  Combat.prototype.rollInitiative = async function(ids, options={}) {
+    console.log('BNW Combat | CUSTOM rollInitiative called with ids:', ids);
     
-    // Build BNW turn order with action cycles
-    const bnwTurns = [];
+    // Call original rollInitiative
+    const result = await originalRollInitiative.call(this, ids, options);
     
-    // Find max actions across all combatants
-    let maxActions = 1;
-    for (const combatant of turns) {
-      const actions = combatant.getFlag('bravenewworld', 'actionsTotal') ?? 1;
-      maxActions = Math.max(maxActions, actions);
-    }
+    console.log('BNW Combat | Original rollInitiative completed, processing combatants');
     
-    // Create turns for each action cycle
-    for (let actionNum = 1; actionNum <= maxActions; actionNum++) {
-      // Add all combatants that have at least this many actions
-      for (const combatant of turns) {
-        const actionsTotal = combatant.getFlag('bravenewworld', 'actionsTotal') ?? 1;
-        if (actionNum <= actionsTotal) {
-          // Create a virtual turn entry
-          bnwTurns.push({
-            ...combatant,
-            _id: `${combatant.id}-action${actionNum}`, // Virtual ID for this action
-            _actionNumber: actionNum,
-            _originalCombatant: combatant
-          });
-        }
+    // Wait a tick for roll data to be saved
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Now process each combatant to create duplicates
+    for (const id of ids) {
+      const combatant = this.combatants.get(id);
+      if (!combatant) continue;
+      
+      console.log('BNW Combat | Processing combatant after initiative roll:', combatant.name);
+      console.log('BNW Combat | Combatant initiative value:', combatant.initiative);
+      console.log('BNW Combat | Combatant isPrimaryCombatant flag:', combatant.getFlag('bravenewworld', 'isPrimaryCombatant'));
+      
+      // Only process primary combatants - check === true to avoid undefined
+      if (combatant.getFlag('bravenewworld', 'isPrimaryCombatant') !== true) {
+        console.log('BNW Combat | Skipping non-primary combatant');
+        continue;
       }
+      
+      await processCombatantInitiative(combatant);
     }
     
-    return bnwTurns;
+    // Reset to first turn after creating duplicates
+    if (this.combatants.size > 0) {
+      await this.update({ turn: 0 });
+      console.log('BNW Combat | Reset combat to first turn');
+    }
+    
+    return result;
   };
+  
+  console.log('BNW Combat | Combat.prototype.rollInitiative override complete');
 });
 
 /**
- * Hook into Combat.rollInitiative to calculate BNW actions
+ * Initialize combatant with BNW flags
  */
 Hooks.on('preCreateCombatant', (combatant, data, options, userId) => {
-  // Initialize BNW-specific flags
-  combatant.updateSource({
-    'flags.bravenewworld.actionsTotal': 1,
-    'flags.bravenewworld.actionsRemaining': 1,
-    'flags.bravenewworld.speedRoll': 0
-  });
+  // Only initialize if not already set (don't overwrite flags from duplicate creation)
+  if (!('flags' in data && 'bravenewworld' in data.flags)) {
+    combatant.updateSource({
+      'flags.bravenewworld.actionsTotal': 1,
+      'flags.bravenewworld.speedRoll': 0,
+      'flags.bravenewworld.isPrimaryCombatant': true,
+      'flags.bravenewworld.actionNumber': 1
+    });
+    console.log('BNW Combat | Initialized combatant as primary:', combatant.name);
+  } else {
+    console.log('BNW Combat | Combatant already has BNW flags, skipping initialization:', combatant.name);
+  }
 });
 
 /**
- * Calculate actions from initiative roll
+ * Process combatant initiative and create duplicates
  */
-Hooks.on('updateCombatant', async (combatant, change, options, userId) => {
-  // Only process if initiative changed
-  if (!change.initiative) return;
-
+async function processCombatantInitiative(combatant) {
   const actor = combatant.actor;
-  if (!actor) return;
+  if (!actor) {
+    console.log('BNW Combat | No actor found');
+    return;
+  }
 
   const speedTrait = actor.system?.traits?.speed;
-  if (!speedTrait) return;
+  if (!speedTrait) {
+    console.log('BNW Combat | No speed trait found');
+    return;
+  }
 
   const speedDice = Number(speedTrait.dice ?? 3);
   const speedDefault = Number(speedTrait.default ?? 0);
   const targetNumber = 5;
 
-  // Get the roll from the combatant
-  const roll = combatant.rolls?.[0];
-  if (!roll) return;
-
-  // Parse dice results to find highest (accounting for exploding dice)
-  const diceResults = [];
-  for (const term of roll.dice ?? []) {
-    if (!term?.results) continue;
-
-    let runningTotal = 0;
-    for (const result of term.results) {
-      if (result?.result == null) continue;
-
-      const value = Number(result.result);
-      if (!Number.isFinite(value)) continue;
-
-      runningTotal += value;
-
-      if (!result.exploded) {
-        diceResults.push(runningTotal);
-        runningTotal = 0;
-      }
-    }
-
-    if (runningTotal > 0) {
-      diceResults.push(runningTotal);
-    }
+  // Get initiative value (this is the final result after roll + bonus)
+  const initiativeValue = combatant.initiative;
+  if (initiativeValue == null) {
+    console.log('BNW Combat | No initiative value found');
+    return;
   }
 
-  if (!diceResults.length) {
-    diceResults.push(0);
-  }
+  console.log('BNW Combat | Processing initiative for', actor.name, 'with value:', initiativeValue);
 
-  const highest = Math.max(...diceResults);
-  const finalResult = highest + speedDefault;
+  // The initiative value is already the highest die + default bonus
+  // We need to calculate actions based on this
+  const finalResult = initiativeValue;
   const success = finalResult >= targetNumber;
 
   // Calculate actions: 1 base + 1 per success, capped at speed dice
@@ -163,13 +170,62 @@ Hooks.on('updateCombatant', async (combatant, change, options, userId) => {
   await combatant.setFlag('bravenewworld', 'actionsTotal', actions);
   await combatant.setFlag('bravenewworld', 'speedRoll', finalResult);
 
-  console.log(`BNW Combat | ${actor.name} rolled ${finalResult}, has ${actions} actions this round`);
+  console.log(`BNW Combat | ${actor.name} initiative ${finalResult}, has ${actions} actions this round`);
+
+  // Create duplicate combatants for additional actions
+  await createActionCombatants(combatant, actions, combatant.initiative);
+}
+
+/**
+ * Create duplicate combatant entries for each action
+ */
+async function createActionCombatants(primaryCombatant, actionCount, initiativeValue) {
+  const combat = primaryCombatant.combat;
+  if (!combat) return;
+
+  // Delete any existing duplicate combatants for this actor
+  const duplicates = combat.combatants.filter(c => 
+    c.actorId === primaryCombatant.actorId &&
+    !c.getFlag('bravenewworld', 'isPrimaryCombatant') &&
+    c.id !== primaryCombatant.id
+  );
   
-  // Rebuild turn order after initiative changes
-  if (combatant.combat) {
-    await combatant.combat.setupTurns();
+  if (duplicates.length > 0) {
+    await combat.deleteEmbeddedDocuments('Combatant', duplicates.map(c => c.id));
+    console.log(`BNW Combat | Deleted ${duplicates.length} old duplicate combatants`);
   }
-});
+
+  // Create duplicate combatants for actions 2 through N
+  const duplicateData = [];
+  for (let actionNum = 2; actionNum <= actionCount; actionNum++) {
+    // Use a large offset per action number to ensure proper grouping
+    // All action 1's sort by initiative, then all action 2's, then all action 3's
+    // Subtract 100 * (actionNum - 1) to create clear separation between action cycles
+    const adjustedInitiative = initiativeValue - (100 * (actionNum - 1));
+    
+    duplicateData.push({
+      tokenId: primaryCombatant.tokenId,
+      sceneId: primaryCombatant.sceneId,
+      actorId: primaryCombatant.actorId,
+      hidden: primaryCombatant.hidden,
+      initiative: adjustedInitiative,
+      flags: {
+        bravenewworld: {
+          isPrimaryCombatant: false,
+          actionNumber: actionNum,
+          actionsTotal: actionCount,
+          speedRoll: primaryCombatant.getFlag('bravenewworld', 'speedRoll'),
+          primaryCombatantId: primaryCombatant.id
+        }
+      }
+    });
+  }
+
+  if (duplicateData.length > 0) {
+    await combat.createEmbeddedDocuments('Combatant', duplicateData);
+    console.log(`BNW Combat | Created ${duplicateData.length} duplicate combatants for ${primaryCombatant.name}`);
+  }
+}
 
 /**
  * Hook into combat updates for round changes
@@ -179,9 +235,53 @@ Hooks.on('updateCombat', async (combat, change, options, userId) => {
   if ('round' in change) {
     console.log('BNW Combat | New round started, rolling initiative for all combatants');
 
-    // Roll initiative for all combatants at the start of each round
-    const combatantIds = combat.combatants.map(c => c.id);
-    await combat.rollInitiative(combatantIds);
+    // First, get list of primary combatants BEFORE deletion
+    const primaryCombatants = combat.combatants.filter(c => 
+      c.getFlag('bravenewworld', 'isPrimaryCombatant') === true
+    );
+    const combatantIds = primaryCombatants.map(c => c.id);
+    
+    console.log(`BNW Combat | Found ${combatantIds.length} primary combatants before deletion`);
+    console.log('BNW Combat | Primary combatant IDs:', combatantIds);
+
+    // Delete all duplicate combatants from previous round
+    const duplicates = combat.combatants.filter(c => 
+      c.getFlag('bravenewworld', 'isPrimaryCombatant') === false
+    );
+    
+    if (duplicates.length > 0) {
+      console.log(`BNW Combat | Deleting ${duplicates.length} duplicate combatants from previous round`);
+      await combat.deleteEmbeddedDocuments('Combatant', duplicates.map(c => c.id));
+    }
+    
+    console.log(`BNW Combat | Rolling initiative for ${combatantIds.length} primary combatants`);
+    
+    if (combatantIds.length > 0) {
+      await combat.rollInitiative(combatantIds);
+    }
+  }
+});
+
+/**
+ * Clean up duplicate combatants when primary is deleted
+ */
+Hooks.on('preDeleteCombatant', async (combatant, options, userId) => {
+  const isPrimary = combatant.getFlag('bravenewworld', 'isPrimaryCombatant') !== false;
+  
+  if (isPrimary) {
+    // Delete all duplicates for this actor
+    const combat = combatant.combat;
+    if (!combat) return;
+    
+    const duplicates = combat.combatants.filter(c => 
+      c.actorId === combatant.actorId &&
+      !c.getFlag('bravenewworld', 'isPrimaryCombatant') &&
+      c.id !== combatant.id
+    );
+    
+    if (duplicates.length > 0) {
+      await combat.deleteEmbeddedDocuments('Combatant', duplicates.map(c => c.id));
+    }
   }
 });
 
@@ -197,28 +297,26 @@ Hooks.on('renderCombatTracker', (app, html, data) => {
   const combatants = element.querySelectorAll('.combatant');
   combatants.forEach((combatantElement) => {
     const combatantId = combatantElement.dataset.combatantId;
+    const combatant = game.combat?.combatants.get(combatantId);
     
-    // Check if this is a virtual turn (has action number in ID)
-    const match = combatantId?.match(/^(.+)-action(\d+)$/);
-    if (match) {
-      const realCombatantId = match[1];
-      const actionNumber = match[2];
-      const combatant = game.combat?.combatants.get(realCombatantId);
-      
-      if (!combatant) return;
-      
-      const actionsTotal = combatant.getFlag('bravenewworld', 'actionsTotal') ?? 1;
+    if (!combatant) return;
+    
+    const actionNumber = combatant.getFlag('bravenewworld', 'actionNumber') ?? 1;
+    const actionsTotal = combatant.getFlag('bravenewworld', 'actionsTotal') ?? 1;
+    const isPrimary = combatant.getFlag('bravenewworld', 'isPrimaryCombatant') ?? true;
 
+    // Only show action indicator if actor has multiple actions
+    if (actionsTotal > 1) {
       // Create action indicator showing which action this is
       const actionIndicator = document.createElement('div');
       actionIndicator.classList.add('bnw-actions');
       actionIndicator.textContent = `#${actionNumber}`;
       actionIndicator.title = `Action ${actionNumber} of ${actionsTotal}`;
 
-      // Insert after the initiative value
-      const initiativeElement = combatantElement.querySelector('.token-initiative');
-      if (initiativeElement) {
-        initiativeElement.parentNode.insertBefore(actionIndicator, initiativeElement.nextSibling);
+      // Insert after the combatant name
+      const nameElement = combatantElement.querySelector('.token-name h4');
+      if (nameElement) {
+        nameElement.appendChild(actionIndicator);
       }
     }
   });
