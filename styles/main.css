@@ -1894,3 +1894,33 @@
   font-size: 1rem;
 }
 
+/* Combat Tracker BNW Action Indicators */
+#combat-tracker .bnw-actions {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, var(--bnw-primary-yellow) 0%, var(--bnw-primary-red) 100%);
+  border: 2px solid var(--bnw-text-bold);
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: var(--bnw-text-bold);
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.3);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+#combat-tracker .combatant.active .bnw-actions {
+  background: linear-gradient(135deg, var(--bnw-success-green) 0%, var(--bnw-primary-blue) 100%);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 2px 2px 8px rgba(46, 204, 113, 0.6);
+  }
+}
+
+
