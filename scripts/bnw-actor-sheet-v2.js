@@ -233,6 +233,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
     // Initialize wounds if not present
     system.wounds ??= {};
     
+    // Check if this is a minor extra
+    const isMinorExtra = system.minorExtra ?? false;
+    
     // Define hit locations with their localization keys
     const hitLocations = [
       { key: 'head', labelKey: 'BNW.HitLocation.Head' },
@@ -291,6 +294,9 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       
       const armorData = armorByLocation[location.key];
       
+      // Hide non-torso locations if this is a minor extra
+      const hidden = isMinorExtra && location.key !== 'torso';
+      
       return {
         key: location.key,
         label: game.i18n.localize(location.labelKey),
@@ -301,7 +307,8 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
         durability: armorData.durability,
         maxDurability: armorData.maxDurability,
         hasArmor: armorData.armorItems.length > 0,
-        armorItems: armorData.armorItems
+        armorItems: armorData.armorItems,
+        hidden: hidden
       };
     });
     
@@ -373,6 +380,18 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
   /* -------------------------------------------- */
   /*  Action Handlers                             */
   /* -------------------------------------------- */
+
+  /**
+   * Handle form submission - override to trigger re-render
+   * @override
+   */
+  async _onSubmitForm(formConfig, event) {
+    // Call parent to handle the actual update
+    await super._onSubmitForm(formConfig, event);
+    
+    // Re-render to update hit locations visibility
+    await this.render();
+  }
 
   /**
    * Handle skill roll action
@@ -602,14 +621,16 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
       const finalKey = keys[keys.length - 1];
       let value = target.value;
       
+      // Handle checkbox - use checked property instead of value
+      if (target.type === 'checkbox') {
+        value = target.checked;
+      }
       // Convert to number if it's a number input
-      if (target.type === 'number') {
+      else if (target.type === 'number') {
         value = Number(value);
       }
       
       current[finalKey] = value;
-      
-      console.log('BNW Actor | Prepared submit data for field:', target.name, 'value:', value);
       
       return submitData;
     }
@@ -628,9 +649,7 @@ class BraveNewWorldActorSheetV2 extends ActorSheetV2Base {
    * @override
    */
   async _processSubmitData(event, form, submitData) {
-    console.log('BNW Actor | _processSubmitData called with:', submitData.system?.wounds);
     await this.document.update(submitData);
-    console.log('BNW Actor | Document updated successfully');
   }
 
   /* -------------------------------------------- */

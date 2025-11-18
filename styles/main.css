@@ -83,6 +83,22 @@
   gap: 0.75rem;
 }
 
+.bnw.sheet .header-fields .name-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bnw.sheet .header-fields .name-row .actor-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.bnw.sheet .header-fields .name-row .minor-extra-checkbox {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .bnw.sheet .header-fields h1 {
   text-transform: uppercase;
   font-weight: 900;
@@ -1783,6 +1799,28 @@
   color: white;
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Checkbox label styling */
+.bnw.sheet .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row;
+}
+
+.bnw.sheet .checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.bnw.sheet .checkbox-label span {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bnw-text-bold);
+  font-size: 0.85rem;
 }
 
 .bnw.sheet .gear-list .item .item-controls a i {

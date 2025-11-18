@@ -1,9 +1,15 @@
 <header class="sheet-header flexrow">
   <img class="profile-img" src="{{actor.img}}" data-action="editImage" title="{{actor.name}}" />
   <div class="header-fields">
-    <h1 class="actor-name">
-      <input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'Name'}}" />
-    </h1>
+    <div class="name-row">
+      <h1 class="actor-name">
+        <input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'Name'}}" />
+      </h1>
+      <label class="checkbox-label minor-extra-checkbox">
+        <input type="checkbox" name="system.minorExtra" {{checked system.minorExtra}} value="1" />
+        <span>{{localize 'BNW.Detail.MinorExtra'}}</span>
+      </label>
+    </div>
     <div class="details-grid">
       <label>
         <span>{{localize 'BNW.Detail.PlayerName'}}</span>
