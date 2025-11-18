@@ -8,9 +8,9 @@
       "name": "Brave New World Development Team"
     }
   ],
-  "url": "https://github.com/BraveNewWorldFoundrySystem",
-  "manifest": "https://github.com/BraveNewWorldFoundrySystem/releases/latest/download/system.json",
-  "download": "https://github.com/BraveNewWorldFoundrySystem/releases/latest/download/system.zip",
+  "url": "https://github.com/hellstromme/BraveNewWorldFoundrySystem",
+  "manifest": "https://github.com/hellstromme/BraveNewWorldFoundrySystem/releases/latest/download/system.json",
+  "download": "https://github.com/hellstromme/BraveNewWorldFoundrySystem/releases/latest/download/system.zip",
   "compatibility": {
     "minimum": "13",
     "verified": "13",
