@@ -146,6 +146,14 @@
         "summary": "",
         "notes": ""
       }
+    },
+    "gear": {
+      "type": "gear",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "cost": 0,
+        "description": ""
+      }
     }
   }
 }

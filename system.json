@@ -25,6 +25,7 @@
     "scripts/bnw-trait-config.js",
     "scripts/bnw-combat.js",
     "scripts/bnw-damage.js",
+    "scripts/bnw-item.js",
     "scripts/main.js"
   ],
   "styles": [

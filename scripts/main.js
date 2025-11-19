@@ -82,6 +82,11 @@ Hooks.once('init', async function () {
   CONFIG.Item.typeLabels.skill = game.i18n.localize('BNW.ItemType.Skill');
   CONFIG.Item.typeLabels.gear = game.i18n.localize('BNW.ItemType.Gear');
 
+  // Use the custom BNW Item document class to provide per-type default icons
+  if (globalThis.BraveNewWorldItem) {
+    CONFIG.Item.documentClass = BraveNewWorldItem;
+  }
+
   if (!Handlebars.helpers.eq) {
     Handlebars.registerHelper('eq', (a, b) => a === b);
   }
